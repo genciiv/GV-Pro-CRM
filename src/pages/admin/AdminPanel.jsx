@@ -1,217 +1,703 @@
-import { useState } from 'react'
-import { useAsync } from '../../hooks/useAsync'
-import { supabase } from '../../lib/supabase'
-import { fmtDate, fmtNum } from '../../lib/db'
-import { Modal, Loading, Empty, StatCard } from '../../components/UI'
-import toast from 'react-hot-toast'
+import { useState } from "react";
+import { useAsync } from "../../hooks/useAsync";
+import { supabase } from "../../lib/supabase";
+import { fmtDate, fmtNum } from "../../lib/db";
+import { Modal, Loading, Empty, StatCard } from "../../components/UI";
+import toast from "react-hot-toast";
 
 async function getApplications() {
-  const { data } = await supabase.from('applications').select('*').order('created_at',{ascending:false})
-  return data??[]
+  const { data } = await supabase
+    .from("applications")
+    .select("*")
+    .order("created_at", { ascending: false });
+  return data ?? [];
 }
 async function getGyms() {
-  const { data } = await supabase.from('gyms').select('*').order('created_at',{ascending:false})
-  return data??[]
+  const { data } = await supabase
+    .from("gyms")
+    .select("*")
+    .order("created_at", { ascending: false });
+  return data ?? [];
 }
 async function getNutritionistApps() {
-  const { data } = await supabase.from('nutritionist_applications').select('*').order('created_at',{ascending:false})
-  return data??[]
+  const { data } = await supabase
+    .from("nutritionist_applications")
+    .select("*")
+    .order("created_at", { ascending: false });
+  return data ?? [];
 }
 async function getNutritionists() {
-  const { data } = await supabase.from('nutritionist_stats').select('*').order('total_earned',{ascending:false})
-  return data??[]
+  const { data } = await supabase
+    .from("nutritionist_stats")
+    .select("*")
+    .order("total_earned", { ascending: false });
+  return data ?? [];
 }
 async function getPlatformOverview() {
-  const { data } = await supabase.from('platform_overview').select('*').single()
-  return data
+  const { data } = await supabase
+    .from("platform_overview")
+    .select("*")
+    .single();
+  return data;
 }
 async function getDietOrders() {
-  const { data } = await supabase.from('diet_orders')
-    .select('*, nutritionist:nutritionists(name), diet_plan:diet_plans(title)')
-    .order('created_at',{ascending:false}).limit(50)
-  return data??[]
+  const { data } = await supabase
+    .from("diet_orders")
+    .select("*, nutritionist:nutritionists(name), diet_plan:diet_plans(title)")
+    .order("created_at", { ascending: false })
+    .limit(50);
+  return data ?? [];
 }
 
 function GymAppRow({ app, onDone }) {
-  const [show,setShow]=useState(false)
-  const [password,setPassword]=useState('')
-  const [loading,setLoading]=useState(false)
+  const [show, setShow] = useState(false);
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const doApprove = async () => {
-    if(!password.trim()){toast.error('Vendos fjalëkalimin');return}
-    setLoading(true)
+    if (!password.trim()) {
+      toast.error("Vendos fjalëkalimin");
+      return;
+    }
+    setLoading(true);
     try {
-      const{data:gym,error}=await supabase.from('gyms').insert({name:app.name,email:app.email,phone:app.phone,address:app.address,city:app.city,status:'approved',approved_at:new Date().toISOString()}).select().single()
-      if(error) throw new Error(error.message)
-      await supabase.rpc('create_default_plans',{p_gym_id:gym.id})
-      await supabase.from('gym_users').insert({gym_id:gym.id,name:app.owner_name,email:app.email,role:'owner'})
-      await supabase.from('applications').update({status:'approved',gym_id:gym.id}).eq('id',app.id)
-      toast.success(`✅ ${app.name} u aprovua!\nShko: Supabase → Auth → Add User\nEmail: ${app.email}\nPassword: ${password}`)
-      setShow(false); onDone()
-    } catch(e){toast.error(e.message)}
-    finally{setLoading(false)}
-  }
+      const { data: gym, error } = await supabase
+        .from("gyms")
+        .insert({
+          name: app.name,
+          email: app.email,
+          phone: app.phone,
+          address: app.address,
+          city: app.city,
+          status: "approved",
+          approved_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+      if (error) throw new Error(error.message);
+      await supabase.rpc("create_default_plans", { p_gym_id: gym.id });
+      await supabase
+        .from("gym_users")
+        .insert({
+          gym_id: gym.id,
+          name: app.owner_name,
+          email: app.email,
+          role: "owner",
+        });
+      await supabase
+        .from("applications")
+        .update({ status: "approved", gym_id: gym.id })
+        .eq("id", app.id);
+      toast.success(
+        `✅ ${app.name} u aprovua!\nShko: Supabase → Auth → Add User\nEmail: ${app.email}\nPassword: ${password}`,
+      );
+      setShow(false);
+      onDone();
+    } catch (e) {
+      toast.error(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const sBadge={new:<span className="bdg bdg-bl">🆕 E Re</span>,contacted:<span className="bdg bdg-am">📞 Kontaktuar</span>,approved:<span className="bdg bdg-gr">✅ Aprovuar</span>,rejected:<span className="bdg bdg-rd">❌ Refuzuar</span>}
+  const sBadge = {
+    new: <span className="bdg bdg-bl">🆕 E Re</span>,
+    contacted: <span className="bdg bdg-am">📞 Kontaktuar</span>,
+    approved: <span className="bdg bdg-gr">✅ Aprovuar</span>,
+    rejected: <span className="bdg bdg-rd">❌ Refuzuar</span>,
+  };
 
   return (
     <>
       <tr>
-        <td><div><div className="mn">{app.name}</div><div className="ms">{app.city}</div></div></td>
-        <td><div><div style={{fontWeight:500}}>{app.owner_name}</div><div className="ms">{app.email}</div><div className="ms">{app.phone}</div></div></td>
+        <td>
+          <div>
+            <div className="mn">{app.name}</div>
+            <div className="ms">{app.city}</div>
+          </div>
+        </td>
+        <td>
+          <div>
+            <div style={{ fontWeight: 500 }}>{app.owner_name}</div>
+            <div className="ms">{app.email}</div>
+            <div className="ms">{app.phone}</div>
+          </div>
+        </td>
         <td>{sBadge[app.status]}</td>
-        <td style={{fontSize:12,color:'var(--g500)'}}>{fmtDate(app.created_at)}</td>
-        <td>{(app.status==='new'||app.status==='contacted')&&<div style={{display:'flex',gap:6}}>
-          <button className="btn btn-success btn-xs" onClick={()=>setShow(true)}>✅ Aprovo</button>
-          <button className="btn btn-danger btn-xs" onClick={async()=>{await supabase.from('applications').update({status:'rejected'}).eq('id',app.id);toast.success('U refuzua');onDone()}}>❌</button>
-        </div>}</td>
+        <td style={{ fontSize: 12, color: "var(--g500)" }}>
+          {fmtDate(app.created_at)}
+        </td>
+        <td>
+          {(app.status === "new" || app.status === "contacted") && (
+            <div style={{ display: "flex", gap: 6 }}>
+              <button
+                className="btn btn-success btn-xs"
+                onClick={() => setShow(true)}
+              >
+                ✅ Aprovo
+              </button>
+              <button
+                className="btn btn-danger btn-xs"
+                onClick={async () => {
+                  await supabase
+                    .from("applications")
+                    .update({ status: "rejected" })
+                    .eq("id", app.id);
+                  toast.success("U refuzua");
+                  onDone();
+                }}
+              >
+                ❌
+              </button>
+            </div>
+          )}
+        </td>
       </tr>
-      {show&&<Modal title={`✅ Aprovo — ${app.name}`} onClose={()=>setShow(false)} footer={<><button className="btn btn-s" onClick={()=>setShow(false)}>Anulo</button><button className="btn btn-p" onClick={doApprove} disabled={loading}>{loading?'Duke aprovuar...':'✅ Aprovo'}</button></>}>
-        <div className="alert al-bl" style={{marginBottom:14}}>Pas aprovimit shko: <strong>Supabase → Auth → Add User</strong></div>
-        <div style={{background:'var(--g50)',borderRadius:10,padding:14,marginBottom:14,fontSize:13,lineHeight:1.8}}>
-          <div>🏋️ <strong>{app.name}</strong> · 👤 {app.owner_name}</div>
-          <div>📧 {app.email} · 📞 {app.phone}</div>
-          {app.message&&<div style={{marginTop:6,color:'var(--g500)'}}>💬 {app.message}</div>}
-        </div>
-        <div className="fgp"><label>🔑 Fjalëkalimi për klientin *</label><input type="text" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Palestra2026!"/><span style={{fontSize:11,color:'var(--g500)'}}>Do ia telefonosh klientit</span></div>
-      </Modal>}
+      {show && (
+        <Modal
+          title={`✅ Aprovo — ${app.name}`}
+          onClose={() => setShow(false)}
+          footer={
+            <>
+              <button className="btn btn-s" onClick={() => setShow(false)}>
+                Anulo
+              </button>
+              <button
+                className="btn btn-p"
+                onClick={doApprove}
+                disabled={loading}
+              >
+                {loading ? "Duke aprovuar..." : "✅ Aprovo"}
+              </button>
+            </>
+          }
+        >
+          <div className="alert al-bl" style={{ marginBottom: 14 }}>
+            Pas aprovimit shko: <strong>Supabase → Auth → Add User</strong>
+          </div>
+          <div
+            style={{
+              background: "var(--g50)",
+              borderRadius: 10,
+              padding: 14,
+              marginBottom: 14,
+              fontSize: 13,
+              lineHeight: 1.8,
+            }}
+          >
+            <div>
+              🏋️ <strong>{app.name}</strong> · 👤 {app.owner_name}
+            </div>
+            <div>
+              📧 {app.email} · 📞 {app.phone}
+            </div>
+            {app.message && (
+              <div style={{ marginTop: 6, color: "var(--g500)" }}>
+                💬 {app.message}
+              </div>
+            )}
+          </div>
+          <div className="fgp">
+            <label>🔑 Fjalëkalimi për klientin *</label>
+            <input
+              type="text"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Palestra2026!"
+            />
+            <span style={{ fontSize: 11, color: "var(--g500)" }}>
+              Do ia telefonosh klientit
+            </span>
+          </div>
+        </Modal>
+      )}
     </>
-  )
+  );
 }
 
 function NutrAppRow({ app, onDone }) {
-  const [show,setShow]=useState(false)
-  const [password,setPassword]=useState('')
-  const [pct,setPct]=useState(70)
-  const [loading,setLoading]=useState(false)
+  const [show, setShow] = useState(false);
+  const [password, setPassword] = useState("");
+  const [pct, setPct] = useState(70);
+  const [loading, setLoading] = useState(false);
 
   const doApprove = async () => {
-    if(!password.trim()){toast.error('Vendos fjalëkalimin');return}
-    setLoading(true)
+    if (!password.trim()) {
+      toast.error("Vendos fjalëkalimin");
+      return;
+    }
+    setLoading(true);
     try {
-      const{data:nutr,error}=await supabase.from('nutritionists').insert({name:app.name,email:app.email,phone:app.phone,speciality:app.speciality,bio:app.bio,certificate:app.certificate,status:'approved',commission_pct:pct,approved_at:new Date().toISOString()}).select().single()
-      if(error) throw new Error(error.message)
-      await supabase.from('nutritionist_applications').update({status:'approved',nutritionist_id:nutr.id}).eq('id',app.id)
-      toast.success(`✅ ${app.name} u aprovua si Dietolog!\nEmail: ${app.email} / Pass: ${password}`)
-      setShow(false); onDone()
-    } catch(e){toast.error(e.message)}
-    finally{setLoading(false)}
-  }
+      const { data: nutr, error } = await supabase
+        .from("nutritionists")
+        .insert({
+          name: app.name,
+          email: app.email,
+          phone: app.phone,
+          speciality: app.speciality,
+          bio: app.bio,
+          certificate: app.certificate,
+          status: "approved",
+          commission_pct: pct,
+          approved_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+      if (error) throw new Error(error.message);
+      await supabase
+        .from("nutritionist_applications")
+        .update({ status: "approved", nutritionist_id: nutr.id })
+        .eq("id", app.id);
+      toast.success(
+        `✅ ${app.name} u aprovua si Dietolog!\nEmail: ${app.email} / Pass: ${password}`,
+      );
+      setShow(false);
+      onDone();
+    } catch (e) {
+      toast.error(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
       <tr>
-        <td><div><div className="mn">{app.name}</div><div className="ms">{app.speciality}</div></div></td>
-        <td><div className="ms">{app.email}</div><div className="ms">{app.phone}</div></td>
-        <td style={{fontSize:12,color:'var(--g600)',maxWidth:180}}>{(app.experience||'—').slice(0,80)}</td>
-        <td>{app.status==='new'?<span className="bdg bdg-bl">🆕 E Re</span>:app.status==='approved'?<span className="bdg bdg-gr">✅ Aprovuar</span>:<span className="bdg bdg-rd">❌ Refuzuar</span>}</td>
-        <td style={{fontSize:12,color:'var(--g500)'}}>{fmtDate(app.created_at)}</td>
-        <td>{app.status==='new'&&<div style={{display:'flex',gap:6}}>
-          <button className="btn btn-success btn-xs" onClick={()=>setShow(true)}>✅ Aprovo</button>
-          <button className="btn btn-danger btn-xs" onClick={async()=>{await supabase.from('nutritionist_applications').update({status:'rejected'}).eq('id',app.id);toast.success('U refuzua');onDone()}}>❌</button>
-        </div>}</td>
+        <td>
+          <div>
+            <div className="mn">{app.name}</div>
+            <div className="ms">{app.speciality}</div>
+          </div>
+        </td>
+        <td>
+          <div className="ms">{app.email}</div>
+          <div className="ms">{app.phone}</div>
+        </td>
+        <td style={{ fontSize: 12, color: "var(--g600)", maxWidth: 180 }}>
+          {(app.experience || "—").slice(0, 80)}
+        </td>
+        <td>
+          {app.status === "new" ? (
+            <span className="bdg bdg-bl">🆕 E Re</span>
+          ) : app.status === "approved" ? (
+            <span className="bdg bdg-gr">✅ Aprovuar</span>
+          ) : (
+            <span className="bdg bdg-rd">❌ Refuzuar</span>
+          )}
+        </td>
+        <td style={{ fontSize: 12, color: "var(--g500)" }}>
+          {fmtDate(app.created_at)}
+        </td>
+        <td>
+          {app.status === "new" && (
+            <div style={{ display: "flex", gap: 6 }}>
+              <button
+                className="btn btn-success btn-xs"
+                onClick={() => setShow(true)}
+              >
+                ✅ Aprovo
+              </button>
+              <button
+                className="btn btn-danger btn-xs"
+                onClick={async () => {
+                  await supabase
+                    .from("nutritionist_applications")
+                    .update({ status: "rejected" })
+                    .eq("id", app.id);
+                  toast.success("U refuzua");
+                  onDone();
+                }}
+              >
+                ❌
+              </button>
+            </div>
+          )}
+        </td>
       </tr>
-      {show&&<Modal title={`🥗 Aprovo Dietologun — ${app.name}`} onClose={()=>setShow(false)} footer={<><button className="btn btn-s" onClick={()=>setShow(false)}>Anulo</button><button className="btn btn-p" onClick={doApprove} disabled={loading}>{loading?'Duke aprovuar...':'✅ Aprovo'}</button></>}>
-        <div style={{background:'var(--g50)',borderRadius:10,padding:14,marginBottom:14,fontSize:13,lineHeight:1.8}}>
-          <div>🥗 <strong>{app.name}</strong> · {app.speciality}</div>
-          <div>📧 {app.email} · 📞 {app.phone}</div>
-          {app.bio&&<div style={{marginTop:6,color:'var(--g500)'}}>{app.bio}</div>}
-        </div>
-        <div className="fg c2">
-          <div className="fgp"><label>💰 Komisioni Dietologut (%)</label><input type="number" value={pct} onChange={e=>setPct(Number(e.target.value))} min="50" max="90"/><span style={{fontSize:11,color:'var(--g500)'}}>Ti merr {100-pct}%</span></div>
-          <div className="fgp"><label>🔑 Fjalëkalimi *</label><input type="text" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Dieta2026!"/></div>
-        </div>
-        <div className="alert al-gr">💰 Dietologu {pct}% · Platforma {100-pct}%</div>
-      </Modal>}
+      {show && (
+        <Modal
+          title={`🥗 Aprovo Dietologun — ${app.name}`}
+          onClose={() => setShow(false)}
+          footer={
+            <>
+              <button className="btn btn-s" onClick={() => setShow(false)}>
+                Anulo
+              </button>
+              <button
+                className="btn btn-p"
+                onClick={doApprove}
+                disabled={loading}
+              >
+                {loading ? "Duke aprovuar..." : "✅ Aprovo"}
+              </button>
+            </>
+          }
+        >
+          <div
+            style={{
+              background: "var(--g50)",
+              borderRadius: 10,
+              padding: 14,
+              marginBottom: 14,
+              fontSize: 13,
+              lineHeight: 1.8,
+            }}
+          >
+            <div>
+              🥗 <strong>{app.name}</strong> · {app.speciality}
+            </div>
+            <div>
+              📧 {app.email} · 📞 {app.phone}
+            </div>
+            {app.bio && (
+              <div style={{ marginTop: 6, color: "var(--g500)" }}>
+                {app.bio}
+              </div>
+            )}
+          </div>
+          <div className="fg c2">
+            <div className="fgp">
+              <label>💰 Komisioni Dietologut (%)</label>
+              <input
+                type="number"
+                value={pct}
+                onChange={(e) => setPct(Number(e.target.value))}
+                min="50"
+                max="90"
+              />
+              <span style={{ fontSize: 11, color: "var(--g500)" }}>
+                Ti merr {100 - pct}%
+              </span>
+            </div>
+            <div className="fgp">
+              <label>🔑 Fjalëkalimi *</label>
+              <input
+                type="text"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Dieta2026!"
+              />
+            </div>
+          </div>
+          <div className="alert al-gr">
+            💰 Dietologu {pct}% · Platforma {100 - pct}%
+          </div>
+        </Modal>
+      )}
     </>
-  )
+  );
 }
 
 export default function AdminPanel({ logout }) {
-  const [tab,setTab]=useState('overview')
-  const [sbOpen,setSbOpen]=useState(false)
-  const {data:overview,reload:ro}=useAsync(getPlatformOverview)
-  const {data:gymApps,loading:gal,reload:rga}=useAsync(getApplications)
-  const {data:nutrApps,loading:nal,reload:rna}=useAsync(getNutritionistApps)
-  const {data:gyms,loading:gl,reload:rg}=useAsync(getGyms)
-  const {data:nutritionists,loading:nl,reload:rn}=useAsync(getNutritionists)
-  const {data:dietOrders,loading:dol}=useAsync(getDietOrders)
-  const newGymApps=(gymApps||[]).filter(a=>a.status==='new').length
-  const newNutrApps=(nutrApps||[]).filter(a=>a.status==='new').length
-  const reloadAll=()=>{ro();rga();rna();rg();rn()}
+  const [tab, setTab] = useState("overview");
+  const [sbOpen, setSbOpen] = useState(false);
+  const { data: overview, reload: ro } = useAsync(getPlatformOverview);
+  const {
+    data: gymApps,
+    loading: gal,
+    reload: rga,
+  } = useAsync(getApplications);
+  const {
+    data: nutrApps,
+    loading: nal,
+    reload: rna,
+  } = useAsync(getNutritionistApps);
+  const { data: gyms, loading: gl, reload: rg } = useAsync(getGyms);
+  const {
+    data: nutritionists,
+    loading: nl,
+    reload: rn,
+  } = useAsync(getNutritionists);
+  const { data: dietOrders, loading: dol } = useAsync(getDietOrders);
+  const newGymApps = (gymApps || []).filter((a) => a.status === "new").length;
+  const newNutrApps = (nutrApps || []).filter((a) => a.status === "new").length;
+  const reloadAll = () => {
+    ro();
+    rga();
+    rna();
+    rg();
+    rn();
+  };
 
-  const NAV_ITEMS=[
-    {s:'Platforma',items:[{id:'overview',l:'Overview',i:'📊'},{id:'revenue',l:'Të Ardhurat',i:'💰'}]},
-    {s:'Palestra',items:[{id:'gym_apps',l:'Aplikimet Palestra',i:'🏋️',badge:newGymApps},{id:'gyms',l:'Palestrat',i:'🏠'}]},
-    {s:'Dietologë',items:[{id:'nutr_apps',l:'Aplikimet Dietolog',i:'🥗',badge:newNutrApps},{id:'nutritionists',l:'Dietologët',i:'👨‍⚕️'},{id:'diet_orders',l:'Porosi Dietash',i:'🛒'}]},
-    {s:'Sistem',items:[{id:'guide',l:'Udhëzues',i:'📖'}]},
-  ]
+  const NAV_ITEMS = [
+    {
+      s: "Platforma",
+      items: [
+        { id: "overview", l: "Overview", i: "📊" },
+        { id: "revenue", l: "Të Ardhurat", i: "💰" },
+      ],
+    },
+    {
+      s: "Palestra",
+      items: [
+        { id: "gym_apps", l: "Aplikimet Palestra", i: "🏋️", badge: newGymApps },
+        { id: "gyms", l: "Palestrat", i: "🏠" },
+      ],
+    },
+    {
+      s: "Dietologë",
+      items: [
+        {
+          id: "nutr_apps",
+          l: "Aplikimet Dietolog",
+          i: "🥗",
+          badge: newNutrApps,
+        },
+        { id: "nutritionists", l: "Dietologët", i: "👨‍⚕️" },
+        { id: "diet_orders", l: "Porosi Dietash", i: "🛒" },
+      ],
+    },
+    { s: "Sistem", items: [{ id: "guide", l: "Udhëzues", i: "📖" }] },
+  ];
 
-  const TITLE_MAP={overview:'📊 Overview',revenue:'💰 Të Ardhurat',gym_apps:'🏋️ Aplikimet Palestra',gyms:'🏠 Palestrat',nutr_apps:'🥗 Aplikimet Dietolog',nutritionists:'👨‍⚕️ Dietologët',diet_orders:'🛒 Porosi Dietash',guide:'📖 Udhëzues'}
+  const TITLE_MAP = {
+    overview: "📊 Overview",
+    revenue: "💰 Të Ardhurat",
+    gym_apps: "🏋️ Aplikimet Palestra",
+    gyms: "🏠 Palestrat",
+    nutr_apps: "🥗 Aplikimet Dietolog",
+    nutritionists: "👨‍⚕️ Dietologët",
+    diet_orders: "🛒 Porosi Dietash",
+    guide: "📖 Udhëzues",
+  };
 
   return (
     <div className="app">
-      <div className={`sbo ${sbOpen?'open':''}`} onClick={()=>setSbOpen(false)}/>
-      <aside className={`sidebar ${sbOpen?'open':''}`}>
-        <div className="sb-logo"><div className="sb-icon">⚡</div><div><div className="sb-name">FitPro Admin</div><div className="sb-sub">Platform Panel</div></div></div>
+      <div
+        className={`sbo ${sbOpen ? "open" : ""}`}
+        onClick={() => setSbOpen(false)}
+      />
+      <aside className={`sidebar ${sbOpen ? "open" : ""}`}>
+        <div className="sb-logo">
+          <div className="sb-icon">⚡</div>
+          <div>
+            <div className="sb-name">GV CRM Admin</div>
+            <div className="sb-sub">Platform Panel</div>
+          </div>
+        </div>
         <nav className="nav">
-          {NAV_ITEMS.map(s=>(
+          {NAV_ITEMS.map((s) => (
             <div key={s.s} className="nav-sec">
               <div className="nav-lbl">{s.s}</div>
-              {s.items.map(item=>(
-                <div key={item.id} className={`nav-item ${tab===item.id?'active':''}`} onClick={()=>{setTab(item.id);setSbOpen(false)}}>
-                  <span className="nav-ico">{item.i}</span>{item.l}
-                  {item.badge>0&&<span className="nav-bdg">{item.badge}</span>}
+              {s.items.map((item) => (
+                <div
+                  key={item.id}
+                  className={`nav-item ${tab === item.id ? "active" : ""}`}
+                  onClick={() => {
+                    setTab(item.id);
+                    setSbOpen(false);
+                  }}
+                >
+                  <span className="nav-ico">{item.i}</span>
+                  {item.l}
+                  {item.badge > 0 && (
+                    <span className="nav-bdg">{item.badge}</span>
+                  )}
                 </div>
               ))}
             </div>
           ))}
         </nav>
-        <div className="sb-bot"><div className="user-card" onClick={logout}><div className="user-av">⚡</div><div><div className="user-nm">Platform Admin</div><div className="user-rl">Dil →</div></div></div></div>
+        <div className="sb-bot">
+          <div className="user-card" onClick={logout}>
+            <div className="user-av">⚡</div>
+            <div>
+              <div className="user-nm">Platform Admin</div>
+              <div className="user-rl">Dil →</div>
+            </div>
+          </div>
+        </div>
       </aside>
 
       <main className="main">
         <div className="topbar">
           <div className="tbl">
-            <button className="hmbg" style={{display:'flex',alignItems:'center',justifyContent:'center'}} onClick={()=>setSbOpen(s=>!s)}>☰</button>
+            <button
+              className="hmbg"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              onClick={() => setSbOpen((s) => !s)}
+            >
+              ☰
+            </button>
             <div className="tb-title">{TITLE_MAP[tab]}</div>
           </div>
-          <div className="tbr"><button className="btn btn-s btn-sm" onClick={reloadAll}>↻</button><span className="bdg bdg-pu">⚡ Admin</span></div>
+          <div className="tbr">
+            <button className="btn btn-s btn-sm" onClick={reloadAll}>
+              ↻
+            </button>
+            <span className="bdg bdg-pu">⚡ Admin</span>
+          </div>
         </div>
 
         <div className="content">
-
-          {tab==='overview'&&(
+          {tab === "overview" && (
             <div className="page-in">
-              <div className="ph"><div><div className="pt">Platform Overview</div><div className="ps">Statistikat e gjithë ekosistemit</div></div></div>
-              {(newGymApps+newNutrApps)>0&&<div className="alert al-am">⚠️ Ke <strong>{newGymApps+newNutrApps} aplikime të reja</strong> që presin!</div>}
+              <div className="ph">
+                <div>
+                  <div className="pt">Platform Overview</div>
+                  <div className="ps">Statistikat e gjithë ekosistemit</div>
+                </div>
+              </div>
+              {newGymApps + newNutrApps > 0 && (
+                <div className="alert al-am">
+                  ⚠️ Ke{" "}
+                  <strong>{newGymApps + newNutrApps} aplikime të reja</strong>{" "}
+                  që presin!
+                </div>
+              )}
               <div className="sg">
-                <StatCard icon="🏋️" label="Palestra Aktive"    value={overview?.active_gyms??0}              change="aprovuar" up/>
-                <StatCard icon="👥" label="Total Anëtarë"       value={overview?.total_members??0}            change="të gjitha" up/>
-                <StatCard icon="🥗" label="Dietologë Aktivë"    value={overview?.active_nutritionists??0}     change="aprovuar" up/>
-                <StatCard icon="💰" label="Gym Revenue/Muaj"    value={fmtNum(overview?.gym_revenue_month??0)+' L'} change="ky muaj" up/>
-                <StatCard icon="🛒" label="Porosi Dieta"        value={overview?.total_diet_orders??0}        change="total" up/>
-                <StatCard icon="📋" label="Aplikime të Reja"    value={(newGymApps+newNutrApps)}/>
+                <StatCard
+                  icon="🏋️"
+                  label="Palestra Aktive"
+                  value={overview?.active_gyms ?? 0}
+                  change="aprovuar"
+                  up
+                />
+                <StatCard
+                  icon="👥"
+                  label="Total Anëtarë"
+                  value={overview?.total_members ?? 0}
+                  change="të gjitha"
+                  up
+                />
+                <StatCard
+                  icon="🥗"
+                  label="Dietologë Aktivë"
+                  value={overview?.active_nutritionists ?? 0}
+                  change="aprovuar"
+                  up
+                />
+                <StatCard
+                  icon="💰"
+                  label="Gym Revenue/Muaj"
+                  value={fmtNum(overview?.gym_revenue_month ?? 0) + " L"}
+                  change="ky muaj"
+                  up
+                />
+                <StatCard
+                  icon="🛒"
+                  label="Porosi Dieta"
+                  value={overview?.total_diet_orders ?? 0}
+                  change="total"
+                  up
+                />
+                <StatCard
+                  icon="📋"
+                  label="Aplikime të Reja"
+                  value={newGymApps + newNutrApps}
+                />
               </div>
               <div className="g2">
-                <div className="card" style={{padding:24}}>
-                  <div style={{fontFamily:'var(--fs)',fontSize:18,marginBottom:16}}>💰 Të Ardhurat e Platformës</div>
-                  {[['🏋️ Abonime Palestrave (muaj)',fmtNum(overview?.gym_revenue_month??0)+' L'],['🥗 Komisioni Dieta (30%)',fmtNum(overview?.diet_revenue??0)+' L'],['📦 Komisioni Produkte (30%)',fmtNum(overview?.product_revenue??0)+' L']].map(([l,v])=>(
-                    <div key={l} style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:'1px solid var(--g100)'}}>
-                      <span style={{fontSize:13,color:'var(--g600)'}}>{l}</span><span style={{fontWeight:700,color:'var(--gr)'}}>{v}</span>
+                <div className="card" style={{ padding: 24 }}>
+                  <div
+                    style={{
+                      fontFamily: "var(--fs)",
+                      fontSize: 18,
+                      marginBottom: 16,
+                    }}
+                  >
+                    💰 Të Ardhurat e Platformës
+                  </div>
+                  {[
+                    [
+                      "🏋️ Abonime Palestrave (muaj)",
+                      fmtNum(overview?.gym_revenue_month ?? 0) + " L",
+                    ],
+                    [
+                      "🥗 Komisioni Dieta (30%)",
+                      fmtNum(overview?.diet_revenue ?? 0) + " L",
+                    ],
+                    [
+                      "📦 Komisioni Produkte (30%)",
+                      fmtNum(overview?.product_revenue ?? 0) + " L",
+                    ],
+                  ].map(([l, v]) => (
+                    <div
+                      key={l}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        padding: "10px 0",
+                        borderBottom: "1px solid var(--g100)",
+                      }}
+                    >
+                      <span style={{ fontSize: 13, color: "var(--g600)" }}>
+                        {l}
+                      </span>
+                      <span style={{ fontWeight: 700, color: "var(--gr)" }}>
+                        {v}
+                      </span>
                     </div>
                   ))}
                 </div>
-                <div className="card" style={{padding:24}}>
-                  <div style={{fontFamily:'var(--fs)',fontSize:18,marginBottom:16}}>📋 Aplikime të Reja</div>
-                  <div style={{display:'flex',flexDirection:'column',gap:12}}>
-                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:14,background:'var(--acl)',borderRadius:10,border:'1px solid var(--acm)'}}>
-                      <div><div style={{fontWeight:600}}>🏋️ Palestra</div><div style={{fontSize:12,color:'var(--ac)'}}>{newGymApps} aplikime</div></div>
-                      <button className="btn btn-p btn-sm" onClick={()=>setTab('gym_apps')}>Shiko →</button>
+                <div className="card" style={{ padding: 24 }}>
+                  <div
+                    style={{
+                      fontFamily: "var(--fs)",
+                      fontSize: 18,
+                      marginBottom: 16,
+                    }}
+                  >
+                    📋 Aplikime të Reja
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 12,
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        padding: 14,
+                        background: "var(--acl)",
+                        borderRadius: 10,
+                        border: "1px solid var(--acm)",
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontWeight: 600 }}>🏋️ Palestra</div>
+                        <div style={{ fontSize: 12, color: "var(--ac)" }}>
+                          {newGymApps} aplikime
+                        </div>
+                      </div>
+                      <button
+                        className="btn btn-p btn-sm"
+                        onClick={() => setTab("gym_apps")}
+                      >
+                        Shiko →
+                      </button>
                     </div>
-                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:14,background:'var(--grl)',borderRadius:10,border:'1px solid #bbf7d0'}}>
-                      <div><div style={{fontWeight:600}}>🥗 Dietologë</div><div style={{fontSize:12,color:'var(--gr)'}}>{newNutrApps} aplikime</div></div>
-                      <button className="btn btn-p btn-sm" onClick={()=>setTab('nutr_apps')}>Shiko →</button>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        padding: 14,
+                        background: "var(--grl)",
+                        borderRadius: 10,
+                        border: "1px solid #bbf7d0",
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontWeight: 600 }}>🥗 Dietologë</div>
+                        <div style={{ fontSize: 12, color: "var(--gr)" }}>
+                          {newNutrApps} aplikime
+                        </div>
+                      </div>
+                      <button
+                        className="btn btn-p btn-sm"
+                        onClick={() => setTab("nutr_apps")}
+                      >
+                        Shiko →
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -219,171 +705,687 @@ export default function AdminPanel({ logout }) {
             </div>
           )}
 
-          {tab==='revenue'&&(
+          {tab === "revenue" && (
             <div className="page-in">
-              <div className="ph"><div><div className="pt">Të Ardhurat</div></div></div>
+              <div className="ph">
+                <div>
+                  <div className="pt">Të Ardhurat</div>
+                </div>
+              </div>
               <div className="sg">
-                <StatCard icon="💰" label="Gym Revenue Muaj" value={fmtNum(overview?.gym_revenue_month??0)+' L'} change="ky muaj" up/>
-                <StatCard icon="🥗" label="Diet Komisioni"   value={fmtNum(overview?.diet_revenue??0)+' L'}      change="total" up/>
-                <StatCard icon="📦" label="Shop Komisioni"   value={fmtNum(overview?.product_revenue??0)+' L'}   change="total" up/>
+                <StatCard
+                  icon="💰"
+                  label="Gym Revenue Muaj"
+                  value={fmtNum(overview?.gym_revenue_month ?? 0) + " L"}
+                  change="ky muaj"
+                  up
+                />
+                <StatCard
+                  icon="🥗"
+                  label="Diet Komisioni"
+                  value={fmtNum(overview?.diet_revenue ?? 0) + " L"}
+                  change="total"
+                  up
+                />
+                <StatCard
+                  icon="📦"
+                  label="Shop Komisioni"
+                  value={fmtNum(overview?.product_revenue ?? 0) + " L"}
+                  change="total"
+                  up
+                />
               </div>
               <div className="card">
-                <div className="card-hd"><div className="card-t">📊 Porositë e Fundit — Dieta</div></div>
-                {dol?<Loading/>:(
-                  <div className="tw"><table>
-                    <thead><tr><th>#</th><th>Klienti</th><th>Dietologu</th><th>Plani</th><th>Totali</th><th>Platforma</th><th>Data</th><th>Statusi</th></tr></thead>
-                    <tbody>
-                      {(dietOrders||[]).length===0?<tr><td colSpan={8}><Empty icon="🛒" title="Asnjë porosi"/></td></tr>:
-                      (dietOrders||[]).map(o=>(
-                        <tr key={o.id}>
-                          <td style={{fontFamily:'monospace',fontSize:11,color:'var(--g400)'}}>{o.invoice_number}</td>
-                          <td style={{fontWeight:500}}>{o.buyer_name}</td>
-                          <td><span className="bdg bdg-gr">{o.nutritionist?.name||'—'}</span></td>
-                          <td style={{fontSize:12}}>{o.diet_plan?.title||'—'}</td>
-                          <td style={{fontWeight:600}}>{fmtNum(o.amount)} L</td>
-                          <td style={{fontWeight:700,color:'var(--ac)'}}>{fmtNum(o.platform_amount)} L</td>
-                          <td style={{fontSize:12,color:'var(--g500)'}}>{fmtDate(o.created_at)}</td>
-                          <td>{o.status==='paid'?<span className="bdg bdg-gr">✅ Paguar</span>:
-                            <button className="btn btn-success btn-xs" onClick={async()=>{await supabase.from('diet_orders').update({status:'paid',paid_at:new Date().toISOString()}).eq('id',o.id);toast.success('✅ U konfirmua!');ro()}}>💰 Konfirmo</button>}
-                          </td>
+                <div className="card-hd">
+                  <div className="card-t">📊 Porositë e Fundit — Dieta</div>
+                </div>
+                {dol ? (
+                  <Loading />
+                ) : (
+                  <div className="tw">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>Klienti</th>
+                          <th>Dietologu</th>
+                          <th>Plani</th>
+                          <th>Totali</th>
+                          <th>Platforma</th>
+                          <th>Data</th>
+                          <th>Statusi</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table></div>
+                      </thead>
+                      <tbody>
+                        {(dietOrders || []).length === 0 ? (
+                          <tr>
+                            <td colSpan={8}>
+                              <Empty icon="🛒" title="Asnjë porosi" />
+                            </td>
+                          </tr>
+                        ) : (
+                          (dietOrders || []).map((o) => (
+                            <tr key={o.id}>
+                              <td
+                                style={{
+                                  fontFamily: "monospace",
+                                  fontSize: 11,
+                                  color: "var(--g400)",
+                                }}
+                              >
+                                {o.invoice_number}
+                              </td>
+                              <td style={{ fontWeight: 500 }}>
+                                {o.buyer_name}
+                              </td>
+                              <td>
+                                <span className="bdg bdg-gr">
+                                  {o.nutritionist?.name || "—"}
+                                </span>
+                              </td>
+                              <td style={{ fontSize: 12 }}>
+                                {o.diet_plan?.title || "—"}
+                              </td>
+                              <td style={{ fontWeight: 600 }}>
+                                {fmtNum(o.amount)} L
+                              </td>
+                              <td
+                                style={{ fontWeight: 700, color: "var(--ac)" }}
+                              >
+                                {fmtNum(o.platform_amount)} L
+                              </td>
+                              <td
+                                style={{ fontSize: 12, color: "var(--g500)" }}
+                              >
+                                {fmtDate(o.created_at)}
+                              </td>
+                              <td>
+                                {o.status === "paid" ? (
+                                  <span className="bdg bdg-gr">✅ Paguar</span>
+                                ) : (
+                                  <button
+                                    className="btn btn-success btn-xs"
+                                    onClick={async () => {
+                                      await supabase
+                                        .from("diet_orders")
+                                        .update({
+                                          status: "paid",
+                                          paid_at: new Date().toISOString(),
+                                        })
+                                        .eq("id", o.id);
+                                      toast.success("✅ U konfirmua!");
+                                      ro();
+                                    }}
+                                  >
+                                    💰 Konfirmo
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
               </div>
             </div>
           )}
 
-          {tab==='gym_apps'&&(
+          {tab === "gym_apps" && (
             <div className="page-in">
-              <div className="ph"><div><div className="pt">Aplikimet Palestra</div><div className="ps">{newGymApps} të reja</div></div></div>
-              {newGymApps>0&&<div className="alert al-am">⚠️ Ke {newGymApps} aplikim të ri palestre!</div>}
-              {gal?<Loading/>:(
-                <div className="card"><div className="tw"><table>
-                  <thead><tr><th>Palestra</th><th>Pronari</th><th>Statusi</th><th>Data</th><th>Veprime</th></tr></thead>
-                  <tbody>{(gymApps||[]).length===0?<tr><td colSpan={5}><Empty icon="🏋️" title="Asnjë aplikim"/></td></tr>:
-                  (gymApps||[]).map(app=><GymAppRow key={app.id} app={app} onDone={reloadAll}/>)}</tbody>
-                </table></div></div>
+              <div className="ph">
+                <div>
+                  <div className="pt">Aplikimet Palestra</div>
+                  <div className="ps">{newGymApps} të reja</div>
+                </div>
+              </div>
+              {newGymApps > 0 && (
+                <div className="alert al-am">
+                  ⚠️ Ke {newGymApps} aplikim të ri palestre!
+                </div>
+              )}
+              {gal ? (
+                <Loading />
+              ) : (
+                <div className="card">
+                  <div className="tw">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Palestra</th>
+                          <th>Pronari</th>
+                          <th>Statusi</th>
+                          <th>Data</th>
+                          <th>Veprime</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(gymApps || []).length === 0 ? (
+                          <tr>
+                            <td colSpan={5}>
+                              <Empty icon="🏋️" title="Asnjë aplikim" />
+                            </td>
+                          </tr>
+                        ) : (
+                          (gymApps || []).map((app) => (
+                            <GymAppRow
+                              key={app.id}
+                              app={app}
+                              onDone={reloadAll}
+                            />
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               )}
             </div>
           )}
 
-          {tab==='gyms'&&(
+          {tab === "gyms" && (
             <div className="page-in">
-              <div className="ph"><div><div className="pt">Palestrat</div><div className="ps">{(gyms||[]).length} total</div></div></div>
-              {gl?<Loading/>:(
-                <div className="card"><div className="tw"><table>
-                  <thead><tr><th>Palestra</th><th>Email</th><th>Qyteti</th><th>Statusi</th><th>Krijuar</th><th>Veprime</th></tr></thead>
-                  <tbody>{(gyms||[]).length===0?<tr><td colSpan={6}><Empty icon="🏋️" title="Asnjë palestre"/></td></tr>:
-                  (gyms||[]).map(gym=>(
-                    <tr key={gym.id}>
-                      <td><div className="mn">{gym.name}</div></td>
-                      <td style={{fontSize:12,color:'var(--g500)'}}>{gym.email}</td>
-                      <td style={{color:'var(--g500)'}}>{gym.city||'—'}</td>
-                      <td>{gym.status==='approved'?<span className="bdg bdg-gr">✅ Aktive</span>:gym.status==='suspended'?<span className="bdg bdg-rd">⏸ Suspenduar</span>:<span className="bdg bdg-am">⏳ Pending</span>}</td>
-                      <td style={{fontSize:12,color:'var(--g500)'}}>{fmtDate(gym.created_at)}</td>
-                      <td>{gym.status==='approved'?<button className="btn btn-danger btn-xs" onClick={async()=>{await supabase.from('gyms').update({status:'suspended'}).eq('id',gym.id);toast.success('U suspendua');rg()}}>⏸</button>:
-                      gym.status==='suspended'?<button className="btn btn-success btn-xs" onClick={async()=>{await supabase.from('gyms').update({status:'approved'}).eq('id',gym.id);toast.success('U aktivizua');rg()}}>▶</button>:null}</td>
-                    </tr>
-                  ))}</tbody>
-                </table></div></div>
+              <div className="ph">
+                <div>
+                  <div className="pt">Palestrat</div>
+                  <div className="ps">{(gyms || []).length} total</div>
+                </div>
+              </div>
+              {gl ? (
+                <Loading />
+              ) : (
+                <div className="card">
+                  <div className="tw">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Palestra</th>
+                          <th>Email</th>
+                          <th>Qyteti</th>
+                          <th>Statusi</th>
+                          <th>Krijuar</th>
+                          <th>Veprime</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(gyms || []).length === 0 ? (
+                          <tr>
+                            <td colSpan={6}>
+                              <Empty icon="🏋️" title="Asnjë palestre" />
+                            </td>
+                          </tr>
+                        ) : (
+                          (gyms || []).map((gym) => (
+                            <tr key={gym.id}>
+                              <td>
+                                <div className="mn">{gym.name}</div>
+                              </td>
+                              <td
+                                style={{ fontSize: 12, color: "var(--g500)" }}
+                              >
+                                {gym.email}
+                              </td>
+                              <td style={{ color: "var(--g500)" }}>
+                                {gym.city || "—"}
+                              </td>
+                              <td>
+                                {gym.status === "approved" ? (
+                                  <span className="bdg bdg-gr">✅ Aktive</span>
+                                ) : gym.status === "suspended" ? (
+                                  <span className="bdg bdg-rd">
+                                    ⏸ Suspenduar
+                                  </span>
+                                ) : (
+                                  <span className="bdg bdg-am">⏳ Pending</span>
+                                )}
+                              </td>
+                              <td
+                                style={{ fontSize: 12, color: "var(--g500)" }}
+                              >
+                                {fmtDate(gym.created_at)}
+                              </td>
+                              <td>
+                                {gym.status === "approved" ? (
+                                  <button
+                                    className="btn btn-danger btn-xs"
+                                    onClick={async () => {
+                                      await supabase
+                                        .from("gyms")
+                                        .update({ status: "suspended" })
+                                        .eq("id", gym.id);
+                                      toast.success("U suspendua");
+                                      rg();
+                                    }}
+                                  >
+                                    ⏸
+                                  </button>
+                                ) : gym.status === "suspended" ? (
+                                  <button
+                                    className="btn btn-success btn-xs"
+                                    onClick={async () => {
+                                      await supabase
+                                        .from("gyms")
+                                        .update({ status: "approved" })
+                                        .eq("id", gym.id);
+                                      toast.success("U aktivizua");
+                                      rg();
+                                    }}
+                                  >
+                                    ▶
+                                  </button>
+                                ) : null}
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               )}
             </div>
           )}
 
-          {tab==='nutr_apps'&&(
+          {tab === "nutr_apps" && (
             <div className="page-in">
-              <div className="ph"><div><div className="pt">Aplikimet Dietologë</div><div className="ps">{newNutrApps} të reja</div></div></div>
-              {newNutrApps>0&&<div className="alert al-am">⚠️ Ke {newNutrApps} aplikim të ri dietologu!</div>}
-              {nal?<Loading/>:(
-                <div className="card"><div className="tw"><table>
-                  <thead><tr><th>Dietologu</th><th>Kontakti</th><th>Eksperienca</th><th>Statusi</th><th>Data</th><th>Veprime</th></tr></thead>
-                  <tbody>{(nutrApps||[]).length===0?<tr><td colSpan={6}><Empty icon="🥗" title="Asnjë aplikim"/></td></tr>:
-                  (nutrApps||[]).map(app=><NutrAppRow key={app.id} app={app} onDone={reloadAll}/>)}</tbody>
-                </table></div></div>
+              <div className="ph">
+                <div>
+                  <div className="pt">Aplikimet Dietologë</div>
+                  <div className="ps">{newNutrApps} të reja</div>
+                </div>
+              </div>
+              {newNutrApps > 0 && (
+                <div className="alert al-am">
+                  ⚠️ Ke {newNutrApps} aplikim të ri dietologu!
+                </div>
+              )}
+              {nal ? (
+                <Loading />
+              ) : (
+                <div className="card">
+                  <div className="tw">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Dietologu</th>
+                          <th>Kontakti</th>
+                          <th>Eksperienca</th>
+                          <th>Statusi</th>
+                          <th>Data</th>
+                          <th>Veprime</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(nutrApps || []).length === 0 ? (
+                          <tr>
+                            <td colSpan={6}>
+                              <Empty icon="🥗" title="Asnjë aplikim" />
+                            </td>
+                          </tr>
+                        ) : (
+                          (nutrApps || []).map((app) => (
+                            <NutrAppRow
+                              key={app.id}
+                              app={app}
+                              onDone={reloadAll}
+                            />
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               )}
             </div>
           )}
 
-          {tab==='nutritionists'&&(
+          {tab === "nutritionists" && (
             <div className="page-in">
-              <div className="ph"><div><div className="pt">Dietologët Aktivë</div></div></div>
-              {nl?<Loading/>:(
-                <div className="card"><div className="tw"><table>
-                  <thead><tr><th>Dietologu</th><th>Specializimi</th><th>Planet</th><th>Porosi</th><th>Fituan</th><th>Platforma</th><th>Komisioni</th><th>Statusi</th><th></th></tr></thead>
-                  <tbody>{(nutritionists||[]).length===0?<tr><td colSpan={9}><Empty icon="🥗" title="Asnjë dietolog"/></td></tr>:
-                  (nutritionists||[]).map(n=>(
-                    <tr key={n.id}>
-                      <td><div><div className="mn">{n.name}</div><div className="ms">{n.email}</div></div></td>
-                      <td style={{fontSize:12}}>{n.speciality||'—'}</td>
-                      <td style={{textAlign:'center',fontWeight:600}}>{n.total_plans||0}</td>
-                      <td style={{textAlign:'center',fontWeight:600}}>{n.total_orders||0}</td>
-                      <td style={{fontWeight:700,color:'var(--gr)'}}>{fmtNum(n.total_earned||0)} L</td>
-                      <td style={{fontWeight:700,color:'var(--ac)'}}>{fmtNum(n.platform_earned||0)} L</td>
-                      <td><span className="bdg bdg-bl">{n.commission_pct||70}% / {100-(n.commission_pct||70)}%</span></td>
-                      <td>{n.status==='approved'?<span className="bdg bdg-gr">✅</span>:<span className="bdg bdg-rd">❌</span>}</td>
-                      <td>{n.status==='approved'?<button className="btn btn-danger btn-xs" onClick={async()=>{await supabase.from('nutritionists').update({status:'suspended'}).eq('id',n.id);toast.success('U suspendua');rn()}}>⏸</button>:<button className="btn btn-success btn-xs" onClick={async()=>{await supabase.from('nutritionists').update({status:'approved'}).eq('id',n.id);toast.success('U aktivizua');rn()}}>▶</button>}</td>
-                    </tr>
-                  ))}</tbody>
-                </table></div></div>
+              <div className="ph">
+                <div>
+                  <div className="pt">Dietologët Aktivë</div>
+                </div>
+              </div>
+              {nl ? (
+                <Loading />
+              ) : (
+                <div className="card">
+                  <div className="tw">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Dietologu</th>
+                          <th>Specializimi</th>
+                          <th>Planet</th>
+                          <th>Porosi</th>
+                          <th>Fituan</th>
+                          <th>Platforma</th>
+                          <th>Komisioni</th>
+                          <th>Statusi</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(nutritionists || []).length === 0 ? (
+                          <tr>
+                            <td colSpan={9}>
+                              <Empty icon="🥗" title="Asnjë dietolog" />
+                            </td>
+                          </tr>
+                        ) : (
+                          (nutritionists || []).map((n) => (
+                            <tr key={n.id}>
+                              <td>
+                                <div>
+                                  <div className="mn">{n.name}</div>
+                                  <div className="ms">{n.email}</div>
+                                </div>
+                              </td>
+                              <td style={{ fontSize: 12 }}>
+                                {n.speciality || "—"}
+                              </td>
+                              <td
+                                style={{ textAlign: "center", fontWeight: 600 }}
+                              >
+                                {n.total_plans || 0}
+                              </td>
+                              <td
+                                style={{ textAlign: "center", fontWeight: 600 }}
+                              >
+                                {n.total_orders || 0}
+                              </td>
+                              <td
+                                style={{ fontWeight: 700, color: "var(--gr)" }}
+                              >
+                                {fmtNum(n.total_earned || 0)} L
+                              </td>
+                              <td
+                                style={{ fontWeight: 700, color: "var(--ac)" }}
+                              >
+                                {fmtNum(n.platform_earned || 0)} L
+                              </td>
+                              <td>
+                                <span className="bdg bdg-bl">
+                                  {n.commission_pct || 70}% /{" "}
+                                  {100 - (n.commission_pct || 70)}%
+                                </span>
+                              </td>
+                              <td>
+                                {n.status === "approved" ? (
+                                  <span className="bdg bdg-gr">✅</span>
+                                ) : (
+                                  <span className="bdg bdg-rd">❌</span>
+                                )}
+                              </td>
+                              <td>
+                                {n.status === "approved" ? (
+                                  <button
+                                    className="btn btn-danger btn-xs"
+                                    onClick={async () => {
+                                      await supabase
+                                        .from("nutritionists")
+                                        .update({ status: "suspended" })
+                                        .eq("id", n.id);
+                                      toast.success("U suspendua");
+                                      rn();
+                                    }}
+                                  >
+                                    ⏸
+                                  </button>
+                                ) : (
+                                  <button
+                                    className="btn btn-success btn-xs"
+                                    onClick={async () => {
+                                      await supabase
+                                        .from("nutritionists")
+                                        .update({ status: "approved" })
+                                        .eq("id", n.id);
+                                      toast.success("U aktivizua");
+                                      rn();
+                                    }}
+                                  >
+                                    ▶
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               )}
             </div>
           )}
 
-          {tab==='diet_orders'&&(
+          {tab === "diet_orders" && (
             <div className="page-in">
-              <div className="ph"><div><div className="pt">Porosi Dietash</div></div></div>
-              {dol?<Loading/>:(
-                <div className="card"><div className="tw"><table>
-                  <thead><tr><th>#</th><th>Klienti</th><th>Dietologu</th><th>Plani</th><th>Totali</th><th>Dietologu</th><th>Platforma</th><th>Data</th><th>Statusi</th></tr></thead>
-                  <tbody>{(dietOrders||[]).length===0?<tr><td colSpan={9}><Empty icon="🛒" title="Asnjë porosi"/></td></tr>:
-                  (dietOrders||[]).map(o=>(
-                    <tr key={o.id}>
-                      <td style={{fontFamily:'monospace',fontSize:11,color:'var(--g400)'}}>{o.invoice_number}</td>
-                      <td><div style={{fontWeight:500}}>{o.buyer_name}</div><div className="ms">{o.buyer_email}</div></td>
-                      <td><span className="bdg bdg-gr">{o.nutritionist?.name||'—'}</span></td>
-                      <td style={{fontSize:12}}>{o.diet_plan?.title||'—'}</td>
-                      <td style={{fontWeight:600}}>{fmtNum(o.amount)} L</td>
-                      <td style={{color:'var(--gr)',fontWeight:600}}>{fmtNum(o.nutritionist_amount)} L</td>
-                      <td style={{color:'var(--ac)',fontWeight:600}}>{fmtNum(o.platform_amount)} L</td>
-                      <td style={{fontSize:12,color:'var(--g500)'}}>{fmtDate(o.created_at)}</td>
-                      <td>{o.status==='paid'?<span className="bdg bdg-gr">✅ Paguar</span>:<button className="btn btn-success btn-xs" onClick={async()=>{await supabase.from('diet_orders').update({status:'paid',paid_at:new Date().toISOString()}).eq('id',o.id);toast.success('✅');ro()}}>💰</button>}</td>
-                    </tr>
-                  ))}</tbody>
-                </table></div></div>
+              <div className="ph">
+                <div>
+                  <div className="pt">Porosi Dietash</div>
+                </div>
+              </div>
+              {dol ? (
+                <Loading />
+              ) : (
+                <div className="card">
+                  <div className="tw">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>Klienti</th>
+                          <th>Dietologu</th>
+                          <th>Plani</th>
+                          <th>Totali</th>
+                          <th>Dietologu</th>
+                          <th>Platforma</th>
+                          <th>Data</th>
+                          <th>Statusi</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(dietOrders || []).length === 0 ? (
+                          <tr>
+                            <td colSpan={9}>
+                              <Empty icon="🛒" title="Asnjë porosi" />
+                            </td>
+                          </tr>
+                        ) : (
+                          (dietOrders || []).map((o) => (
+                            <tr key={o.id}>
+                              <td
+                                style={{
+                                  fontFamily: "monospace",
+                                  fontSize: 11,
+                                  color: "var(--g400)",
+                                }}
+                              >
+                                {o.invoice_number}
+                              </td>
+                              <td>
+                                <div style={{ fontWeight: 500 }}>
+                                  {o.buyer_name}
+                                </div>
+                                <div className="ms">{o.buyer_email}</div>
+                              </td>
+                              <td>
+                                <span className="bdg bdg-gr">
+                                  {o.nutritionist?.name || "—"}
+                                </span>
+                              </td>
+                              <td style={{ fontSize: 12 }}>
+                                {o.diet_plan?.title || "—"}
+                              </td>
+                              <td style={{ fontWeight: 600 }}>
+                                {fmtNum(o.amount)} L
+                              </td>
+                              <td
+                                style={{ color: "var(--gr)", fontWeight: 600 }}
+                              >
+                                {fmtNum(o.nutritionist_amount)} L
+                              </td>
+                              <td
+                                style={{ color: "var(--ac)", fontWeight: 600 }}
+                              >
+                                {fmtNum(o.platform_amount)} L
+                              </td>
+                              <td
+                                style={{ fontSize: 12, color: "var(--g500)" }}
+                              >
+                                {fmtDate(o.created_at)}
+                              </td>
+                              <td>
+                                {o.status === "paid" ? (
+                                  <span className="bdg bdg-gr">✅ Paguar</span>
+                                ) : (
+                                  <button
+                                    className="btn btn-success btn-xs"
+                                    onClick={async () => {
+                                      await supabase
+                                        .from("diet_orders")
+                                        .update({
+                                          status: "paid",
+                                          paid_at: new Date().toISOString(),
+                                        })
+                                        .eq("id", o.id);
+                                      toast.success("✅");
+                                      ro();
+                                    }}
+                                  >
+                                    💰
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               )}
             </div>
           )}
 
-          {tab==='guide'&&(
+          {tab === "guide" && (
             <div className="page-in">
-              <div className="ph"><div><div className="pt">Udhëzues Admin</div></div></div>
+              <div className="ph">
+                <div>
+                  <div className="pt">Udhëzues Admin</div>
+                </div>
+              </div>
               <div className="g2">
-                <div className="card" style={{padding:24}}>
-                  <div style={{fontFamily:'var(--fs)',fontSize:18,marginBottom:16}}>🏋️ Si Aprovoj Palestre</div>
-                  {[['1','Palestra aplikon nga / (faqja kryesore)'],['2','Shfaqet te "Aplikimet Palestra" me status E Re'],['3','Telefono, merr pagesën cash'],['4','Kliko Aprovo → vendos fjalëkalimin'],['5','Supabase → Auth → Add User → email + fjalëkalim'],['6','Telefono klientin me kredencialet']].map(([n,t])=>(
-                    <div key={n} style={{display:'flex',gap:12,marginBottom:10}}>
-                      <div style={{width:24,height:24,borderRadius:'50%',background:'var(--g900)',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700,flexShrink:0}}>{n}</div>
-                      <div style={{fontSize:13,color:'var(--g600)',paddingTop:3}}>{t}</div>
+                <div className="card" style={{ padding: 24 }}>
+                  <div
+                    style={{
+                      fontFamily: "var(--fs)",
+                      fontSize: 18,
+                      marginBottom: 16,
+                    }}
+                  >
+                    🏋️ Si Aprovoj Palestre
+                  </div>
+                  {[
+                    ["1", "Palestra aplikon nga / (faqja kryesore)"],
+                    ["2", 'Shfaqet te "Aplikimet Palestra" me status E Re'],
+                    ["3", "Telefono, merr pagesën cash"],
+                    ["4", "Kliko Aprovo → vendos fjalëkalimin"],
+                    ["5", "Supabase → Auth → Add User → email + fjalëkalim"],
+                    ["6", "Telefono klientin me kredencialet"],
+                  ].map(([n, t]) => (
+                    <div
+                      key={n}
+                      style={{ display: "flex", gap: 12, marginBottom: 10 }}
+                    >
+                      <div
+                        style={{
+                          width: 24,
+                          height: 24,
+                          borderRadius: "50%",
+                          background: "var(--g900)",
+                          color: "#fff",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: 11,
+                          fontWeight: 700,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {n}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 13,
+                          color: "var(--g600)",
+                          paddingTop: 3,
+                        }}
+                      >
+                        {t}
+                      </div>
                     </div>
                   ))}
                 </div>
-                <div className="card" style={{padding:24}}>
-                  <div style={{fontFamily:'var(--fs)',fontSize:18,marginBottom:16}}>🥗 Si Aprovoj Dietolog</div>
-                  {[['1','Dietologu aplikon nga /nutritionist/apply'],['2','Shfaqet te "Aplikimet Dietolog"'],['3','Kontrollo CV dhe çertifikatat'],['4','Vendos komisionin (default 70/30)'],['5','Kliko Aprovo → vendos fjalëkalimin'],['6','Supabase → Auth → Add User → email + fjalëkalim'],['7','Dietologu hyn dhe shton dieta']].map(([n,t])=>(
-                    <div key={n} style={{display:'flex',gap:12,marginBottom:10}}>
-                      <div style={{width:24,height:24,borderRadius:'50%',background:'var(--gr)',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700,flexShrink:0}}>{n}</div>
-                      <div style={{fontSize:13,color:'var(--g600)',paddingTop:3}}>{t}</div>
+                <div className="card" style={{ padding: 24 }}>
+                  <div
+                    style={{
+                      fontFamily: "var(--fs)",
+                      fontSize: 18,
+                      marginBottom: 16,
+                    }}
+                  >
+                    🥗 Si Aprovoj Dietolog
+                  </div>
+                  {[
+                    ["1", "Dietologu aplikon nga /nutritionist/apply"],
+                    ["2", 'Shfaqet te "Aplikimet Dietolog"'],
+                    ["3", "Kontrollo CV dhe çertifikatat"],
+                    ["4", "Vendos komisionin (default 70/30)"],
+                    ["5", "Kliko Aprovo → vendos fjalëkalimin"],
+                    ["6", "Supabase → Auth → Add User → email + fjalëkalim"],
+                    ["7", "Dietologu hyn dhe shton dieta"],
+                  ].map(([n, t]) => (
+                    <div
+                      key={n}
+                      style={{ display: "flex", gap: 12, marginBottom: 10 }}
+                    >
+                      <div
+                        style={{
+                          width: 24,
+                          height: 24,
+                          borderRadius: "50%",
+                          background: "var(--gr)",
+                          color: "#fff",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: 11,
+                          fontWeight: 700,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {n}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 13,
+                          color: "var(--g600)",
+                          paddingTop: 3,
+                        }}
+                      >
+                        {t}
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
           )}
-
         </div>
       </main>
     </div>
-  )
+  );
 }
