@@ -517,35 +517,6 @@ export default function LandingPage({ onApply, onLogin }) {
               animation: "fadeUp .7s ease both",
             }}
           >
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                background: "#fff",
-                border: "1px solid rgba(0,0,0,.08)",
-                borderRadius: 100,
-                padding: "6px 16px",
-                fontSize: 12,
-                fontWeight: 600,
-                color: "#52525b",
-                letterSpacing: ".05em",
-                textTransform: "uppercase",
-                marginBottom: 28,
-              }}
-            >
-              <span
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: "50%",
-                  background: "#16a34a",
-                  animation: "pulse 2s ease infinite",
-                  display: "inline-block",
-                }}
-              />
-              Sistemi #1 CRM për palestra në Shqipëri
-            </div>
             <h1
               className="hero-title"
               style={{
