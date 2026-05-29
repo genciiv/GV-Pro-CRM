@@ -336,7 +336,7 @@ export default function LandingPage({ onApply, onLogin }) {
             💪
           </div>
           <span style={{ fontWeight: 700, fontSize: 17, color: "#18181b" }}>
-            GV-CRM
+            GV CRM
           </span>
         </button>
 
