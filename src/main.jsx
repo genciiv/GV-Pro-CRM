@@ -2,13 +2,14 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider, useAuth } from './lib/auth.jsx'
-import LandingPage          from './pages/LandingPage.jsx'
-import Login                from './pages/auth/Login.jsx'
-import Apply                from './pages/auth/Apply.jsx'
-import AdminPanel           from './pages/admin/AdminPanel.jsx'
-import GymDashboard         from './pages/gym/GymDashboard.jsx'
+import LandingPage           from './pages/LandingPage.jsx'
+import Login                 from './pages/auth/Login.jsx'
+import Apply                 from './pages/auth/Apply.jsx'
+import AdminPanel            from './pages/admin/AdminPanel.jsx'
+import GymDashboard          from './pages/gym/GymDashboard.jsx'
 import NutritionistDashboard from './pages/nutritionist/NutritionistDashboard.jsx'
-import NutritionistApply   from './pages/nutritionist/NutritionistApply.jsx'
+import NutritionistApply     from './pages/nutritionist/NutritionistApply.jsx'
+import MemberApp             from './pages/member/MemberApp.jsx'
 import './index.css'
 
 function Router() {
@@ -24,9 +25,9 @@ function Router() {
   )
 
   // Public routes
-  if (path === '/apply')                return <Apply/>
-  if (path === '/nutritionist/apply')   return <NutritionistApply/>
-  if (path === '/login' && !user)       return <Login/>
+  if (path === '/apply')              return <Apply/>
+  if (path === '/nutritionist/apply') return <NutritionistApply/>
+  if (path === '/login' && !user)     return <Login/>
 
   // Logged in
   if (user) {
@@ -35,7 +36,7 @@ function Router() {
         <div style={{background:'#fff',borderRadius:16,padding:48,maxWidth:460,width:'100%',textAlign:'center',boxShadow:'0 4px 24px rgba(0,0,0,.08)'}}>
           <div style={{fontSize:48,marginBottom:16}}>⚠️</div>
           <div style={{fontFamily:'serif',fontSize:22,marginBottom:12}}>Profili nuk u gjet</div>
-          <div style={{fontSize:14,color:'#71717a',lineHeight:1.7,marginBottom:16}}>Email: <strong>{user.email}</strong></div>
+          <div style={{fontSize:14,color:'#71717a',marginBottom:16}}>Email: <strong>{user.email}</strong></div>
           <div style={{background:'#fef3c7',border:'1px solid #fde68a',borderRadius:10,padding:14,marginBottom:24,fontSize:13,textAlign:'left',lineHeight:1.8}}>
             <strong>Zgjidha:</strong> Supabase → SQL Editor → Run:<br/>
             <code style={{fontSize:11,background:'#fff',padding:'2px 6px',borderRadius:4,display:'block',marginTop:6,wordBreak:'break-all'}}>
@@ -50,15 +51,16 @@ function Router() {
       </div>
     )
 
-    if (profile.type === 'admin')         return <AdminPanel logout={logout}/>
-    if (profile.type === 'nutritionist')  return <NutritionistDashboard/>
+    if (profile.type === 'admin')        return <AdminPanel logout={logout}/>
+    if (profile.type === 'nutritionist') return <NutritionistDashboard/>
+    if (profile.type === 'member')       return <MemberApp/>
     if (profile.type === 'gym' && profile.gym?.status === 'approved') return <GymDashboard/>
     if (profile.type === 'gym') return (
       <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#fafafa',padding:24}}>
         <div style={{background:'#fff',borderRadius:16,padding:48,maxWidth:440,width:'100%',textAlign:'center',boxShadow:'0 4px 24px rgba(0,0,0,.08)'}}>
           <div style={{fontSize:48,marginBottom:16}}>⏳</div>
           <div style={{fontFamily:'serif',fontSize:22,marginBottom:12}}>Duke u aprovuar</div>
-          <div style={{fontSize:14,color:'#71717a',lineHeight:1.7,marginBottom:24}}>Do t'ju njoftojmë brenda 24 orësh.</div>
+          <div style={{fontSize:14,color:'#71717a',marginBottom:24}}>Do t'ju njoftojmë brenda 24 orësh.</div>
           <button onClick={logout} style={{background:'#18181b',color:'#fff',border:'none',padding:'10px 24px',borderRadius:8,fontSize:14,fontWeight:600,cursor:'pointer'}}>Dil</button>
         </div>
       </div>
