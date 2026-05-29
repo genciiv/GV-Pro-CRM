@@ -7,6 +7,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPass, setShowPass] = useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -14,8 +15,6 @@ export default function Login() {
     setLoading(true);
     try {
       await login(email, password);
-      // Auth listener do të ndryshojë profilin dhe Router do të ridrejtojë
-      // Presim pak për të lejuar auth state të përditësohet
       setTimeout(() => {
         window.location.href = "/";
       }, 800);
@@ -30,271 +29,420 @@ export default function Login() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", background: "#fafafa" }}>
-      {/* Left */}
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        background: "#fafafa",
+        fontFamily: "'Geist',-apple-system,sans-serif",
+      }}
+    >
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600;700&display=swap');
+        *{box-sizing:border-box;margin:0;padding:0}
+        .login-input{width:100%;background:#fff;border:1.5px solid #e4e4e7;color:#18181b;border-radius:10px;padding:13px 14px;font-family:inherit;font-size:15px;outline:none;transition:border-color .15s,box-shadow .15s}
+        .login-input:focus{border-color:#18181b;box-shadow:0 0 0 3px rgba(0,0,0,.06)}
+        .login-btn{width:100%;background:#18181b;color:#fff;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;margin-top:8px}
+        .login-btn:hover:not(:disabled){background:#333}
+        .login-btn:disabled{opacity:.6;cursor:wait}
+        .login-panel{display:flex}
+        @media(max-width:768px){.login-panel{display:none!important}}
+      `}</style>
+
+      {/* Nav */}
       <div
         style={{
-          flex: 1,
+          background: "#fff",
+          borderBottom: "1px solid #e4e4e7",
+          padding: "14px 20px",
           display: "flex",
           alignItems: "center",
-          justifyContent: "center",
-          padding: 40,
+          gap: 10,
         }}
       >
-        <div style={{ width: "100%", maxWidth: 380 }}>
-          <div style={{ marginBottom: 40 }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                marginBottom: 28,
-              }}
-            >
+        <button
+          onClick={() => (window.location.href = "/")}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            padding: 0,
+          }}
+        >
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              background: "#18181b",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 16,
+            }}
+          >
+            💪
+          </div>
+          <span style={{ fontWeight: 700, fontSize: 16, color: "#18181b" }}>
+            GV CRM
+          </span>
+        </button>
+      </div>
+
+      {/* Body */}
+      <div style={{ flex: 1, display: "flex" }}>
+        {/* Form - LEFT */}
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "32px 20px",
+          }}
+        >
+          <div style={{ width: "100%", maxWidth: 400 }}>
+            {/* Header */}
+            <div style={{ textAlign: "center", marginBottom: 32 }}>
               <div
                 style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 12,
+                  width: 56,
+                  height: 56,
+                  borderRadius: 14,
                   background: "#18181b",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: 22,
+                  fontSize: 26,
+                  margin: "0 auto 16px",
                 }}
               >
                 💪
               </div>
-              <div>
-                <div
-                  style={{
-                    fontWeight: 700,
-                    fontSize: 18,
-                    letterSpacing: "-.3px",
-                  }}
-                >
-                  GV CRM
-                </div>
-                <div style={{ fontSize: 11, color: "#a1a1aa" }}>
-                  Platformë për Palestra
-                </div>
+              <h1
+                style={{
+                  fontFamily: "'Instrument Serif',serif",
+                  fontSize: 28,
+                  fontWeight: 900,
+                  marginBottom: 6,
+                  color: "#18181b",
+                }}
+              >
+                Mirë se erdhe
+              </h1>
+              <p style={{ fontSize: 14, color: "#71717a" }}>
+                Hyr me llogarinë tënde GV CRM
+              </p>
+            </div>
+
+            {/* Error */}
+            {error && (
+              <div
+                style={{
+                  background: "#fef2f2",
+                  border: "1px solid #fecaca",
+                  borderRadius: 10,
+                  padding: "12px 14px",
+                  marginBottom: 20,
+                  fontSize: 13,
+                  color: "#991b1b",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                <span style={{ fontSize: 16 }}>❌</span> {error}
               </div>
-            </div>
-            <div
-              style={{
-                fontFamily: "Instrument Serif,serif",
-                fontSize: 28,
-                marginBottom: 6,
-              }}
-            >
-              Mirë se erdhe
-            </div>
-            <div style={{ fontSize: 13, color: "#71717a" }}>
-              Hyr me llogarinë tënde për të vazhduar
-            </div>
-          </div>
+            )}
 
-          {error && (
-            <div
-              style={{
-                background: "#fef2f2",
-                border: "1px solid #fecaca",
-                borderRadius: 8,
-                padding: "10px 14px",
-                marginBottom: 20,
-                fontSize: 13,
-                color: "#991b1b",
-                display: "flex",
-                gap: 8,
-              }}
+            {/* Form */}
+            <form
+              onSubmit={submit}
+              style={{ display: "flex", flexDirection: "column", gap: 16 }}
             >
-              ❌ {error}
-            </div>
-          )}
-
-          <form onSubmit={submit}>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 14,
-                marginBottom: 20,
-              }}
-            >
-              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+              <div>
                 <label
-                  style={{ fontSize: 12, fontWeight: 500, color: "#52525b" }}
+                  style={{
+                    display: "block",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: "#3f3f46",
+                    marginBottom: 6,
+                  }}
                 >
                   Email
                 </label>
                 <input
+                  className="login-input"
                   type="email"
                   required
                   autoFocus
+                  autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="email@palestra.al"
-                  style={{
-                    background: "#fff",
-                    border: "1px solid #e4e4e7",
-                    borderRadius: 8,
-                    padding: "9px 12px",
-                    fontSize: 13,
-                    outline: "none",
-                    fontFamily: "inherit",
-                    width: "100%",
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = "#a1a1aa")}
-                  onBlur={(e) => (e.target.style.borderColor = "#e4e4e7")}
                 />
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+
+              <div>
                 <label
-                  style={{ fontSize: 12, fontWeight: 500, color: "#52525b" }}
+                  style={{
+                    display: "block",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: "#3f3f46",
+                    marginBottom: 6,
+                  }}
                 >
                   Fjalëkalimi
                 </label>
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  style={{
-                    background: "#fff",
-                    border: "1px solid #e4e4e7",
-                    borderRadius: 8,
-                    padding: "9px 12px",
-                    fontSize: 13,
-                    outline: "none",
-                    fontFamily: "inherit",
-                    width: "100%",
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = "#a1a1aa")}
-                  onBlur={(e) => (e.target.style.borderColor = "#e4e4e7")}
-                />
+                <div style={{ position: "relative" }}>
+                  <input
+                    className="login-input"
+                    type={showPass ? "text" : "password"}
+                    required
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    style={{ paddingRight: 48 }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPass((s) => !s)}
+                    style={{
+                      position: "absolute",
+                      right: 14,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      fontSize: 18,
+                      color: "#a1a1aa",
+                      padding: 4,
+                    }}
+                  >
+                    {showPass ? "🙈" : "👁️"}
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: "100%",
-                background: loading ? "#52525b" : "#18181b",
-                color: "#fff",
-                border: "none",
-                padding: "12px 0",
-                borderRadius: 9,
-                fontSize: 14,
-                fontWeight: 600,
-                cursor: loading ? "wait" : "pointer",
-                fontFamily: "inherit",
-                transition: "background .2s",
-              }}
-            >
-              {loading ? "⏳ Duke hyrë..." : "Hyr në sistem →"}
-            </button>
-          </form>
+              <button type="submit" className="login-btn" disabled={loading}>
+                {loading ? "⏳ Duke hyrë..." : "Hyr në sistem →"}
+              </button>
+            </form>
 
-          <div
-            style={{
-              marginTop: 24,
-              textAlign: "center",
-              fontSize: 12,
-              color: "#a1a1aa",
-            }}
-          >
-            Nuk ke llogari?{" "}
-            <a
-              href="/apply"
-              style={{
-                color: "#18181b",
-                fontWeight: 600,
-                textDecoration: "none",
-              }}
-            >
-              Apliko tani
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* Right */}
-      <div
-        style={{
-          flex: 1,
-          background: "#18181b",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 60,
-          color: "#fff",
-        }}
-        className="login-panel"
-      >
-        <div style={{ maxWidth: 360 }}>
-          <div
-            style={{
-              fontFamily: "Instrument Serif,serif",
-              fontSize: 34,
-              marginBottom: 14,
-              lineHeight: 1.2,
-            }}
-          >
-            Menaxho palestrën me profesionalizëm
-          </div>
-          <div
-            style={{
-              fontSize: 14,
-              color: "rgba(255,255,255,.5)",
-              lineHeight: 1.8,
-              marginBottom: 40,
-            }}
-          >
-            QR check-in, pagesa, fatura dhe raporte — gjithçka në një vend.
-          </div>
-          {[
-            ["📊", "Dashboard live me statistika reale"],
-            ["📷", "QR Check-in me kamerë"],
-            ["💰", "Pagesa cash dhe fatura automatike"],
-            ["📈", "Raporte dhe analiza të detajuara"],
-            ["👥", "Menaxhim i plotë anëtarësh"],
-          ].map(([ico, txt]) => (
+            {/* Divider */}
             <div
-              key={txt}
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: 12,
-                marginBottom: 14,
+                margin: "24px 0",
               }}
             >
-              <div
+              <div style={{ flex: 1, height: 1, background: "#e4e4e7" }} />
+              <span
+                style={{ fontSize: 12, color: "#a1a1aa", whiteSpace: "nowrap" }}
+              >
+                ose
+              </span>
+              <div style={{ flex: 1, height: 1, background: "#e4e4e7" }} />
+            </div>
+
+            {/* Links */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <a
+                href="/apply"
                 style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 8,
-                  background: "rgba(255,255,255,.08)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 16,
-                  flexShrink: 0,
+                  display: "block",
+                  width: "100%",
+                  padding: "13px 14px",
+                  borderRadius: 10,
+                  border: "1.5px solid #e4e4e7",
+                  background: "#fff",
+                  textAlign: "center",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: "#18181b",
+                  textDecoration: "none",
+                  transition: "all .2s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "#18181b";
+                  e.currentTarget.style.background = "#fafafa";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "#e4e4e7";
+                  e.currentTarget.style.background = "#fff";
                 }}
               >
-                {ico}
-              </div>
-              <div style={{ fontSize: 13, color: "rgba(255,255,255,.7)" }}>
-                {txt}
-              </div>
+                🏋️ Apliko si Palestre
+              </a>
+              <a
+                href="/nutritionist/apply"
+                style={{
+                  display: "block",
+                  width: "100%",
+                  padding: "13px 14px",
+                  borderRadius: 10,
+                  border: "1.5px solid #bbf7d0",
+                  background: "#f0fdf4",
+                  textAlign: "center",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: "#16a34a",
+                  textDecoration: "none",
+                  transition: "all .2s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#dcfce7";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#f0fdf4";
+                }}
+              >
+                🥗 Apliko si Dietolog
+              </a>
             </div>
-          ))}
+
+            <p
+              style={{
+                textAlign: "center",
+                fontSize: 12,
+                color: "#a1a1aa",
+                marginTop: 24,
+              }}
+            >
+              Duke hyrë, pranoni{" "}
+              <a
+                href="#"
+                style={{
+                  color: "#18181b",
+                  textDecoration: "none",
+                  fontWeight: 500,
+                }}
+              >
+                Kushtet e Shërbimit
+              </a>
+            </p>
+          </div>
+        </div>
+
+        {/* Right panel - desktop only */}
+        <div
+          className="login-panel"
+          style={{
+            width: 420,
+            background: "#18181b",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 48,
+            color: "#fff",
+          }}
+        >
+          <div style={{ maxWidth: 320 }}>
+            <div
+              style={{
+                fontFamily: "'Instrument Serif',serif",
+                fontSize: 28,
+                marginBottom: 14,
+                lineHeight: 1.25,
+              }}
+            >
+              Menaxho palestrën me profesionalizëm
+            </div>
+            <p
+              style={{
+                fontSize: 14,
+                color: "rgba(255,255,255,.5)",
+                lineHeight: 1.8,
+                marginBottom: 36,
+              }}
+            >
+              QR check-in, pagesa, fatura dhe raporte — gjithçka në një vend.
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {[
+                ["📊", "Dashboard live me statistika"],
+                ["📷", "QR Check-in me kamerë"],
+                ["💰", "Pagesa cash dhe fatura PDF"],
+                ["🥗", "Planet e dietave nga ekspertë"],
+                ["📈", "Raporte dhe analiza"],
+              ].map(([ico, txt]) => (
+                <div
+                  key={txt}
+                  style={{ display: "flex", alignItems: "center", gap: 14 }}
+                >
+                  <div
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: 9,
+                      background: "rgba(255,255,255,.08)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 18,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {ico}
+                  </div>
+                  <div style={{ fontSize: 13, color: "rgba(255,255,255,.7)" }}>
+                    {txt}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Stats */}
+            <div
+              style={{
+                display: "flex",
+                gap: 24,
+                marginTop: 40,
+                paddingTop: 32,
+                borderTop: "1px solid rgba(255,255,255,.08)",
+              }}
+            >
+              {[
+                ["50+", "Palestra"],
+                ["12K+", "Anëtarë"],
+                ["98%", "Kënaqësi"],
+              ].map(([n, l]) => (
+                <div key={l} style={{ textAlign: "center" }}>
+                  <div
+                    style={{
+                      fontFamily: "'Instrument Serif',serif",
+                      fontSize: 24,
+                      fontWeight: 900,
+                      color: "#c8a96e",
+                    }}
+                  >
+                    {n}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: "rgba(255,255,255,.4)",
+                      marginTop: 2,
+                    }}
+                  >
+                    {l}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
-
-      <style>{`@media(max-width:768px){.login-panel{display:none}}`}</style>
     </div>
   );
 }
