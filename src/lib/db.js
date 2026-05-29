@@ -7,6 +7,37 @@ export const today   = () => new Date().toISOString().split('T')[0]
 export const addDays = (d, n) => { const r = new Date(d); r.setDate(r.getDate()+n); return r.toISOString().split('T')[0] }
 export const AVC     = ['#18181b','#2563eb','#16a34a','#d97706','#dc2626','#7c3aed','#0891b2','#be185d']
 
+// ─── PLAN LIMITS ─────────────────────────────────────────
+export const PLAN_LIMITS = { starter:100, pro:500, business:Infinity }
+
+export const getGymPlan = async (gymId) => {
+  const { data } = await supabase.from('gyms').select('plan').eq('id', gymId).single()
+  return data?.plan ?? 'starter'
+}
+
+export const getMemberCount = async (gymId) => {
+  const { count } = await supabase.from('members').select('id', { count:'exact', head:true }).eq('gym_id', gymId).eq('is_active', true)
+  return count ?? 0
+}
+
+export const canAddMember = async (gymId) => {
+  const [plan, count] = await Promise.all([getGymPlan(gymId), getMemberCount(gymId)])
+  const limit = PLAN_LIMITS[plan] ?? 100
+  return { allowed: count < limit, count, limit, plan }
+}
+
+// ─── MAGIC LINK ───────────────────────────────────────────
+export const sendMagicLink = async (email, gymName) => {
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      emailRedirectTo: `${window.location.origin}/`,
+      data: { gym_name: gymName }
+    }
+  })
+  if (error) throw new Error(error.message)
+}
+
 export const memberStatus = (m) => {
   if (!m?.membership_status) return 'none'
   if (m.membership_status === 'frozen') return 'frozen'
@@ -38,7 +69,6 @@ export const getPlatformStats = async () => {
 }
 
 export const approveGym = async (appId, gymData) => {
-  // 1. Krijo gym
   const { data: gym, error } = await supabase.from('gyms').insert({
     name: gymData.name, email: gymData.email,
     phone: gymData.phone, address: gymData.address,
@@ -46,32 +76,10 @@ export const approveGym = async (appId, gymData) => {
     approved_at: new Date().toISOString(),
   }).select().single()
   if (error) throw new Error(error.message)
-
-  // 2. Plane default
   await supabase.rpc('create_default_plans', { p_gym_id: gym.id })
-
-  // 3. Gym user (owner)
-  await supabase.from('gym_users').insert({
-    gym_id: gym.id, name: gymData.ownerName,
-    email: gymData.email, role: 'owner',
-  })
-
-  // 4. Update application
+  await supabase.from('gym_users').insert({ gym_id: gym.id, name: gymData.ownerName, email: gymData.email, role: 'owner' })
   await supabase.from('applications').update({ status:'approved', gym_id: gym.id }).eq('id', appId)
-
   return gym
-}
-
-export const rejectApp = async (appId) => {
-  await supabase.from('applications').update({ status:'rejected' }).eq('id', appId)
-}
-
-export const suspendGym = async (gymId) => {
-  await supabase.from('gyms').update({ status:'suspended' }).eq('id', gymId)
-}
-
-export const activateGym = async (gymId) => {
-  await supabase.from('gyms').update({ status:'approved' }).eq('id', gymId)
 }
 
 export const submitApplication = async (f) => {
@@ -152,14 +160,18 @@ export const getPaymentStats = async (gymId) => {
     supabase.from('payments').select('amount').eq('gym_id',gymId).eq('status','unpaid'),
   ])
   return {
-    today:   td.data?.reduce((a,p)=>a+p.amount,0)  ?? 0,
-    month:   mo_.data?.reduce((a,p)=>a+p.amount,0) ?? 0,
-    debt:    d.data?.reduce((a,p)=>a+p.amount,0)   ?? 0,
+    today: td.data?.reduce((a,p)=>a+p.amount,0)  ?? 0,
+    month: mo_.data?.reduce((a,p)=>a+p.amount,0) ?? 0,
+    debt:  d.data?.reduce((a,p)=>a+p.amount,0)   ?? 0,
     debtors: d.data?.length ?? 0,
   }
 }
 
-export const addMember = async (gymId, f) => {
+export const addMember = async (gymId, f, gymName='') => {
+  // Kontrollo limitin
+  const { allowed, count, limit, plan } = await canAddMember(gymId)
+  if (!allowed) throw new Error(`Ke arritur limitin e paketës ${plan} (${limit} anëtarë). Upgrade planin për të shtuar më shumë.`)
+
   const { data: m, error } = await supabase.from('members').insert({
     gym_id: gymId, first_name: f.firstName, last_name: f.lastName,
     phone: f.phone||null, email: f.email||null, birthday: f.birthday||null,
@@ -182,6 +194,13 @@ export const addMember = async (gymId, f) => {
       status: 'paid', paid_at: new Date().toISOString(),
     })
   }
+
+  // Dërgo Magic Link nëse ka email
+  if (f.email && f.sendMagicLink) {
+    try { await sendMagicLink(f.email, gymName) }
+    catch(e) { console.warn('Magic link failed:', e.message) }
+  }
+
   return m
 }
 
@@ -242,4 +261,8 @@ export const updateGym = async (gymId, u) => {
 
 export const updatePlanPrice = async (gymId, planId, price) => {
   await supabase.from('plans').update({ price: parseInt(price)||0 }).eq('id', planId).eq('gym_id', gymId)
+}
+
+export const resendMagicLink = async (email, gymName) => {
+  await sendMagicLink(email, gymName)
 }

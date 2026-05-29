@@ -280,7 +280,7 @@ function CheckIn({ gymId }) {
 }
 
 // ─── MEMBERS ─────────────────────────────────────────────
-function Members({ gymId }) {
+function Members({ gymId, gymName }) {
   const [filter,   setFilter]   = useState('all')
   const [search,   setSearch]   = useState('')
   const [showAdd,  setShowAdd]  = useState(false)
@@ -369,7 +369,7 @@ function Members({ gymId }) {
         </div>
       )}
 
-      {showAdd && <AddMemberModal gymId={gymId} plans={plans||[]} onClose={()=>setShowAdd(false)} onSave={reload}/>}
+      {showAdd && <AddMemberModal gymId={gymId} plans={plans||[]} gymName={gymName} onClose={()=>setShowAdd(false)} onSave={reload}/>}
 
       {renew && (
         <Modal title="💳 Rinovim Abonoimi" onClose={()=>setRenew(null)} footer={
@@ -401,27 +401,55 @@ function Members({ gymId }) {
   )
 }
 
-function AddMemberModal({ gymId, plans, onClose, onSave }) {
-  const [saving, setSaving] = useState(false)
-  const [err, setErr] = useState('')
+function AddMemberModal({ gymId, plans, gymName, onClose, onSave }) {
+  const [saving,    setSaving]    = useState(false)
+  const [err,       setErr]       = useState('')
+  const [magicLink, setMagicLink] = useState(true)
+  const [limitInfo, setLimitInfo] = useState(null)
+
+  // Kontrollo limitin kur hapet modal
+  useState(() => {
+    import('../../lib/db').then(({ canAddMember }) => {
+      canAddMember(gymId).then(info => setLimitInfo(info))
+    })
+  }, [])
+
+  const PLAN_LABELS = { starter:'Starter (max 100)', pro:'Pro (max 500)', business:'Business (pa limit)' }
 
   return (
     <Modal title="👤 Anëtar i Ri" onClose={onClose} footer={
       <><button className="btn btn-s" onClick={onClose}>Anulo</button>
-      <button className="btn btn-p" form="addForm" type="submit" disabled={saving}>{saving?'Duke shtuar...':'✅ Shto Anëtarin'}</button></>
+      <button className="btn btn-p" form="addForm" type="submit" disabled={saving||limitInfo?.allowed===false}>
+        {saving ? '⏳ Duke shtuar...' : '✅ Shto Anëtarin'}
+      </button></>
     }>
+      {/* Limit info */}
+      {limitInfo && (
+        <div className={`alert ${limitInfo.allowed ? 'al-bl' : 'al-rd'}`} style={{marginBottom:12}}>
+          {limitInfo.allowed
+            ? `📊 ${limitInfo.count} / ${limitInfo.limit === Infinity ? '∞' : limitInfo.limit} anëtarë — Paketa ${PLAN_LABELS[limitInfo.plan]||limitInfo.plan}`
+            : `❌ Ke arritur limitin! ${limitInfo.count}/${limitInfo.limit} anëtarë. Upgrade planin.`}
+        </div>
+      )}
       {err && <div className="alert al-rd" style={{marginBottom:12}}>❌ {err}</div>}
       <form id="addForm" onSubmit={async e=>{
         e.preventDefault(); setSaving(true); setErr('')
         const fd = new FormData(e.target)
         try {
-          await addMember(gymId,{
-            firstName:fd.get('fn'), lastName:fd.get('ln'),
-            phone:fd.get('ph'), email:fd.get('em'),
-            birthday:fd.get('bd')||null, gender:fd.get('gn'),
-            notes:fd.get('no'), planId:fd.get('pl'), method:'cash'
-          })
-          toast.success('✅ Anëtari u shtua!'); onSave(); onClose()
+          await addMember(gymId, {
+            firstName: fd.get('fn'), lastName: fd.get('ln'),
+            phone: fd.get('ph'), email: fd.get('em'),
+            birthday: fd.get('bd')||null, gender: fd.get('gn'),
+            notes: fd.get('no'), planId: fd.get('pl'), method:'cash',
+            sendMagicLink: magicLink,
+          }, gymName)
+          const email = fd.get('em')
+          if (magicLink && email) {
+            toast.success(`✅ Anëtari u shtua!\n📧 Magic Link u dërgua te ${email}`)
+          } else {
+            toast.success('✅ Anëtari u shtua!')
+          }
+          onSave(); onClose()
         } catch(e) { setErr(e.message) }
         finally { setSaving(false) }
       }}>
@@ -447,6 +475,22 @@ function AddMemberModal({ gymId, plans, onClose, onSave }) {
         </div>
         <div className="fg" style={{marginBottom:0}}>
           <div className="fgp"><label>Shënime</label><textarea name="no" placeholder="Opsionale..."/></div>
+        </div>
+
+        {/* Magic Link */}
+        <div style={{marginTop:16,background:'#f0fdf4',border:'1px solid #bbf7d0',borderRadius:10,padding:14}}>
+          <div style={{display:'flex',alignItems:'flex-start',gap:10}}>
+            <input type="checkbox" id="ml" checked={magicLink} onChange={e=>setMagicLink(e.target.checked)}
+              style={{width:16,height:16,marginTop:2,flexShrink:0,cursor:'pointer'}}/>
+            <div>
+              <label htmlFor="ml" style={{fontSize:13,fontWeight:600,color:'#15803d',cursor:'pointer',display:'block',marginBottom:3}}>
+                📧 Dërgo Magic Link automatikisht
+              </label>
+              <div style={{fontSize:12,color:'#16a34a',lineHeight:1.6}}>
+                Anëtari merr email me link — klikoni dhe hyn direkt pa fjalëkalim. <strong>Kërkon email.</strong>
+              </div>
+            </div>
+          </div>
         </div>
       </form>
     </Modal>
@@ -520,6 +564,10 @@ function MemberProfile({ memberId, gymId, plans, onBack }) {
               {activeMembership&&<button className="btn btn-s btn-sm" onClick={()=>doFreeze(activeMembership.id,false)}>❄️ Freeze</button>}
               {frozenMembership&&<button className="btn btn-s btn-sm" onClick={()=>doFreeze(frozenMembership.id,true)}>🔥 Shkrij</button>}
               <button className="btn btn-s btn-sm" onClick={()=>{setEditing(true);setEditForm({fn:m.first_name,ln:m.last_name,ph:m.phone||'',em:m.email||'',bd:m.birthday||'',no:m.notes||''})}}>✏️ Edito</button>
+              {m.email&&<button className="btn btn-success btn-sm" onClick={async()=>{
+                try{const{sendMagicLink}=await import('../../lib/db');await sendMagicLink(m.email,'Palestra');toast.success('📧 Magic Link u dërgua!')}
+                catch(e){toast.error(e.message)}
+              }}>📧 Magic Link</button>}
             </div>
           </div>
           {/* QR Code */}
@@ -1051,7 +1099,7 @@ export default function GymDashboard() {
   const PAGE = {
     dashboard:   <Dashboard   gymId={gymId} setPage={nav}/>,
     checkin:     <CheckIn     gymId={gymId}/>,
-    members:     <Members     gymId={gymId}/>,
+    members:     <Members     gymId={gymId} gymName={gymName}/>,
     memberships: <Memberships gymId={gymId}/>,
     payments:    <Payments    gymId={gymId}/>,
     reports:     <Reports     gymId={gymId}/>,
