@@ -561,9 +561,6 @@ export default function LandingPage({ onApply, onLogin }) {
               <button className="btn-main" onClick={onApply}>
                 Fillo Sot →
               </button>
-              <button className="btn-out" onClick={() => scrollTo("features")}>
-                Shiko Demo
-              </button>
             </div>
             <div
               id="hero-stats"
