@@ -1,115 +1,64 @@
-# 💪 FitPro CRM — Setup Guide
+# 💪 FitPro Ecosystem — Platforma Fitness #1 Shqipëri
 
-## HAPAT PAS SHKARKIMIT TË ZIP
+## Çfarë ka ky sistem
 
----
+```
+FitPro Platform
+├── 💪 CRM Palestra     — menaxhim i plotë
+├── 🥗 Dietologë        — shitje dietash (70/30)
+├── 🛒 Dyqani           — produkte sportive (30% komision)
+└── 📱 App Anëtarësh    — planet stërvitjeje
+```
 
-### HAPI 1 — Hap projektin në VS Code
-1. Shpako ZIP-in
-2. Hap folderin `fitpro-final` në VS Code
-3. Hap terminalin (Ctrl + `)
+## URLs
 
----
+| URL | Shfaqet |
+|-----|---------|
+| `/` | Faqja kryesore (Landing Page) |
+| `/apply` | Apliko si Palestre |
+| `/nutritionist/apply` | Apliko si Dietolog |
+| `/login` | Hyrja |
+| pas login (admin) | Platform Admin Panel |
+| pas login (dietolog) | Nutritionist Dashboard |
+| pas login (gym) | Gym Dashboard |
 
-### HAPI 2 — Instalo dependencies
+## Setup
+
+### 1. Instalo
 ```bash
 npm install
-```
-
----
-
-### HAPI 3 — SQL Schema në Supabase
-1. Shko te **supabase.com** → projekti yt
-2. **SQL Editor** → **New Query**
-3. Kopjo gjithçka nga skedari `supabase_schema.sql`
-4. Kliko **Run** (ose Ctrl+Enter)
-5. Duhet të shohësh: `FitPro Schema u krijua me sukses! ✅`
-
----
-
-### HAPI 4 — Krijo llogarinë tënde (Platform Admin)
-
-**Supabase → Authentication → Users → Add User:**
-```
-Email:    vaqogenci@gmail.com
-Password: fjalëkalimi_yt_i_fortë
-```
-
-Kliko **Create User** dhe kopjo **UUID** (kolona UID).
-
----
-
-### HAPI 5 — Shto veten si Platform Admin
-
-**SQL Editor → New Query:**
-```sql
-insert into platform_admins (auth_id, email, name)
-values (
-  'VENDOS_UUID_KETU',
-  'vaqogenci@gmail.com',
-  'Admin FitPro'
-);
-```
-
-Zëvendëso `VENDOS_UUID_KETU` me UUID-in që kopjove.
-
----
-
-### HAPI 6 — Nis projektin
-```bash
 npm run dev
 ```
 
-Hap: **http://localhost:5173**
+### 2. SQL Schema
+Supabase → SQL Editor → kopjo `supabase_schema.sql` → Run
 
----
-
-### HAPI 7 — Hyr si Admin
-- Shko te `/login`
-- Email: `vaqogenci@gmail.com`
-- Password: fjalëkalimi që ke vendosur
-
----
-
-## SI FUNKSIONON PROCESI ME KLIENTËT
-
+### 3. .env
 ```
-1. Klienti shkon te / (faqja kryesore)
-2. Klikon "Apliko Tani" → plotëson formularin
-3. TI shikon aplikimin te Admin Panel → "Aplikimet"
-4. Telefonon klientin, merr pagesën cash
-5. Klik "Aprovo" → vendos fjalëkalimin për klientin
-6. Shko te Supabase → Authentication → Add User
-   Email: emaili i klientit
-   Password: fjalëkalimi që vendose
-7. Telefono klientin: "Hyr te [URL] me [email] dhe [password]"
-8. Klienti hyn → sheh dashboardin e tij BOSH → fillon punën
+VITE_SUPABASE_URL=https://pmefecdbnsbqgpknbeku.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGci...
 ```
 
----
+### 4. Krijo Admin
+Supabase → Auth → Add User → emailin tënd
+```sql
+UPDATE platform_admins SET auth_id = (SELECT id FROM auth.users WHERE email='emaili_yt' LIMIT 1) WHERE email='emaili_yt';
+```
 
-## DEPLOY FALAS ME VERCEL
+## Modeli i Biznesit
 
+| Burimi | Ti fiton |
+|--------|---------|
+| Abonim palestre Starter | 4,900 L/muaj |
+| Abonim palestre Pro | 9,900 L/muaj |
+| Çdo dietë e shitur | 30% |
+| Çdo produkt i shitur | 30% |
+
+## Deploy me Vercel
 ```bash
 npm run build
 npx vercel --prod
 ```
 
-Shto env variables te Vercel:
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
-
 ---
-
-## FAQET
-
-| URL | Shfaqet |
-|-----|---------|
-| `/` | Faqja kryesore (landing page) |
-| `/apply` | Formulari i aplikimit |
-| `/login` | Hyrja |
-| pas login (admin) | Panel Admin |
-| pas login (gym) | Dashboard i palestrës |
-
----
-*FitPro CRM v1.0 — Bërë për palestra shqiptare 🇦🇱*
+*FitPro Ecosystem v2.0 — Bërë për Shqipërinë 🇦🇱*

@@ -83,43 +83,59 @@ const TESTIMONIALS = [
 const PLANS = [
   {
     name: "Starter",
-    price: "Falas",
-    period: "Përgjithmonë • deri 50 anëtarë",
+    price: "4,900",
+    period: "L / muaj",
+    desc: "Për palestra të vogla deri 100 anëtarë",
     features: [
-      "Dashboard i plotë",
+      "Deri 100 anëtarë",
+      "Dashboard live",
       "QR Check-in",
       "3 plane abonoimi",
-      "Fatura bazë",
+      "Fatura automatike",
       "1 staf account",
+      "Support email",
     ],
+    cta: "Apliko Tani",
     featured: false,
+    limit: "100 anëtarë",
   },
   {
     name: "Pro",
-    price: "4,900 L",
-    period: "në muaj • anëtarë të pakufizuar",
+    price: "7,900",
+    period: "L / muaj",
+    desc: "Për palestra me rritje të shpejtë",
     features: [
+      "Deri 500 anëtarë",
       "Gjithçka nga Starter",
-      "Anëtarë të pakufizuar",
-      "Të 8 planet",
+      "Të 8 planet e abonoimit",
+      "Export CSV & PDF",
       "Email automatik",
       "3 staf accounts",
       "Raporte të detajuara",
+      "Support prioritar",
     ],
+    cta: "Apliko Pro →",
     featured: true,
+    limit: "500 anëtarë",
   },
   {
     name: "Business",
-    price: "9,900 L",
-    period: "në muaj • shumë degë",
+    price: "14,900",
+    period: "L / muaj",
+    desc: "Për zinxhirë palestrash dhe degë të shumta",
     features: [
+      "Anëtarë të pakufizuar",
       "Gjithçka nga Pro",
       "Shumë degë / palestra",
       "Staf të pakufizuar",
-      "Support prioritar",
+      "API access",
+      "WhatsApp reminders",
       "Onboarding personal",
+      "Support 24/7",
     ],
+    cta: "Na Kontaktoni",
     featured: false,
+    limit: "Pa limit",
   },
 ];
 
@@ -127,6 +143,10 @@ const FAQS = [
   {
     q: "Si e filloj? A ka kontratë?",
     a: "Asnjë kontratë. Aplikon online, kontaktojmë, pagesa cash, fillon menjëherë. Anulo kurdo.",
+  },
+  {
+    q: "Çfarë ndodh nëse kaloj limitin e anëtarëve?",
+    a: "Do të njoftoheni automatikisht kur të afroheni limitit. Mund të upgradoni planin kurdo pa humbur asnjë të dhënë.",
   },
   {
     q: "A mund ta përdorin recepsionistët?",
@@ -149,14 +169,18 @@ const FAQS = [
 export default function LandingPage({ onApply, onLogin }) {
   const [faqOpen, setFaqOpen] = useState(null);
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [count, setCount] = useState({ gyms: 0, members: 0, pct: 0 });
   const started = useRef(false);
 
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 20);
+    const fn = () => {
+      setScrolled(window.scrollY > 20);
+      if (menuOpen) setMenuOpen(false);
+    };
     window.addEventListener("scroll", fn);
     return () => window.removeEventListener("scroll", fn);
-  }, []);
+  }, [menuOpen]);
 
   useEffect(() => {
     const el = document.getElementById("hero-stats");
@@ -187,29 +211,13 @@ export default function LandingPage({ onApply, onLogin }) {
     requestAnimationFrame(tick);
   };
 
-  const scrollTo = (id) =>
+  const scrollTo = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    setMenuOpen(false);
+  };
 
   const S = {
-    // shared styles
     serif: { fontFamily: "'Instrument Serif',Georgia,serif" },
-    tag: {
-      fontSize: 11,
-      fontWeight: 700,
-      letterSpacing: ".1em",
-      textTransform: "uppercase",
-      color: "#a8894e",
-      marginBottom: 12,
-      display: "flex",
-      alignItems: "center",
-      gap: 8,
-    },
-    line: {
-      width: 24,
-      height: 1.5,
-      background: "#c8a96e",
-      display: "inline-block",
-    },
     h2: {
       fontSize: "clamp(30px,4vw,48px)",
       fontWeight: 900,
@@ -236,12 +244,11 @@ export default function LandingPage({ onApply, onLogin }) {
         @keyframes float{0%,100%{transform:perspective(1000px) rotateY(-5deg) rotateX(2deg) translateY(0)}50%{transform:perspective(1000px) rotateY(-5deg) rotateX(2deg) translateY(-10px)}}
         @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
         @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
-        .feat-card{transition:all .2s}
-        .feat-card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.08)}
-        .plan-card{transition:all .2s}
-        .plan-card:hover{transform:translateY(-4px)}
+        @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+        .feat-card{transition:all .2s}.feat-card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.08)}
+        .plan-card{transition:all .2s}.plan-card:hover{transform:translateY(-4px)}
         .btn-main{background:#18181b;color:#fff;border:none;padding:14px 30px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;box-shadow:0 4px 20px rgba(0,0,0,.15)}
-        .btn-main:hover{background:#333;transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.2)}
+        .btn-main:hover{background:#333;transform:translateY(-2px)}
         .btn-out{background:transparent;color:#18181b;border:1.5px solid rgba(0,0,0,.18);padding:14px 30px;border-radius:10px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .2s}
         .btn-out:hover{border-color:#18181b}
         .btn-gold{background:#c8a96e;color:#fff;border:none;padding:14px 36px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
@@ -251,22 +258,36 @@ export default function LandingPage({ onApply, onLogin }) {
         .nav-link{background:none;border:none;cursor:pointer;font-size:14px;color:#52525b;font-weight:500;font-family:inherit;transition:color .15s;padding:0}
         .nav-link:hover{color:#18181b}
         .faq-ans{overflow:hidden;transition:max-height .35s ease,opacity .3s ease}
-        @media(max-width:900px){
+        .hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px;border-radius:6px;flex-direction:column;gap:5px;align-items:center;justify-content:center}
+        .hamburger span{display:block;width:22px;height:2px;background:#18181b;border-radius:2px;transition:all .3s}
+        .hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+        .hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+        .hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+        .mobile-menu{display:none;position:fixed;top:62px;left:0;right:0;background:#fff;border-bottom:1px solid #e4e4e7;padding:16px 24px 20px;flex-direction:column;gap:4px;z-index:99;box-shadow:0 8px 24px rgba(0,0,0,.08);animation:slideDown .2s ease}
+        .mobile-menu.open{display:flex}
+        .mobile-menu .nav-link{font-size:15px;padding:10px 8px;border-radius:8px;text-align:left;color:#18181b}
+        .mobile-menu .nav-link:hover{background:#fafafa}
+        @media(max-width:768px){
+          .hamburger{display:flex!important}
+          .desktop-nav{display:none!important}
           .hero-visual{display:none!important}
-          .features-grid{grid-template-columns:1fr 1fr!important}
+          .features-grid{grid-template-columns:1fr!important}
           .steps-grid{grid-template-columns:1fr 1fr!important}
           .plans-grid{grid-template-columns:1fr!important;max-width:420px;margin-left:auto;margin-right:auto}
           .testi-grid{grid-template-columns:1fr!important}
-        }
-        @media(max-width:600px){
-          .features-grid{grid-template-columns:1fr!important}
-          .steps-grid{grid-template-columns:1fr!important}
+          .hero-content{max-width:100%!important}
           .hero-title{font-size:38px!important}
-          .hide-sm{display:none!important}
+          .section-pad{padding:60px 24px!important}
+          .footer-inner{flex-direction:column!important;text-align:center!important}
+          .cta-btns{flex-direction:column!important;align-items:center!important}
+        }
+        @media(max-width:480px){
+          .steps-grid{grid-template-columns:1fr!important}
+          .hero-stats{gap:24px!important}
         }
       `}</style>
 
-      {/* NAV */}
+      {/* ── NAV ── */}
       <nav
         style={{
           position: "fixed",
@@ -274,18 +295,32 @@ export default function LandingPage({ onApply, onLogin }) {
           left: 0,
           right: 0,
           zIndex: 100,
-          padding: "0 48px",
+          padding: "0 40px",
           height: 62,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          background: scrolled ? "rgba(255,255,255,.92)" : "transparent",
-          backdropFilter: scrolled ? "blur(16px)" : "none",
-          borderBottom: scrolled ? "1px solid rgba(0,0,0,.07)" : "none",
+          background:
+            scrolled || menuOpen ? "rgba(255,255,255,.95)" : "transparent",
+          backdropFilter: scrolled || menuOpen ? "blur(16px)" : "none",
+          borderBottom:
+            scrolled || menuOpen ? "1px solid rgba(0,0,0,.07)" : "none",
           transition: "all .3s",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        {/* Logo — klikueshme, con te kryefaqja */}
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            padding: 0,
+          }}
+        >
           <div
             style={{
               width: 34,
@@ -300,10 +335,14 @@ export default function LandingPage({ onApply, onLogin }) {
           >
             💪
           </div>
-          <span style={{ fontWeight: 700, fontSize: 17 }}>GV-Pro CRM</span>
-        </div>
+          <span style={{ fontWeight: 700, fontSize: 17, color: "#18181b" }}>
+            GV-CRM
+          </span>
+        </button>
+
+        {/* Desktop nav */}
         <div
-          className="hide-sm"
+          className="desktop-nav"
           style={{ display: "flex", alignItems: "center", gap: 32 }}
         >
           {[
@@ -327,10 +366,60 @@ export default function LandingPage({ onApply, onLogin }) {
             Apliko Tani →
           </button>
         </div>
+
+        {/* Hamburger mobile */}
+        <button
+          className={`hamburger ${menuOpen ? "open" : ""}`}
+          onClick={() => setMenuOpen((m) => !m)}
+          aria-label="Menu"
+        >
+          <span />
+          <span />
+          <span />
+        </button>
       </nav>
 
-      {/* HERO */}
+      {/* Mobile menu */}
+      <div className={`mobile-menu ${menuOpen ? "open" : ""}`}>
+        {[
+          ["Funksionet", "features"],
+          ["Si Funksionon", "how"],
+          ["Çmimet", "pricing"],
+          ["FAQ", "faq"],
+        ].map(([l, id]) => (
+          <button key={id} className="nav-link" onClick={() => scrollTo(id)}>
+            {l}
+          </button>
+        ))}
+        <button
+          className="nav-link"
+          onClick={() => {
+            setMenuOpen(false);
+            onLogin();
+          }}
+        >
+          Hyr →
+        </button>
+        <button
+          className="btn-main"
+          style={{
+            marginTop: 8,
+            width: "100%",
+            justifyContent: "center",
+            padding: "12px",
+          }}
+          onClick={() => {
+            setMenuOpen(false);
+            onApply();
+          }}
+        >
+          Apliko Tani →
+        </button>
+      </div>
+
+      {/* ── HERO ── */}
       <section
+        className="section-pad"
         style={{
           minHeight: "100vh",
           display: "flex",
@@ -356,7 +445,7 @@ export default function LandingPage({ onApply, onLogin }) {
             position: "absolute",
             inset: 0,
             background:
-              "radial-gradient(ellipse 70% 60% at 80% 40%,rgba(200,169,110,.1) 0%,transparent 70%),radial-gradient(ellipse 50% 70% at 10% 90%,rgba(37,99,235,.05) 0%,transparent 60%)",
+              "radial-gradient(ellipse 70% 60% at 80% 40%,rgba(200,169,110,.1) 0%,transparent 70%)",
           }}
         />
 
@@ -373,6 +462,7 @@ export default function LandingPage({ onApply, onLogin }) {
           }}
         >
           <div
+            className="hero-content"
             style={{
               flex: 1,
               maxWidth: 600,
@@ -399,7 +489,6 @@ export default function LandingPage({ onApply, onLogin }) {
               <br />
               <span style={{ color: "#2d5a3d" }}>efikasitet</span>
             </h1>
-
             <p
               style={{
                 fontSize: 17,
@@ -410,10 +499,8 @@ export default function LandingPage({ onApply, onLogin }) {
               }}
             >
               Nga check-in me QR deri te fatura automatike — FitPro i mban të
-              gjitha nën kontroll. I dizajnuar posaçërisht për palestrën
-              shqiptare.
+              gjitha nën kontroll.
             </p>
-
             <div
               style={{
                 display: "flex",
@@ -423,15 +510,15 @@ export default function LandingPage({ onApply, onLogin }) {
               }}
             >
               <button className="btn-main" onClick={onApply}>
-                Fillo Falas Sot →
+                Fillo Sot →
               </button>
               <button className="btn-out" onClick={() => scrollTo("features")}>
-                🎥 Shiko Demo
+                Shiko Demo
               </button>
             </div>
-
             <div
               id="hero-stats"
+              className="hero-stats"
               style={{
                 display: "flex",
                 gap: 44,
@@ -478,8 +565,7 @@ export default function LandingPage({ onApply, onLogin }) {
                 maxWidth: 460,
                 background: "#fff",
                 borderRadius: 16,
-                boxShadow:
-                  "0 32px 80px rgba(0,0,0,.12),0 8px 20px rgba(0,0,0,.06)",
+                boxShadow: "0 32px 80px rgba(0,0,0,.12)",
                 overflow: "hidden",
                 animation: "float 6s ease-in-out infinite",
               }}
@@ -527,7 +613,6 @@ export default function LandingPage({ onApply, onLogin }) {
                     ["👥", "Anëtarët", false],
                     ["🎫", "Abonimet", false],
                     ["💰", "Pagesat", false],
-                    ["📈", "Raporte", false],
                   ].map(([ico, lbl, a]) => (
                     <div
                       key={lbl}
@@ -601,63 +686,6 @@ export default function LandingPage({ onApply, onLogin }) {
                       border: "1px solid #f0f0f0",
                       borderRadius: 7,
                       padding: 8,
-                      marginBottom: 8,
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: 9,
-                        fontWeight: 600,
-                        color: "#333",
-                        marginBottom: 6,
-                      }}
-                    >
-                      Të Ardhurat 2026
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "flex-end",
-                        gap: 3,
-                        height: 44,
-                      }}
-                    >
-                      {[35, 48, 55, 62, 72, 85, 100, 90, 0, 0, 0, 0].map(
-                        (h, i) => (
-                          <div
-                            key={i}
-                            style={{
-                              flex: 1,
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                              gap: 2,
-                              height: "100%",
-                              justifyContent: "flex-end",
-                            }}
-                          >
-                            <div
-                              style={{
-                                width: "100%",
-                                height: h ? `${h}%` : "3px",
-                                background: h ? "#18181b" : "#e4e4e7",
-                                borderRadius: "2px 2px 0 0",
-                              }}
-                            />
-                            <div style={{ fontSize: 6, color: "#ccc" }}>
-                              {"JFMAMJKGSTND"[i]}
-                            </div>
-                          </div>
-                        ),
-                      )}
-                    </div>
-                  </div>
-                  <div
-                    style={{
-                      background: "#fafafa",
-                      border: "1px solid #f0f0f0",
-                      borderRadius: 7,
-                      padding: 8,
                     }}
                   >
                     <div
@@ -722,15 +750,35 @@ export default function LandingPage({ onApply, onLogin }) {
         </div>
       </section>
 
-      {/* FEATURES */}
+      {/* ── FEATURES ── */}
       <section
         id="features"
+        className="section-pad"
         style={{ padding: "100px 60px", background: "#fff" }}
       >
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ marginBottom: 60 }}>
-            <div style={S.tag}>
-              <span style={S.line} />
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: ".1em",
+                textTransform: "uppercase",
+                color: "#a8894e",
+                marginBottom: 12,
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              <span
+                style={{
+                  width: 24,
+                  height: 1.5,
+                  background: "#c8a96e",
+                  display: "inline-block",
+                }}
+              />
               Funksionet
             </div>
             <h2 style={{ ...S.serif, ...S.h2 }}>
@@ -802,17 +850,37 @@ export default function LandingPage({ onApply, onLogin }) {
         </div>
       </section>
 
-      {/* HOW */}
+      {/* ── HOW ── */}
       <section
         id="how"
+        className="section-pad"
         style={{ padding: "100px 60px", background: "#f5f0e8" }}
       >
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 64 }}>
-            <div style={{ ...S.tag, justifyContent: "center" }}>
-              <span style={S.line} />
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: ".1em",
+                textTransform: "uppercase",
+                color: "#a8894e",
+                marginBottom: 12,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+              }}
+            >
+              <span
+                style={{
+                  width: 24,
+                  height: 1.5,
+                  background: "#c8a96e",
+                  display: "inline-block",
+                }}
+              />
               Si Funksionon
-              <span style={S.line} />
             </div>
             <h2 style={{ ...S.serif, ...S.h2 }}>Gati në 4 hapa të thjeshtë</h2>
           </div>
@@ -826,7 +894,6 @@ export default function LandingPage({ onApply, onLogin }) {
             }}
           >
             <div
-              className="hide-sm"
               style={{
                 position: "absolute",
                 top: 28,
@@ -836,7 +903,9 @@ export default function LandingPage({ onApply, onLogin }) {
                 background:
                   "linear-gradient(90deg,transparent,rgba(0,0,0,.15),transparent)",
                 zIndex: 0,
+                display: "none",
               }}
+              className="steps-line"
             />
             {STEPS.map((s, i) => (
               <div
@@ -876,12 +945,35 @@ export default function LandingPage({ onApply, onLogin }) {
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
-      <section style={{ padding: "100px 60px", background: "#fff" }}>
+      {/* ── TESTIMONIALS ── */}
+      <section
+        className="section-pad"
+        style={{ padding: "100px 60px", background: "#fff" }}
+      >
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 60 }}>
-            <div style={{ ...S.tag, justifyContent: "center" }}>
-              <span style={S.line} />
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: ".1em",
+                textTransform: "uppercase",
+                color: "#a8894e",
+                marginBottom: 12,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+              }}
+            >
+              <span
+                style={{
+                  width: 24,
+                  height: 1.5,
+                  background: "#c8a96e",
+                  display: "inline-block",
+                }}
+              />
               Klientët Tanë
             </div>
             <h2 style={{ ...S.serif, ...S.h2 }}>Çfarë thonë pronarët</h2>
@@ -903,7 +995,6 @@ export default function LandingPage({ onApply, onLogin }) {
                   padding: 28,
                   border: "1px solid #f0f0f0",
                   boxShadow: "0 2px 12px rgba(0,0,0,.04)",
-                  transition: "all .2s",
                 }}
               >
                 <div
@@ -960,22 +1051,44 @@ export default function LandingPage({ onApply, onLogin }) {
         </div>
       </section>
 
-      {/* PRICING */}
+      {/* ── PRICING ── */}
       <section
         id="pricing"
+        className="section-pad"
         style={{ padding: "100px 60px", background: "#f5f0e8" }}
       >
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 60 }}>
-            <div style={{ ...S.tag, justifyContent: "center" }}>
-              <span style={S.line} />
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: ".1em",
+                textTransform: "uppercase",
+                color: "#a8894e",
+                marginBottom: 12,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+              }}
+            >
+              <span
+                style={{
+                  width: 24,
+                  height: 1.5,
+                  background: "#c8a96e",
+                  display: "inline-block",
+                }}
+              />
               Çmimet
             </div>
             <h2 style={{ ...S.serif, ...S.h2 }}>Transparent. Pa surpriza.</h2>
             <p style={{ fontSize: 16, color: "#71717a" }}>
-              Nis falas, rrit kur të duash. Asnjë kontratë afatgjatë.
+              Zgjidh planin që i përshtatet madhësisë së palestrës tënde.
             </p>
           </div>
+
           <div
             className="plans-grid"
             style={{
@@ -1021,6 +1134,25 @@ export default function LandingPage({ onApply, onLogin }) {
                     Më Popullar
                   </div>
                 )}
+
+                {/* Limit badge */}
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    background: p.featured ? "rgba(255,255,255,.1)" : "#f0f0f0",
+                    borderRadius: 20,
+                    padding: "4px 12px",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    marginBottom: 16,
+                    color: p.featured ? "rgba(255,255,255,.7)" : "#52525b",
+                  }}
+                >
+                  👥 {p.limit}
+                </div>
+
                 <div
                   style={{
                     fontSize: 12,
@@ -1028,7 +1160,7 @@ export default function LandingPage({ onApply, onLogin }) {
                     textTransform: "uppercase",
                     letterSpacing: ".06em",
                     color: p.featured ? "rgba(255,255,255,.5)" : "#71717a",
-                    marginBottom: 12,
+                    marginBottom: 8,
                   }}
                 >
                   {p.name}
@@ -1036,23 +1168,35 @@ export default function LandingPage({ onApply, onLogin }) {
                 <div
                   style={{
                     ...S.serif,
-                    fontSize: 42,
+                    fontSize: 46,
                     fontWeight: 900,
                     lineHeight: 1,
                     marginBottom: 4,
                   }}
                 >
                   {p.price}
+                  <span style={{ fontSize: 18 }}> L</span>
                 </div>
                 <div
                   style={{
                     fontSize: 13,
                     color: p.featured ? "rgba(255,255,255,.5)" : "#71717a",
-                    marginBottom: 28,
+                    marginBottom: 6,
                   }}
                 >
                   {p.period}
                 </div>
+                <div
+                  style={{
+                    fontSize: 13,
+                    color: p.featured ? "rgba(255,255,255,.6)" : "#52525b",
+                    marginBottom: 24,
+                    fontStyle: "italic",
+                  }}
+                >
+                  {p.desc}
+                </div>
+
                 <ul style={{ listStyle: "none", marginBottom: 32 }}>
                   {p.features.map((f, j) => (
                     <li
@@ -1079,8 +1223,13 @@ export default function LandingPage({ onApply, onLogin }) {
                     </li>
                   ))}
                 </ul>
+
                 <button
-                  onClick={onApply}
+                  onClick={
+                    p.name === "Business"
+                      ? () => (window.location.href = "tel:+35569000000")
+                      : onApply
+                  }
                   style={{
                     display: "block",
                     width: "100%",
@@ -1095,16 +1244,23 @@ export default function LandingPage({ onApply, onLogin }) {
                     background: p.featured ? "#fff" : "transparent",
                     color: p.featured ? "#18181b" : "#18181b",
                   }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = p.featured
+                      ? "#f5f5f5"
+                      : "rgba(0,0,0,.04)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = p.featured
+                      ? "#fff"
+                      : "transparent";
+                  }}
                 >
-                  {p.featured
-                    ? "Fillo Pro →"
-                    : p.price === "Falas"
-                      ? "Fillo Falas"
-                      : "Na Kontaktoni"}
+                  {p.cta}
                 </button>
               </div>
             ))}
           </div>
+
           <div
             style={{
               textAlign: "center",
@@ -1114,17 +1270,41 @@ export default function LandingPage({ onApply, onLogin }) {
             }}
           >
             💵 Pagesa vetëm cash &nbsp;•&nbsp; ✅ 30 ditë provë falas
-            &nbsp;•&nbsp; 🔒 Anulo kurdo
+            &nbsp;•&nbsp; 🔒 Anulo kurdo &nbsp;•&nbsp; 📈 Upgrade kurdo
           </div>
         </div>
       </section>
 
-      {/* FAQ */}
-      <section id="faq" style={{ padding: "100px 60px", background: "#fff" }}>
+      {/* ── FAQ ── */}
+      <section
+        id="faq"
+        className="section-pad"
+        style={{ padding: "100px 60px", background: "#fff" }}
+      >
         <div style={{ maxWidth: 720, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 60 }}>
-            <div style={{ ...S.tag, justifyContent: "center" }}>
-              <span style={S.line} />
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: ".1em",
+                textTransform: "uppercase",
+                color: "#a8894e",
+                marginBottom: 12,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+              }}
+            >
+              <span
+                style={{
+                  width: 24,
+                  height: 1.5,
+                  background: "#c8a96e",
+                  display: "inline-block",
+                }}
+              />
               Pyetje të Shpeshta
             </div>
             <h2 style={{ ...S.serif, ...S.h2 }}>Keni pyetje?</h2>
@@ -1183,8 +1363,9 @@ export default function LandingPage({ onApply, onLogin }) {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* ── CTA ── */}
       <section
+        className="section-pad"
         style={{
           padding: "100px 60px",
           background: "#18181b",
@@ -1193,8 +1374,28 @@ export default function LandingPage({ onApply, onLogin }) {
         }}
       >
         <div style={{ maxWidth: 580, margin: "0 auto" }}>
-          <div style={{ ...S.tag, justifyContent: "center", color: "#c8a96e" }}>
-            <span style={{ ...S.line, background: "#c8a96e" }} />
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: ".1em",
+              textTransform: "uppercase",
+              color: "#c8a96e",
+              marginBottom: 16,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+            }}
+          >
+            <span
+              style={{
+                width: 24,
+                height: 1.5,
+                background: "#c8a96e",
+                display: "inline-block",
+              }}
+            />
             Fillo Tani
           </div>
           <h2
@@ -1221,6 +1422,7 @@ export default function LandingPage({ onApply, onLogin }) {
             5 minuta aplikim. Pa kartë krediti. 30 ditë provë falas.
           </p>
           <div
+            className="cta-btns"
             style={{
               display: "flex",
               gap: 14,
@@ -1238,56 +1440,96 @@ export default function LandingPage({ onApply, onLogin }) {
         </div>
       </section>
 
-      {/* FOOTER */}
+      {/* ── FOOTER ── */}
       <footer
         style={{
           background: "#0c0c0c",
           color: "rgba(255,255,255,.4)",
           padding: "40px 60px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          gap: 16,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div
+        <div
+          className="footer-inner"
+          style={{
+            maxWidth: 1100,
+            margin: "0 auto",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 16,
+          }}
+        >
+          {/* Logo footer — klikueshme */}
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             style={{
-              width: 30,
-              height: 30,
-              borderRadius: 7,
-              background: "#18181b",
-              border: "1px solid rgba(255,255,255,.1)",
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              fontSize: 15,
+              gap: 10,
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: 0,
             }}
           >
-            💪
-          </div>
-          <span style={{ ...S.serif, fontSize: 17, color: "#fff" }}>
-            FitPro CRM
-          </span>
-        </div>
-        <div style={{ fontSize: 12 }}>
-          © 2026 FitPro CRM — Bërë me ❤️ për Shqipërinë 🇦🇱
-        </div>
-        <div style={{ display: "flex", gap: 24, fontSize: 13 }}>
-          {["Funksionet", "Çmimet", "Kontakt"].map((l) => (
-            <a
-              key={l}
-              href="#"
-              style={{ color: "rgba(255,255,255,.4)", textDecoration: "none" }}
-              onMouseEnter={(e) => (e.target.style.color = "#fff")}
-              onMouseLeave={(e) =>
-                (e.target.style.color = "rgba(255,255,255,.4)")
-              }
+            <div
+              style={{
+                width: 30,
+                height: 30,
+                borderRadius: 7,
+                background: "#18181b",
+                border: "1px solid rgba(255,255,255,.1)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 15,
+              }}
             >
-              {l}
-            </a>
-          ))}
+              💪
+            </div>
+            <span
+              style={{
+                fontFamily: "'Instrument Serif',serif",
+                fontSize: 17,
+                color: "#fff",
+              }}
+            >
+              FitPro CRM
+            </span>
+          </button>
+          <div style={{ fontSize: 12 }}>
+            © 2026 FitPro CRM — Bërë me ❤️ për Shqipërinë 🇦🇱
+          </div>
+          <div
+            style={{ display: "flex", gap: 24, fontSize: 13, flexWrap: "wrap" }}
+          >
+            {[
+              ["Funksionet", "features"],
+              ["Çmimet", "pricing"],
+              ["FAQ", "faq"],
+            ].map(([l, id]) => (
+              <button
+                key={l}
+                onClick={() => scrollTo(id)}
+                style={{
+                  color: "rgba(255,255,255,.4)",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  fontSize: 13,
+                  transition: "color .15s",
+                }}
+                onMouseEnter={(e) => (e.target.style.color = "#fff")}
+                onMouseLeave={(e) =>
+                  (e.target.style.color = "rgba(255,255,255,.4)")
+                }
+              >
+                {l}
+              </button>
+            ))}
+          </div>
         </div>
       </footer>
     </div>
