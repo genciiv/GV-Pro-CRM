@@ -26,16 +26,24 @@ export const canAddMember = async (gymId) => {
   return { allowed: count < limit, count, limit, plan }
 }
 
-// ─── MAGIC LINK ───────────────────────────────────────────
-export const sendMagicLink = async (email, gymName) => {
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: {
-      emailRedirectTo: `${window.location.origin}/`,
-      data: { gym_name: gymName }
-    }
+// ─── MAGIC LINK via Edge Function ────────────────────────
+export const sendMagicLink = async (email, gymName, gymId, memberName) => {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+  const anonKey    = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+  const res = await fetch(`${supabaseUrl}/functions/v1/invite-member`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${anonKey}`,
+      'apikey': anonKey,
+    },
+    body: JSON.stringify({ email, gymName, gymId, memberName }),
   })
-  if (error) throw new Error(error.message)
+
+  const data = await res.json()
+  if (!res.ok || data.error) throw new Error(data.error || 'Gabim gjatë dërgimit')
+  return data
 }
 
 export const memberStatus = (m) => {
@@ -197,8 +205,12 @@ export const addMember = async (gymId, f, gymName='') => {
 
   // Dërgo Magic Link nëse ka email
   if (f.email && f.sendMagicLink) {
-    try { await sendMagicLink(f.email, gymName) }
-    catch(e) { console.warn('Magic link failed:', e.message) }
+    try {
+      await sendMagicLink(f.email, gymName, gymId, `${f.firstName} ${f.lastName}`)
+    } catch(e) {
+      console.warn('Magic link failed:', e.message)
+      // Mos faj user-in — anëtari u shtua, vetëm emaili dështoi
+    }
   }
 
   return m
