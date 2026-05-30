@@ -1,404 +1,210 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
-// Data për çdo kategori
 const CATEGORY_DATA = {
-  gym: {
-    slug: 'gym',
-    icon: '🏋️',
-    name: 'Palestre & Gym',
-    tagline: 'Menaxho palestrën me efikasitet maksimal',
-    desc: 'Platforma e plotë për menaxhim palestre — anëtarë, pagesa, check-in QR, plane stërvitjeje dhe raporte të detajuara. Gjithçka nën një dashboard.',
-    color: '#18181b',
-    bg: '#f4f4f5',
-    features: [
-      { icon:'👥', title:'Menaxhim Anëtarësh', desc:'Profil i plotë për çdo anëtar — abonime, pagesa, historiku, borxhet dhe statistikat.' },
-      { icon:'💰', title:'Pagesa & Fatura', desc:'Regjistro pagesa cash ose transfertë. Fatura automatike me numër unik. Gjurmim borxhesh.' },
-      { icon:'📷', title:'QR Check-in', desc:'Çdo anëtar ka QR kod personal. Skanim i menjëhershëm me çdo telefon — pa pajisje shtesë.' },
-      { icon:'📋', title:'Plane Stërvitjeje', desc:'Trajneri krijon plane personale. Anëtari i sheh dhe regjistron stërvitjet nga app-i mobil.' },
-      { icon:'📊', title:'Raporte & Analiza', desc:'Të ardhura mujore, prezenca, planet më të shituara, anëtarë që skadon — gjithçka live.' },
-      { icon:'📱', title:'App Anëtarësh', desc:'Anëtarët regjistrohen, shohin abonimin, planet e stërvitjes dhe statistikat nga telefoni.' },
-      { icon:'🥗', title:'Dietologë të Integruar', desc:'Anëtarët mund të blejnë plane dietash nga dietologët e platformës direkt nga app-i.' },
-      { icon:'❄️', title:'Freeze Abonim', desc:'Ngri abonimin kur anëtari është me pushime — ditët kursehen automatikisht.' },
-    ],
-    plans: ['Starter — 4,900 L/muaj (deri 100 anëtarë)', 'Pro — 7,900 L/muaj (deri 500 anëtarë)', 'Business — 14,900 L/muaj (pa limit)'],
-    testimonial: { text:'Nga 80 anëtarë shkuam në 340 brenda 6 muajve. Dashboard-i më tregon gjithçka — pagesa, prezenca, planet.', name:'Elona K.', biz:'PowerFit Studio, Durrës' },
-    stats: [['340+','Anëtarë mesatarisht'],['3h','Kursyer çdo ditë'],['40%','Rritje e anëtarëve']],
-  },
-  yoga: {
-    slug: 'yoga',
-    icon: '🧘',
-    name: 'Yoga Studio',
-    tagline: 'Menaxho klasat, instruktorët dhe rezervimet me lehtësi',
-    desc: 'Sistemi i dedikuar për studio yoga — orare klasash grupore, rezervime online, kapacitet automatik dhe listë pritjeje. Instruktorët menaxhojnë klasat e tyre.',
-    color: '#7c3aed',
-    bg: '#f5f3ff',
-    features: [
-      { icon:'📅', title:'Orari i Klasave', desc:'Shto klasa individuale ose të përsëritura çdo javë. 4 javë shtohen automatikisht me 1 klik.' },
-      { icon:'👥', title:'Rezervime Online', desc:'Klientët rezervojnë nga telefoni pa nevojë për llogari. Konfirmim i menjëhershëm.' },
-      { icon:'🔢', title:'Kapacitet Automatik', desc:'Vendos numrin maksimal të vendeve. Kur plotësohet, aktivizohet lista e pritjes automatikisht.' },
-      { icon:'🧘', title:'Nivele & Kategori', desc:'Fillestar, Mesatar, Avancuar — organizoi klasat sipas nivelit dhe tipit (Yoga, Pilates, Meditim).' },
-      { icon:'👤', title:'Menaxhim Instruktorësh', desc:'Profil i dedikuar për çdo instruktor me specializim, bio dhe oraret e tyre.' },
-      { icon:'📊', title:'Statistika Klasash', desc:'Shih prezencën, rezervimet dhe të ardhurat për çdo klasë dhe instruktor.' },
-      { icon:'💰', title:'Çmim Fleksibël', desc:'Çmim i ndryshëm për çdo klasë. Pagesa cash kur vijnë ose rezervim me paradhënie.' },
-      { icon:'📱', title:'App Klientësh', desc:'Klientët shohin orarin, rezervojnë dhe marrin kujtues automatikë para klasës.' },
-    ],
-    plans: ['Starter — 3,900 L/muaj (deri 100 klientë)', 'Pro — 6,900 L/muaj (deri 500 klientë)', 'Business — 12,900 L/muaj (pa limit)'],
-    testimonial: { text:'Rezervimet online ndryshuan gjithçka. Klasat mbushen vetë dhe ne fokusohemi te praktika.', name:'Mirela P.', biz:'Zen Yoga, Tiranë' },
-    stats: [['95%','Kapacitet i mbushur'],['2h','Kursyer në admin/ditë'],['60+','Rezervime/javë']],
-  },
-  pilates: {
-    slug: 'pilates',
-    icon: '🤸',
-    name: 'Pilates Studio',
-    tagline: 'Klasa grupore dhe sesione individuale — të organizuara',
-    desc: 'Sistemi i dedikuar për studio pilates — orare klasash, sesione individuale dhe ndjekje e progresit të çdo klienti. I përshtatshëm edhe për studio të vogla.',
-    color: '#0891b2',
-    bg: '#ecfeff',
-    features: [
-      { icon:'📅', title:'Klasa Grupore & Individuale', desc:'Menaxho si klasat grupore ashtu edhe sesionet 1-me-1 nga e njëjta platformë.' },
-      { icon:'📈', title:'Progres Klientësh', desc:'Ndjek progresin e çdo klienti — ushtrimet, niveli, arritjet dhe objektivat.' },
-      { icon:'👥', title:'Rezervime Online', desc:'Klientët rezervojnë klasën ose sesionin e tyre 24/7 nga telefoni.' },
-      { icon:'🔢', title:'Kapacitet & Lista Pritjeje', desc:'Kontrollo numrin maksimal të vendeve dhe listën e pritjes automatike.' },
-      { icon:'👤', title:'Instruktorët', desc:'Çdo instruktor ka profilin e tij me klasat, oraret dhe disponueshmërinë.' },
-      { icon:'💰', title:'Pagesa Fleksibël', desc:'Abonim mujor, paketa klasash ose sesion i vetëm — çdo model funksionon.' },
-      { icon:'📊', title:'Raporte Detajuara', desc:'Prezenca, të ardhurat, klasat me sukses dhe klientët më aktivë.' },
-      { icon:'📱', title:'App Klientësh', desc:'Shih orarin, rezervo dhe ndjek progresin personal nga telefoni.' },
-    ],
-    plans: ['Starter — 3,900 L/muaj (deri 100 klientë)', 'Pro — 6,900 L/muaj (deri 500 klientë)', 'Business — 12,900 L/muaj (pa limit)'],
-    testimonial: { text:'Menaxhimi i sesioneve individuale dhe klasave grupore nga e njëjta platformë na kurseu shumë kohë.', name:'Arta M.', biz:'Balance Pilates, Tiranë' },
-    stats: [['85%','Klientë të kthyer'],['1.5h','Kursyer çdo ditë'],['30+','Sesione/javë']],
-  },
-  martial_arts: {
-    slug: 'martial-arts',
-    icon: '🥊',
-    name: 'Arte Marciale',
-    tagline: 'Menaxho gradime, klasa dhe progres — si duhet',
-    desc: 'Platforma e dedikuar për shkolla të arteve marciale — gradime, klasa sipas nivelit, prezenca dhe ndjekja e progresit të çdo nxënësi. Karate, Judo, MMA dhe më shumë.',
-    color: '#dc2626',
-    bg: '#fef2f2',
-    features: [
-      { icon:'🥋', title:'Sistemi i Gradimeve', desc:'Ndjek beltat dhe gradimin e çdo nxënësi. Shëno progresin dhe datat e gradimeve.' },
-      { icon:'📅', title:'Klasa sipas Nivelit', desc:'Fillestar, Intermediate, Avancuar — klasa të ndara sipas nivelit dhe moshës.' },
-      { icon:'👥', title:'Menaxhim Nxënësish', desc:'Profil i plotë — gradimi aktual, prezenca, pagesa dhe progresi individual.' },
-      { icon:'📷', title:'QR Check-in', desc:'Nxënësit skanojnë QR kodin kur vijnë — prezenca regjistrohet automatikisht.' },
-      { icon:'💰', title:'Pagesa Mujore', desc:'Abonim mujor ose tremujor. Gjurmim borxhesh dhe njoftime automatike.' },
-      { icon:'👤', title:'Instruktorët', desc:'Çdo instruktor menaxhon klasat e tija dhe sheh statistikat e nxënësve.' },
-      { icon:'🏆', title:'Turneut & Evente', desc:'Regjistro nxënësit për turneut dhe evente speciale brenda platformës.' },
-      { icon:'📊', title:'Raporte Prezence', desc:'Shih prezencën ditore, javore dhe mujore. Identifiko nxënësit jo aktivë.' },
-    ],
-    plans: ['Starter — 3,900 L/muaj (deri 100 nxënës)', 'Pro — 6,900 L/muaj (deri 500 nxënës)', 'Business — 12,900 L/muaj (pa limit)'],
-    testimonial: { text:'Sistemi i gradimeve dhe prezenca automatike me QR na ndihmuan shumë. Nxënësit janë të motivuar të shohin progresin e tyre.', name:'Besnik H.', biz:'Dragon MMA, Tiranë' },
-    stats: [['120+','Nxënës aktiv'],['100%','Prezencë automatike'],['3x','Kohë e kursyer']],
-  },
-  dance: {
-    slug: 'dance',
-    icon: '💃',
-    name: 'Studio Vallëzimi',
-    tagline: 'Menaxho kurset, recitalet dhe nxënësit me stil',
-    desc: 'Platforma e dedikuar për studio vallëzimi — kurse, nivele, grupe moshash, regjistrimi online dhe ndjekja e progresit. Salsa, Bachata, Ballet, Hip-Hop dhe më shumë.',
-    color: '#be185d',
-    bg: '#fdf2f8',
-    features: [
-      { icon:'💃', title:'Kurse & Nivele', desc:'Organizo kurset sipas stilit, nivelit dhe grupmoshës. Fillestar deri Avancuar.' },
-      { icon:'📅', title:'Orari i Kurseve', desc:'Orare javore të organizuara. Nxënësit shohin dhe rezervojnë online.' },
-      { icon:'👶', title:'Grupe Moshe', desc:'Fëmijë, Adoleshentë, Të Rritur — menaxho grupe të ndryshme nga e njëjta platformë.' },
-      { icon:'🎭', title:'Recitalet & Evente', desc:'Organizoi recitalin vjetor, evente speciale dhe shfaqjet me menaxhim të plotë.' },
-      { icon:'💰', title:'Pagesa Mujore & Semestrale', desc:'Abonim mujor ose me semestër. Fatura automatike për prindërit.' },
-      { icon:'📱', title:'App Prindërish', desc:'Prindërit shohin oraret, pagesat dhe progresin e fëmijëve nga telefoni.' },
-      { icon:'📊', title:'Raporte Prezence', desc:'Ndjek prezencën e çdo nxënësi. Njoftime automatike për mungesa.' },
-      { icon:'🏆', title:'Çertifikata & Diplome', desc:'Lëshoi çertifikata dixhitale për kurset e përfunduara.' },
-    ],
-    plans: ['Starter — 3,900 L/muaj (deri 100 nxënës)', 'Pro — 6,900 L/muaj (deri 500 nxënës)', 'Business — 12,900 L/muaj (pa limit)'],
-    testimonial: { text:'Prindërit janë shumë të kënaqur me app-in. Shohin oraret dhe pagesat direkt — nuk thërrasin më çdo herë.', name:'Valentina K.', biz:'Dance Academy, Tiranë' },
-    stats: [['200+','Nxënës aktiv'],['95%','Prindër të kënaqur'],['50%','Reduktim thirrjesh']],
-  },
-  fitness: {
-    slug: 'fitness',
-    icon: '⚡',
-    name: 'Functional Fitness',
-    tagline: 'HIIT, CrossFit dhe trajnim personal — i organizuar',
-    desc: 'Platforma e dedikuar për studio fitness funksionale — WOD-et ditore, klasat HIIT, CrossFit dhe sesionet e trajnimit personal. Gjurmimi i performancës dhe progresit.',
-    color: '#d97706',
-    bg: '#fffbeb',
-    features: [
-      { icon:'⚡', title:'WOD & Programe', desc:'Publiko WOD-et ditore dhe programet javore. Atletët i shohin dhe regjistrojnë rezultatet.' },
-      { icon:'📅', title:'Klasa HIIT & CrossFit', desc:'Orare klasash me kapacitet maksimal dhe rezervime online të thjeshta.' },
-      { icon:'👤', title:'Trajnim Personal', desc:'Menaxho sesionet 1-me-1. Paketa sesionesh dhe ndjekja e progresit individual.' },
-      { icon:'📈', title:'Performance Tracking', desc:'Gjurmo PRs, kohët dhe ngarkesën për çdo atlet. Grafiku i progresit personal.' },
-      { icon:'💪', title:'Plane Stërvitjeje', desc:'Trajneri krijon plane të personalizuara. Atleti i ndjek nga app-i mobil.' },
-      { icon:'📷', title:'QR Check-in', desc:'Check-in i shpejtë me QR kod — pa pritje, pa letër.' },
-      { icon:'💰', title:'Membership & Drop-in', desc:'Abonim mujor ose drop-in për klasë të vetme. Të dy modelet funksionojnë.' },
-      { icon:'📊', title:'Raporte Atletësh', desc:'Statistikat e çdo atleti — prezenca, PRs, programet dhe progresi.' },
-    ],
-    plans: ['Starter — 4,900 L/muaj (deri 100 atletë)', 'Pro — 7,900 L/muaj (deri 500 atletë)', 'Business — 14,900 L/muaj (pa limit)'],
-    testimonial: { text:'WOD-et dhe tracking i progresit nga app-i motivoi shumë atletët tanë. Prezenca u rrit 35%.', name:'Artan B.', biz:'FitZone CrossFit, Tiranë' },
-    stats: [['35%','Rritje prezence'],['PRs','Gjurmuar automatik'],['2h','Kursyer/ditë']],
-  },
-  barbershop: {
-    slug: 'barbershop',
-    icon: '💈',
-    name: 'Barbershop',
-    tagline: 'Rezervime online, staf dhe shërbime — gjithçka automatik',
-    desc: 'Platforma e dedikuar për barbershop — rezervime online 24/7, menaxhim stafi, shërbime me çmim dhe kohëzgjatje, oraret e lira automatike dhe njoftime para takimit.',
-    color: '#18181b',
-    bg: '#f4f4f5',
-    features: [
-      { icon:'📅', title:'Rezervime Online 24/7', desc:'Klientët rezervojnë kur duan — natën, fundjavës, pa thirrje telefonike.' },
-      { icon:'🕐', title:'Oraret e Lira Automatike', desc:'Sistemi llogarit vetë oraret e disponueshme sipas berberit dhe shërbimit.' },
-      { icon:'✂️', title:'Shërbime & Çmime', desc:'Prerje flokësh, mjekër, ngjyrosje — çdo shërbim me çmim dhe kohëzgjatje.' },
-      { icon:'👤', title:'Menaxhim Stafi', desc:'Çdo berber ka orarin e tij. Klienti zgjedh berberin e preferuar.' },
-      { icon:'🔔', title:'Njoftime Automatike', desc:'Kujtues SMS/email para takimit. Pa no-shows, pa humbje kohë.' },
-      { icon:'💰', title:'Pagesa & Raporte', desc:'Regjistro pagesat dhe shih të ardhurat sipas berberit dhe shërbimit.' },
-      { icon:'⭐', title:'Reviews & Rating', desc:'Klientët lënë vlerësime. Shfaqen te Explore publik — tërheq klientë të rinj.' },
-      { icon:'🗺️', title:'Harta & Explore', desc:'Biznesi shfaqet te harta e Vaqo. Klientët të gjejnë lehtë nga zona.' },
-    ],
-    plans: ['Starter — 2,900 L/muaj (deri 3 berberë)', 'Pro — 4,900 L/muaj (deri 10 berberë)', 'Business — 8,900 L/muaj (pa limit)'],
-    testimonial: { text:'Rezervimet online ndryshuan gjithçka. Klientët rezervojnë vetë dhe ne fokusohemi te shërbimi. 3 orë kursyer çdo ditë.', name:'Genti N.', biz:'Elite Barber, Shkodër' },
-    stats: [['3h','Kursyer çdo ditë'],['40%','Rritje klientësh'],['0','No-shows pas njoftimeve']],
-  },
-  salon: {
-    slug: 'salon',
-    icon: '💅',
-    name: 'Sallon Bukurie',
-    tagline: 'Takime, ngjyrosje dhe trajtimie — menaxhuar me profesionalizëm',
-    desc: 'Platforma e dedikuar për sallon bukurie — rezervime online, menaxhim stilistësh, shërbime me kohëzgjatje dhe njoftime automatike. Prerje, ngjyrosje, manikyr dhe shumë më tepër.',
-    color: '#be185d',
-    bg: '#fdf2f8',
-    features: [
-      { icon:'📅', title:'Rezervime Online', desc:'Klientët rezervojnë shërbimin dhe stilisten e tyre 24/7 nga telefoni.' },
-      { icon:'💇', title:'Shërbime të Shumta', desc:'Prerje, ngjyrosje, highlights, manikyr, pedikyr, makeup — çdo shërbim i konfiguruar.' },
-      { icon:'👤', title:'Stilistët', desc:'Çdo stiliste ka profilin, orarin dhe shërbimet e saja. Klienti zgjedh stilisten.' },
-      { icon:'🕐', title:'Kohëzgjatje Automatike', desc:'Sistemi llogarit oraret bazuar në kohëzgjatjen e çdo shërbimi.' },
-      { icon:'🔔', title:'Kujtues Automatikë', desc:'SMS/email para takimit. Klientët nuk harrojnë dhe nuk vonojnë.' },
-      { icon:'💰', title:'Pagesa & Fatura', desc:'Regjistro pagesat cash. Fatura automatike. Raporte sipas stilistes.' },
-      { icon:'⭐', title:'Reviews & Rating', desc:'Vlerësimet e klientëve shfaqen te profili publik i sallonit.' },
-      { icon:'🗺️', title:'Harta & Explore', desc:'Shfaqesh te harta e Vaqo. Klientë të rinj të gjejnë lehtë.' },
-    ],
-    plans: ['Starter — 2,900 L/muaj (deri 3 stiliste)', 'Pro — 4,900 L/muaj (deri 10 stiliste)', 'Business — 8,900 L/muaj (pa limit)'],
-    testimonial: { text:'Klientët tanë janë shumë të kënaqur me rezervimet online. Nuk na thërrasin më për oraret — rezervojnë vetë.', name:'Elsa M.', biz:'Glam Salon, Tiranë' },
-    stats: [['60%','Rezervime online'],['25%','Rritje klientësh'],['4.9⭐','Rating mesatar']],
-  },
-  spa: {
-    slug: 'spa',
-    icon: '💆',
-    name: 'Spa & Masazh',
-    tagline: 'Trajtimie premium — rezervime të thjeshta dhe profesionale',
-    desc: 'Platforma e dedikuar për spa dhe klinika masazhi — rezervime online, menaxhim terapistësh, trajtimie me kohëzgjatje dhe paketa shërbimesh. Relaksim i garantuar.',
-    color: '#0891b2',
-    bg: '#ecfeff',
-    features: [
-      { icon:'💆', title:'Rezervime Online', desc:'Klientët rezervojnë trajtimin dhe terapisten e tyre 24/7 nga telefoni.' },
-      { icon:'🛁', title:'Trajtimie & Paketa', desc:'Masazh, trajtim fytyre, hammam, aromaterapi — çdo trajtim me çmim dhe kohëzgjatje.' },
-      { icon:'👤', title:'Terapistët', desc:'Çdo terapist ka profilin, specializimin dhe disponueshmërinë e tij.' },
-      { icon:'🕐', title:'Menaxhim Kohës', desc:'Sistemi menaxhon oraret automatikisht — pa mbivendosje, pa konfuzion.' },
-      { icon:'🔔', title:'Kujtues Automatikë', desc:'Klientët marrin kujtues para trajtimit. No-show praktikisht 0.' },
-      { icon:'🎁', title:'Gift Cards & Paketa', desc:'Shes paketa trajtimesh dhe gift cards — ideal për dhurata.' },
-      { icon:'⭐', title:'Reviews & Rating', desc:'Vlerësimet shfaqen te profili publik. Reputacioni ndërtohet vetë.' },
-      { icon:'📊', title:'Raporte Detajuara', desc:'Të ardhurat sipas terapistit, trajtimit dhe periudhës. Analiza e plotë.' },
-    ],
-    plans: ['Starter — 3,900 L/muaj (deri 3 terapistë)', 'Pro — 6,900 L/muaj (deri 10 terapistë)', 'Business — 11,900 L/muaj (pa limit)'],
-    testimonial: { text:'Klientët e rinj na gjejnë te harta e Vaqo. Rezervimet online i bëjnë vetë — ne fokusohemi te trajtimi.', name:'Mirela P.', biz:'Zen Spa, Vlorë' },
-    stats: [['4.9⭐','Rating mesatar'],['70%','Klientë të kthyer'],['2.5h','Kursyer çdo ditë']],
-  },
-  wellness: {
-    slug: 'wellness',
-    icon: '🌿',
-    name: 'Wellness Clinic',
-    tagline: 'Terapi holistike dhe trajtimie — të organizuara me kujdes',
-    desc: 'Platforma e dedikuar për klinika wellness dhe terapi holistike — menaxhim pacientësh, takime, histori trajtimesh dhe ndjekja e progresit. Profesional dhe konfidencial.',
-    color: '#16a34a',
-    bg: '#f0fdf4',
-    features: [
-      { icon:'🌿', title:'Menaxhim Pacientësh', desc:'Profil i plotë për çdo pacient — historiku i trajtimeve, shënime dhe progresi.' },
-      { icon:'📅', title:'Takime Online', desc:'Pacientët rezervojnë takimin online. Konfirmim i menjëhershëm.' },
-      { icon:'📋', title:'Histori Trajtimesh', desc:'Regjistro çdo seancë me shënime, diagnoza dhe plane trajtimi.' },
-      { icon:'🔒', title:'Konfidencialitet', desc:'Të dhënat e pacientëve janë të sigurta dhe aksesibël vetëm nga stafi i autorizuar.' },
-      { icon:'👤', title:'Terapistët & Specialistët', desc:'Çdo specialist menaxhon pacientët dhe oraret e tij individualisht.' },
-      { icon:'🔔', title:'Kujtues Automatikë', desc:'Pacientët marrin kujtues para takimit. Reduktim drastik i no-shows.' },
-      { icon:'💰', title:'Pagesa & Sigurime', desc:'Regjistro pagesat cash, transfertë ose sigurime shëndetësore.' },
-      { icon:'📊', title:'Raporte Klinike', desc:'Statistikat e trajtimeve, pacientëve aktivë dhe të ardhurat mujore.' },
-    ],
-    plans: ['Starter — 4,900 L/muaj (deri 3 specialistë)', 'Pro — 7,900 L/muaj (deri 10 specialistë)', 'Business — 14,900 L/muaj (pa limit)'],
-    testimonial: { text:'Historiku dixhital i çdo pacienti na ndihmon të ofrojmë kujdes më të personalizuar. Pacientët e vlerësojnë.', name:'Dr. Anda K.', biz:'Holistic Wellness, Tiranë' },
-    stats: [['100%','Histori dixhitale'],['80%','Reduktim paperwork'],['4.8⭐','Rating pacientësh']],
-  },
+  gym:          { slug:'gym',          icon:'🏋️', name:'Palestre & Gym',     color:'#18181b', bg:'#f4f4f5', tagline:'Menaxho palestrën me efikasitet maksimal', desc:'Platforma e plotë për palestra — anëtarë, pagesa, check-in QR, plane stërvitjeje dhe raporte të detajuara.', stats:[['340+','Anëtarë mesatarisht'],['3h','Kursyer/ditë'],['40%','Rritje anëtarësh']], testimonial:{text:'Nga 80 anëtarë shkuam në 340 brenda 6 muajve. Dashboard-i më tregon gjithçka.',name:'Elona K.',biz:'PowerFit Studio, Durrës'},
+    features:[{icon:'👥',t:'Menaxhim Anëtarësh',d:'Profil i plotë, abonime, pagesa, historiku dhe statistikat.'},{icon:'💰',t:'Pagesa & Fatura',d:'Cash ose transfertë. Fatura automatike me numër unik.'},{icon:'📷',t:'QR Check-in',d:'Çdo anëtar ka QR kod. Skanim i menjëhershëm.'},{icon:'📋',t:'Plane Stërvitjeje',d:'Trajneri krijon plane. Anëtari i sheh nga app-i mobil.'},{icon:'📊',t:'Raporte Live',d:'Të ardhura, prezenca, planet më të shituara — live.'},{icon:'📱',t:'App Anëtarësh',d:'Shohin abonimin, stërvitjet dhe statistikat.'},{icon:'🥗',t:'Dietologë',d:'Anëtarët blejnë plane dietash direkt nga app-i.'},{icon:'❄️',t:'Freeze Abonim',d:'Ngri abonimin kur anëtari është me pushime.'}],
+    plans:['Starter — 4,900 L/muaj · deri 100 anëtarë','Pro — 7,900 L/muaj · deri 500 anëtarë','Business — 14,900 L/muaj · pa limit']},
+
+  yoga:         { slug:'yoga',         icon:'🧘', name:'Yoga Studio',        color:'#7c3aed', bg:'#f5f3ff', tagline:'Klasa, instruktorë dhe rezervime — të organizuara', desc:'Sistemi i dedikuar për studio yoga — orare klasash, rezervime online, kapacitet automatik dhe listë pritjeje.', stats:[['95%','Kapacitet i mbushur'],['2h','Kursyer/ditë'],['60+','Rezervime/javë']], testimonial:{text:'Klasat mbushen vetë dhe ne fokusohemi te praktika.',name:'Mirela P.',biz:'Zen Yoga, Tiranë'},
+    features:[{icon:'📅',t:'Orari i Klasave',d:'Klasa individuale ose të përsëritura çdo javë.'},{icon:'👥',t:'Rezervime Online',d:'Klientët rezervojnë 24/7 pa nevojë për llogari.'},{icon:'🔢',t:'Kapacitet Automatik',d:'Kur plotësohet, aktivizohet lista e pritjes.'},{icon:'🧘',t:'Nivele & Kategori',d:'Fillestar, Mesatar, Avancuar — Yoga, Pilates, Meditim.'},{icon:'👤',t:'Instruktorët',d:'Profil i dedikuar me specializim dhe orare.'},{icon:'📊',t:'Statistika',d:'Prezenca, rezervimet dhe të ardhurat për çdo klasë.'},{icon:'💰',t:'Çmim Fleksibël',d:'Çmim i ndryshëm për çdo klasë.'},{icon:'📱',t:'App Klientësh',d:'Shohin orarin, rezervojnë dhe marrin kujtues.'}],
+    plans:['Starter — 3,900 L/muaj · deri 100 klientë','Pro — 6,900 L/muaj · deri 500 klientë','Business — 12,900 L/muaj · pa limit']},
+
+  pilates:      { slug:'pilates',      icon:'🤸', name:'Pilates Studio',     color:'#0891b2', bg:'#ecfeff', tagline:'Klasa grupore dhe sesione individuale — të organizuara', desc:'Platforma e dedikuar për studio pilates — orare klasash, sesione individuale dhe ndjekja e progresit.', stats:[['85%','Klientë të kthyer'],['1.5h','Kursyer/ditë'],['30+','Sesione/javë']], testimonial:{text:'Menaxhimi i sesioneve individuale dhe klasave grupore nga e njëjta platformë.',name:'Arta M.',biz:'Balance Pilates, Tiranë'},
+    features:[{icon:'📅',t:'Klasa & Sesione',d:'Grupore dhe 1-me-1 nga e njëjta platformë.'},{icon:'📈',t:'Progres Klientësh',d:'Ndjek ushtrimet, nivelin dhe objektivat.'},{icon:'👥',t:'Rezervime Online',d:'Klientët rezervojnë 24/7 nga telefoni.'},{icon:'🔢',t:'Kapacitet',d:'Kontroll i numrit maksimal dhe listës së pritjes.'},{icon:'👤',t:'Instruktorët',d:'Profil me klasat, oraret dhe disponueshmërinë.'},{icon:'💰',t:'Modele Pagese',d:'Abonim mujor, paketa klasash ose sesion i vetëm.'},{icon:'📊',t:'Raporte',d:'Prezenca, të ardhurat dhe klientët më aktivë.'},{icon:'📱',t:'App Klientësh',d:'Rezervo dhe ndjek progresin nga telefoni.'}],
+    plans:['Starter — 3,900 L/muaj · deri 100 klientë','Pro — 6,900 L/muaj · deri 500 klientë','Business — 12,900 L/muaj · pa limit']},
+
+  'martial-arts':{ slug:'martial-arts',icon:'🥊', name:'Arte Marciale',      color:'#dc2626', bg:'#fef2f2', tagline:'Gradime, klasa dhe progres — si duhet', desc:'Platforma për shkolla artesh marciale — gradime, klasa sipas nivelit, prezenca dhe progres individual.', stats:[['120+','Nxënës aktivë'],['100%','Prezencë QR'],['3x','Kohë kursyer']], testimonial:{text:'Sistemi i gradimeve dhe prezenca automatike me QR na ndihmuan shumë.',name:'Besnik H.',biz:'Dragon MMA, Tiranë'},
+    features:[{icon:'🥋',t:'Sistemi i Gradimeve',d:'Ndjek beltat dhe gradimin e çdo nxënësi.'},{icon:'📅',t:'Klasa sipas Nivelit',d:'Fillestar, Intermediate, Avancuar.'},{icon:'👥',t:'Menaxhim Nxënësish',d:'Profil i plotë — gradimi, prezenca, pagesa.'},{icon:'📷',t:'QR Check-in',d:'Prezenca regjistrohet automatikisht.'},{icon:'💰',t:'Pagesa Mujore',d:'Abonim mujor ose tremujor me gjurmim borxhesh.'},{icon:'👤',t:'Instruktorët',d:'Menaxhon klasat dhe sheh statistikat e nxënësve.'},{icon:'🏆',t:'Turneut & Evente',d:'Regjistro nxënësit për turneut.'},{icon:'📊',t:'Raporte Prezence',d:'Ditore, javore dhe mujore. Nxënës jo aktivë.'}],
+    plans:['Starter — 3,900 L/muaj · deri 100 nxënës','Pro — 6,900 L/muaj · deri 500 nxënës','Business — 12,900 L/muaj · pa limit']},
+
+  dance:        { slug:'dance',        icon:'💃', name:'Studio Vallëzimi',   color:'#be185d', bg:'#fdf2f8', tagline:'Kurse, recitale dhe nxënës — menaxhuar me stil', desc:'Platforma për studio vallëzimi — kurse, nivele, grupe moshash dhe regjistrimi online.', stats:[['200+','Nxënës aktivë'],['95%','Prindër të kënaqur'],['50%','Reduktim thirrjesh']], testimonial:{text:'Prindërit shohin oraret dhe pagesat direkt — nuk thërrasin më çdo herë.',name:'Valentina K.',biz:'Dance Academy, Tiranë'},
+    features:[{icon:'💃',t:'Kurse & Nivele',d:'Sipas stilit, nivelit dhe grupmoshës.'},{icon:'📅',t:'Orari i Kurseve',d:'Orare javore. Nxënësit shohin dhe rezervojnë online.'},{icon:'👶',t:'Grupe Moshe',d:'Fëmijë, Adoleshentë, Të Rritur — njëkohësisht.'},{icon:'🎭',t:'Recitalet & Evente',d:'Organizoi recitalet dhe shfaqjet speciale.'},{icon:'💰',t:'Pagesa & Fatura',d:'Mujore ose semestrale. Fatura automatike.'},{icon:'📱',t:'App Prindërish',d:'Shohin oraret, pagesat dhe progresin e fëmijëve.'},{icon:'📊',t:'Raporte Prezence',d:'Prezenca e çdo nxënësi. Njoftime mungese.'},{icon:'🏆',t:'Çertifikata Dixhitale',d:'Lëshoi çertifikata për kurset e përfunduara.'}],
+    plans:['Starter — 3,900 L/muaj · deri 100 nxënës','Pro — 6,900 L/muaj · deri 500 nxënës','Business — 12,900 L/muaj · pa limit']},
+
+  fitness:      { slug:'fitness',      icon:'⚡', name:'Functional Fitness', color:'#d97706', bg:'#fffbeb', tagline:'HIIT, CrossFit dhe trajnim personal — i organizuar', desc:'Platforma për studio fitness funksionale — WOD-et ditore, klasat HIIT dhe trajnimi personal.', stats:[['35%','Rritje prezence'],['PRs','Gjurmuar auto'],['2h','Kursyer/ditë']], testimonial:{text:'WOD-et dhe tracking i progresit motivoi shumë atletët tanë. Prezenca u rrit 35%.',name:'Artan B.',biz:'FitZone CrossFit, Tiranë'},
+    features:[{icon:'⚡',t:'WOD & Programe',d:'Publiko WOD-et ditore. Atletët regjistrojnë rezultatet.'},{icon:'📅',t:'Klasa HIIT & CrossFit',d:'Kapacitet dhe rezervime online.'},{icon:'👤',t:'Trajnim Personal',d:'Sesione 1-me-1. Paketa dhe progres individual.'},{icon:'📈',t:'Performance Tracking',d:'PRs, kohët dhe ngarkesa për çdo atlet.'},{icon:'💪',t:'Plane Stërvitjeje',d:'Trajneri krijon plane. Atleti ndjek nga app-i.'},{icon:'📷',t:'QR Check-in',d:'Check-in i shpejtë — pa pritje.'},{icon:'💰',t:'Membership & Drop-in',d:'Abonim mujor ose drop-in. Të dy modelet.'},{icon:'📊',t:'Raporte Atletësh',d:'Prezenca, PRs, programet dhe progresi.'}],
+    plans:['Starter — 4,900 L/muaj · deri 100 atletë','Pro — 7,900 L/muaj · deri 500 atletë','Business — 14,900 L/muaj · pa limit']},
+
+  barbershop:   { slug:'barbershop',   icon:'💈', name:'Barbershop',         color:'#18181b', bg:'#f4f4f5', tagline:'Rezervime online, staf dhe shërbime — automatik', desc:'Platforma për barbershop — rezervime 24/7, menaxhim stafi, shërbime me çmim dhe njoftime automatike.', stats:[['3h','Kursyer/ditë'],['40%','Rritje klientësh'],['0','No-shows']], testimonial:{text:'Klientët rezervojnë vetë dhe ne fokusohemi te shërbimi. 3 orë kursyer çdo ditë.',name:'Genti N.',biz:'Elite Barber, Shkodër'},
+    features:[{icon:'📅',t:'Rezervime 24/7',d:'Klientët rezervojnë kur duan — pa thirrje.'},{icon:'🕐',t:'Oraret e Lira',d:'Sistemi llogarit vetë oraret sipas berberit.'},{icon:'✂️',t:'Shërbime & Çmime',d:'Prerje, mjekër, ngjyrosje — me çmim dhe kohë.'},{icon:'👤',t:'Menaxhim Stafi',d:'Çdo berber ka orarin e tij. Klienti zgjedh.'},{icon:'🔔',t:'Njoftime Automatike',d:'Kujtues para takimit. Pa no-shows.'},{icon:'💰',t:'Pagesa & Raporte',d:'Të ardhurat sipas berberit dhe shërbimit.'},{icon:'⭐',t:'Reviews & Rating',d:'Vlerësimet shfaqen te Explore publik.'},{icon:'🗺️',t:'Harta & Explore',d:'Shfaqesh te harta. Klientë të rinj falas.'}],
+    plans:['Starter — 2,900 L/muaj · deri 3 berberë','Pro — 4,900 L/muaj · deri 10 berberë','Business — 8,900 L/muaj · pa limit']},
+
+  salon:        { slug:'salon',        icon:'💅', name:'Sallon Bukurie',     color:'#be185d', bg:'#fdf2f8', tagline:'Takime, ngjyrosje dhe trajtimie — me profesionalizëm', desc:'Platforma për sallon bukurie — rezervime, menaxhim stilistësh dhe shërbime me kohëzgjatje.', stats:[['60%','Rezervime online'],['25%','Rritje klientësh'],['4.9⭐','Rating mesatar']], testimonial:{text:'Klientët rezervojnë vetë — nuk na thërrasin më për oraret.',name:'Elsa M.',biz:'Glam Salon, Tiranë'},
+    features:[{icon:'📅',t:'Rezervime Online',d:'Klientët rezervojnë shërbimin dhe stilisten 24/7.'},{icon:'💇',t:'Shërbime të Shumta',d:'Prerje, ngjyrosje, manikyr, pedikyr, makeup.'},{icon:'👤',t:'Stilistët',d:'Çdo stiliste ka profilin dhe shërbimet e saja.'},{icon:'🕐',t:'Kohëzgjatje Auto',d:'Sistemi llogarit oraret bazuar në shërbim.'},{icon:'🔔',t:'Kujtues Automatikë',d:'SMS/email para takimit.'},{icon:'💰',t:'Pagesa & Fatura',d:'Regjistro pagesat. Raporte sipas stilistes.'},{icon:'⭐',t:'Reviews & Rating',d:'Vlerësimet te profili publik.'},{icon:'🗺️',t:'Harta & Explore',d:'Klientë të rinj të gjejnë lehtë.'}],
+    plans:['Starter — 2,900 L/muaj · deri 3 stiliste','Pro — 4,900 L/muaj · deri 10 stiliste','Business — 8,900 L/muaj · pa limit']},
+
+  spa:          { slug:'spa',          icon:'💆', name:'Spa & Masazh',       color:'#0891b2', bg:'#ecfeff', tagline:'Trajtimie premium — rezervime profesionale', desc:'Platforma për spa dhe masazh — rezervime, menaxhim terapistësh dhe trajtimie me kohëzgjatje.', stats:[['4.9⭐','Rating mesatar'],['70%','Klientë të kthyer'],['2.5h','Kursyer/ditë']], testimonial:{text:'Klientët e rinj na gjejnë te harta. Rezervimet i bëjnë vetë.',name:'Mirela P.',biz:'Zen Spa, Vlorë'},
+    features:[{icon:'💆',t:'Rezervime Online',d:'Klientët rezervojnë trajtimin 24/7.'},{icon:'🛁',t:'Trajtimie & Paketa',d:'Masazh, trajtim fytyre, hammam, aromaterapi.'},{icon:'👤',t:'Terapistët',d:'Profil, specializim dhe disponueshmëri.'},{icon:'🕐',t:'Menaxhim Kohës',d:'Sistemi menaxhon oraret automatikisht.'},{icon:'🔔',t:'Kujtues Automatikë',d:'No-show praktikisht 0.'},{icon:'🎁',t:'Gift Cards',d:'Shes paketa dhe gift cards — ideal për dhurata.'},{icon:'⭐',t:'Reviews & Rating',d:'Reputacioni ndërtohet automatikisht.'},{icon:'📊',t:'Raporte',d:'Të ardhurat sipas terapistit dhe trajtimit.'}],
+    plans:['Starter — 3,900 L/muaj · deri 3 terapistë','Pro — 6,900 L/muaj · deri 10 terapistë','Business — 11,900 L/muaj · pa limit']},
+
+  wellness:     { slug:'wellness',     icon:'🌿', name:'Wellness Clinic',    color:'#16a34a', bg:'#f0fdf4', tagline:'Terapi holistike — të organizuara me kujdes', desc:'Platforma për klinika wellness — menaxhim pacientësh, takime dhe histori trajtimesh.', stats:[['100%','Histori dixhitale'],['80%','Reduktim paperwork'],['4.8⭐','Rating pacientësh']], testimonial:{text:'Historiku dixhital na ndihmon të ofrojmë kujdes të personalizuar.',name:'Dr. Anda K.',biz:'Holistic Wellness, Tiranë'},
+    features:[{icon:'🌿',t:'Menaxhim Pacientësh',d:'Profil i plotë — historiku, shënime dhe progresi.'},{icon:'📅',t:'Takime Online',d:'Pacientët rezervojnë online.'},{icon:'📋',t:'Histori Trajtimesh',d:'Regjistro çdo seancë me shënime.'},{icon:'🔒',t:'Konfidencialitet',d:'Të dhënat aksesibël vetëm nga stafi i autorizuar.'},{icon:'👤',t:'Specialistët',d:'Çdo specialist menaxhon pacientët e tij.'},{icon:'🔔',t:'Kujtues Automatikë',d:'Reduktim drastik i no-shows.'},{icon:'💰',t:'Pagesa',d:'Cash, transfertë ose sigurime shëndetësore.'},{icon:'📊',t:'Raporte Klinike',d:'Statistikat e trajtimeve dhe të ardhurat mujore.'}],
+    plans:['Starter — 4,900 L/muaj · deri 3 specialistë','Pro — 7,900 L/muaj · deri 10 specialistë','Business — 14,900 L/muaj · pa limit']},
+}
+
+function useW() {
+  const [w,setW]=useState(typeof window!=='undefined'?window.innerWidth:1200)
+  useEffect(()=>{const fn=()=>setW(window.innerWidth);window.addEventListener('resize',fn);return()=>window.removeEventListener('resize',fn)},[])
+  return {isMobile:w<640,isTablet:w>=640&&w<1024}
 }
 
 export default function CategoryPage() {
-  const slug = window.location.pathname.replace('/category/','').replace('/','')
+  const {isMobile,isTablet} = useW()
+  const slug = window.location.pathname.replace('/category/','').replace(/\/$/,'')
   const data = CATEGORY_DATA[slug] || CATEGORY_DATA['gym']
   const [faqOpen, setFaqOpen] = useState(null)
+  const px = isMobile?16:isTablet?32:64
 
   const FAQS = [
-    { q:`Sa kohë duhet për setup i ${data.name}?`, a:'30 minuta. Konfigurojmë bashkë — shërbime, staf, orare dhe pagesa. Gati menjëherë.' },
-    { q:'A mund të shtoj staf të shumtë?', a:'Po! Paketa Pro lejon deri 10 anëtarë stafi, Business pa limit. Çdo anëtar ka rolin dhe akseset e tij.' },
-    { q:'Si funksionojnë rezervimet online?', a:'Klienti hap faqen tuaj te Vaqo, zgjedh shërbimin, specialistin dhe orën. Ju merrni njoftim menjëherë.' },
-    { q:'A mund ta provoj falas?', a:'Po — 30 ditë falas, pa kartë krediti, pa kontratë. Anuloni kurdo.' },
-    { q:'A shfaqem te harta dhe Explore?', a:'Po! Biznesi juaj shfaqet automatikisht te /explore dhe harta interaktive e Vaqo. Klientë të rinj ju gjejnë falas.' },
+    {q:`Sa kohë duhet setup i ${data.name}?`,a:'30 minuta. Konfigurojmë bashkë — shërbime, staf dhe orare. Gati menjëherë.'},
+    {q:'A mund të shtoj staf të shumtë?',a:'Po! Paketa Pro lejon deri 10 anëtarë stafi, Business pa limit.'},
+    {q:'Si funksionojnë rezervimet online?',a:'Klienti zgjedh shërbimin, specialistin dhe orën. Ju merrni njoftim menjëherë.'},
+    {q:'A mund ta provoj falas?',a:'Po — 30 ditë falas, pa kartë krediti, pa kontratë. Anuloni kurdo.'},
+    {q:'A shfaqem te harta dhe Explore?',a:'Po! Shfaqeni automatikisht te /explore dhe harta interaktive e Vaqo.'},
   ]
 
   return (
-    <div style={{ fontFamily:"system-ui,-apple-system,sans-serif", color:'#18181b', lineHeight:1.6, overflowX:'hidden' }}>
-      <style>{`
-        *{box-sizing:border-box;margin:0;padding:0}
-        ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#d4d4d8;border-radius:4px}
-        @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-        .feat-card:hover{transform:translateY(-3px)!important;box-shadow:0 16px 40px rgba(0,0,0,.08)!important}
-        @media(max-width:768px){
-          .g2{grid-template-columns:1fr!important}
-          .g3{grid-template-columns:1fr 1fr!important}
-          .hero-t{font-size:36px!important}
-          .sp{padding:64px 20px!important}
-        }
-      `}</style>
+    <div style={{fontFamily:'system-ui,-apple-system,sans-serif',color:'#18181b',lineHeight:1.6,overflowX:'hidden'}}>
+      <style>{`*{box-sizing:border-box;margin:0;padding:0}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#d4d4d8;border-radius:4px}@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}.fc:hover{transform:translateY(-2px)!important;box-shadow:0 12px 32px rgba(0,0,0,.08)!important}`}</style>
 
-      {/* NAV */}
-      <nav style={{ position:'sticky', top:0, zIndex:100, height:58, padding:'0 32px', display:'flex', alignItems:'center', justifyContent:'space-between', background:'rgba(255,255,255,.97)', backdropFilter:'blur(20px)', borderBottom:'1px solid rgba(0,0,0,.07)' }}>
-        <button onClick={()=>window.location.href='/'} style={{ display:'flex', alignItems:'center', gap:9, background:'none', border:'none', cursor:'pointer', padding:0 }}>
-          <div style={{ width:32, height:32, borderRadius:8, background:'#18181b', display:'flex', alignItems:'center', justifyContent:'center', fontSize:17 }}>💪</div>
-          <span style={{ fontSize:20, fontWeight:900, color:'#18181b', fontFamily:'Georgia,serif' }}>Vaqo</span>
+      {/* Nav */}
+      <nav style={{position:'sticky',top:0,zIndex:100,height:56,padding:`0 ${px}px`,display:'flex',alignItems:'center',justifyContent:'space-between',background:'rgba(255,255,255,.97)',backdropFilter:'blur(20px)',borderBottom:'1px solid rgba(0,0,0,.07)'}}>
+        <button onClick={()=>window.location.href='/'} style={{display:'flex',alignItems:'center',gap:8,background:'none',border:'none',cursor:'pointer',padding:0}}>
+          <div style={{width:30,height:30,borderRadius:8,background:'#18181b',display:'flex',alignItems:'center',justifyContent:'center',fontSize:16}}>💪</div>
+          <span style={{fontSize:19,fontWeight:900,color:'#18181b',fontFamily:'Georgia,serif'}}>Vaqo</span>
         </button>
-        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-          <button onClick={()=>window.location.href='/explore'} style={{ background:'none', border:'1px solid #e4e4e7', color:'#18181b', padding:'7px 16px', borderRadius:8, fontSize:13, fontWeight:500, cursor:'pointer', fontFamily:'inherit' }}>🔍 Explore</button>
-          <button onClick={()=>window.location.href='/login'} style={{ background:'none', border:'1px solid #e4e4e7', color:'#18181b', padding:'7px 16px', borderRadius:8, fontSize:13, fontWeight:500, cursor:'pointer', fontFamily:'inherit' }}>Hyr</button>
-          <button onClick={()=>window.location.href='/apply'} style={{ background:'#18181b', color:'#fff', border:'none', padding:'8px 20px', borderRadius:9, fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>Fillo Falas →</button>
+        <div style={{display:'flex',alignItems:'center',gap:8}}>
+          {!isMobile&&<button onClick={()=>window.location.href='/explore'} style={{background:'none',border:'1px solid #e4e4e7',color:'#18181b',padding:'6px 14px',borderRadius:8,fontSize:13,fontWeight:500,cursor:'pointer',fontFamily:'inherit'}}>🔍 Explore</button>}
+          <button onClick={()=>window.location.href='/demo'} style={{background:'#18181b',color:'#fff',border:'none',padding:'8px 18px',borderRadius:9,fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>Book Demo</button>
         </div>
       </nav>
 
-      {/* HERO */}
-      <section style={{ padding:'80px 64px 64px', background:data.bg, position:'relative', overflow:'hidden' }} className="sp">
-        <div style={{ position:'absolute', inset:0, backgroundImage:'linear-gradient(rgba(0,0,0,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.03) 1px,transparent 1px)', backgroundSize:'48px 48px' }}/>
-        <div style={{ maxWidth:900, margin:'0 auto', position:'relative', zIndex:1, animation:'fadeUp .7s ease both' }}>
+      {/* Hero */}
+      <section style={{padding:`${isMobile?60:80}px ${px}px ${isMobile?40:56}px`,background:data.bg,position:'relative',overflow:'hidden'}}>
+        <div style={{position:'absolute',inset:0,backgroundImage:'linear-gradient(rgba(0,0,0,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.03) 1px,transparent 1px)',backgroundSize:'48px 48px'}}/>
+        <div style={{maxWidth:900,margin:'0 auto',position:'relative',zIndex:1,animation:'fadeUp .6s ease both'}}>
           {/* Breadcrumb */}
-          <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:24, fontSize:13, color:'#71717a' }}>
-            <button onClick={()=>window.location.href='/'} style={{ background:'none', border:'none', cursor:'pointer', color:'#71717a', fontFamily:'inherit', fontSize:13 }}>Kryefaqja</button>
-            <span>›</span>
-            <span style={{ color:'#18181b', fontWeight:500 }}>{data.name}</span>
+          <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:20,fontSize:12,color:'#71717a'}}>
+            <button onClick={()=>window.location.href='/'} style={{background:'none',border:'none',cursor:'pointer',color:'#71717a',fontFamily:'inherit',fontSize:12}}>Kryefaqja</button>
+            <span>›</span><span style={{color:'#18181b',fontWeight:500}}>{data.name}</span>
           </div>
 
-          <div style={{ display:'inline-flex', alignItems:'center', gap:10, background:'#fff', border:`1px solid ${data.color}20`, borderRadius:100, padding:'6px 16px 6px 6px', marginBottom:24, boxShadow:'0 2px 8px rgba(0,0,0,.06)' }}>
-            <div style={{ width:32, height:32, borderRadius:'50%', background:data.color, display:'flex', alignItems:'center', justifyContent:'center', fontSize:17 }}>{data.icon}</div>
-            <span style={{ fontSize:13, fontWeight:700, color:data.color }}>{data.name}</span>
+          <div style={{display:'inline-flex',alignItems:'center',gap:9,background:'#fff',border:`1px solid ${data.color}20`,borderRadius:100,padding:'5px 16px 5px 5px',marginBottom:20,boxShadow:'0 2px 8px rgba(0,0,0,.06)'}}>
+            <div style={{width:30,height:30,borderRadius:'50%',background:data.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:16}}>{data.icon}</div>
+            <span style={{fontSize:13,fontWeight:700,color:data.color}}>{data.name}</span>
           </div>
 
-          <h1 className="hero-t" style={{ fontFamily:'Georgia,serif', fontSize:'clamp(32px,5vw,60px)', fontWeight:900, lineHeight:1.05, letterSpacing:'-.03em', marginBottom:20, color:'#18181b' }}>
+          <h1 style={{fontFamily:'Georgia,serif',fontSize:isMobile?'clamp(26px,7vw,36px)':isTablet?40:56,fontWeight:900,lineHeight:1.05,letterSpacing:'-.03em',marginBottom:16,color:'#18181b'}}>
             {data.tagline}
           </h1>
+          <p style={{fontSize:isMobile?14:17,color:'#52525b',lineHeight:1.75,maxWidth:620,marginBottom:28}}>{data.desc}</p>
 
-          <p style={{ fontSize:18, color:'#52525b', lineHeight:1.75, maxWidth:660, marginBottom:36 }}>{data.desc}</p>
-
-          <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
-            <button onClick={()=>window.location.href='/apply'} style={{ background:'#18181b', color:'#fff', border:'none', padding:'13px 28px', borderRadius:10, fontSize:15, fontWeight:700, cursor:'pointer', fontFamily:'inherit', transition:'all .2s' }}
+          <div style={{display:'flex',gap:10,flexWrap:'wrap',marginBottom:40}}>
+            <button onClick={()=>window.location.href='/demo'} style={{background:'#18181b',color:'#fff',border:'none',padding:`${isMobile?11:13}px ${isMobile?20:28}px`,borderRadius:10,fontSize:isMobile?14:15,fontWeight:700,cursor:'pointer',fontFamily:'inherit',transition:'all .2s'}}
               onMouseEnter={e=>{e.currentTarget.style.background='#333';e.currentTarget.style.transform='translateY(-2px)'}}
               onMouseLeave={e=>{e.currentTarget.style.background='#18181b';e.currentTarget.style.transform='translateY(0)'}}>
               Fillo 30 Ditë Falas →
             </button>
-            <button onClick={()=>window.location.href='/explore'} style={{ background:'transparent', color:'#18181b', border:'1.5px solid rgba(0,0,0,.15)', padding:'13px 22px', borderRadius:10, fontSize:14, fontWeight:500, cursor:'pointer', fontFamily:'inherit' }}>
+            <button onClick={()=>window.location.href='/explore'} style={{background:'transparent',color:'#18181b',border:'1.5px solid rgba(0,0,0,.15)',padding:`${isMobile?11:13}px ${isMobile?16:22}px`,borderRadius:10,fontSize:isMobile?13:14,fontWeight:500,cursor:'pointer',fontFamily:'inherit'}}>
               🔍 Shfleto Bizneset
             </button>
           </div>
 
           {/* Stats */}
-          <div style={{ display:'flex', gap:40, marginTop:48, paddingTop:32, borderTop:'1px solid rgba(0,0,0,.08)', flexWrap:'wrap' }}>
-            {data.stats.map(([n,l]) => (
+          <div style={{display:'flex',gap:isMobile?24:44,paddingTop:24,borderTop:'1px solid rgba(0,0,0,.08)',flexWrap:'wrap'}}>
+            {data.stats.map(([n,l])=>(
               <div key={l}>
-                <div style={{ fontFamily:'Georgia,serif', fontSize:40, fontWeight:900, lineHeight:1, color:data.color }}>{n}</div>
-                <div style={{ fontSize:13, color:'#71717a', marginTop:4 }}>{l}</div>
+                <div style={{fontFamily:'Georgia,serif',fontSize:isMobile?32:42,fontWeight:900,lineHeight:1,color:data.color}}>{n}</div>
+                <div style={{fontSize:12,color:'#71717a',marginTop:4}}>{l}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* FEATURES */}
-      <section style={{ padding:'80px 64px', background:'#fff' }} className="sp">
-        <div style={{ maxWidth:1060, margin:'0 auto' }}>
-          <div style={{ textAlign:'center', marginBottom:48 }}>
-            <div style={{ fontSize:11, fontWeight:700, letterSpacing:'.1em', textTransform:'uppercase', color:data.color, marginBottom:12 }}>Funksionet</div>
-            <h2 style={{ fontFamily:'Georgia,serif', fontSize:'clamp(26px,3.5vw,42px)', fontWeight:900, lineHeight:1.1, marginBottom:12 }}>
-              Gjithçka që i duhet {data.name}
-            </h2>
-            <p style={{ fontSize:16, color:'#71717a', maxWidth:500, margin:'0 auto' }}>
-              I dizajnuar specifikisht për {data.name.toLowerCase()} — jo zgjidhje gjenerike.
-            </p>
+      {/* Features */}
+      <section style={{padding:`${isMobile?48:72}px ${px}px`,background:'#fff'}}>
+        <div style={{maxWidth:1060,margin:'0 auto'}}>
+          <div style={{textAlign:'center',marginBottom:36}}>
+            <div style={{fontSize:10,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:data.color,marginBottom:10}}>Funksionet</div>
+            <h2 style={{fontFamily:'Georgia,serif',fontSize:isMobile?24:isTablet?30:40,fontWeight:900,lineHeight:1.1,marginBottom:10}}>Gjithçka që i duhet {data.name}</h2>
+            <p style={{fontSize:14,color:'#71717a',maxWidth:440,margin:'0 auto'}}>I dizajnuar specifikisht — jo zgjidhje gjenerike.</p>
           </div>
-
-          <div className="g2" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
-            {data.features.map((f,i) => (
-              <div key={i} className="feat-card" style={{ background:'#fafafa', border:'1px solid #e4e4e7', borderRadius:14, padding:24, transition:'all .2s', cursor:'default' }}>
-                <div style={{ width:46, height:46, borderRadius:11, background:data.bg, border:`1px solid ${data.color}20`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:22, marginBottom:14 }}>{f.icon}</div>
-                <div style={{ fontWeight:700, fontSize:15, marginBottom:7, color:'#18181b' }}>{f.title}</div>
-                <div style={{ fontSize:13, color:'#52525b', lineHeight:1.7 }}>{f.desc}</div>
+          <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:12}}>
+            {data.features.map((f,i)=>(
+              <div key={i} className="fc" style={{background:'#fafafa',border:'1px solid #e4e4e7',borderRadius:14,padding:isMobile?16:22,transition:'all .2s'}}>
+                <div style={{width:44,height:44,borderRadius:11,background:data.bg,border:`1px solid ${data.color}20`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:21,marginBottom:12}}>{f.icon}</div>
+                <div style={{fontWeight:700,fontSize:15,marginBottom:6}}>{f.t}</div>
+                <div style={{fontSize:13,color:'#52525b',lineHeight:1.7}}>{f.d}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* TESTIMONIAL */}
-      <section style={{ padding:'64px', background:data.color, color:'#fff' }} className="sp">
-        <div style={{ maxWidth:700, margin:'0 auto', textAlign:'center' }}>
-          <div style={{ fontSize:32, color:'rgba(255,255,255,.3)', marginBottom:20, letterSpacing:4 }}>❝</div>
-          <p style={{ fontFamily:'Georgia,serif', fontSize:'clamp(18px,2.5vw,24px)', lineHeight:1.6, marginBottom:28, fontStyle:'italic', color:'rgba(255,255,255,.9)' }}>
-            {data.testimonial.text}
+      {/* Testimonial */}
+      <section style={{padding:`${isMobile?48:64}px ${px}px`,background:data.color,color:'#fff'}}>
+        <div style={{maxWidth:680,margin:'0 auto',textAlign:'center'}}>
+          <div style={{fontSize:28,color:'rgba(255,255,255,.25)',marginBottom:16,letterSpacing:4}}>❝</div>
+          <p style={{fontFamily:'Georgia,serif',fontSize:isMobile?16:22,lineHeight:1.65,marginBottom:24,fontStyle:'italic',color:'rgba(255,255,255,.9)'}}>
+            "{data.testimonial.text}"
           </p>
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:14 }}>
-            <div style={{ width:44, height:44, borderRadius:'50%', background:'rgba(255,255,255,.2)', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:16 }}>
+          <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:12}}>
+            <div style={{width:40,height:40,borderRadius:'50%',background:'rgba(255,255,255,.2)',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:14}}>
               {data.testimonial.name.split(' ').map(x=>x[0]).join('')}
             </div>
-            <div style={{ textAlign:'left' }}>
-              <div style={{ fontWeight:700, fontSize:15 }}>{data.testimonial.name}</div>
-              <div style={{ fontSize:13, color:'rgba(255,255,255,.6)' }}>{data.testimonial.biz}</div>
+            <div style={{textAlign:'left'}}>
+              <div style={{fontWeight:700,fontSize:14}}>{data.testimonial.name}</div>
+              <div style={{fontSize:12,color:'rgba(255,255,255,.6)'}}>{data.testimonial.biz}</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* PRICING */}
-      <section style={{ padding:'80px 64px', background:'#f5f5f5' }} className="sp">
-        <div style={{ maxWidth:800, margin:'0 auto' }}>
-          <div style={{ textAlign:'center', marginBottom:40 }}>
-            <div style={{ fontSize:11, fontWeight:700, letterSpacing:'.1em', textTransform:'uppercase', color:data.color, marginBottom:12 }}>Çmimet</div>
-            <h2 style={{ fontFamily:'Georgia,serif', fontSize:'clamp(24px,3.5vw,40px)', fontWeight:900, lineHeight:1.1 }}>Transparent. Pa surpriza.</h2>
+      {/* Pricing */}
+      <section style={{padding:`${isMobile?48:72}px ${px}px`,background:'#f5f5f5'}}>
+        <div style={{maxWidth:800,margin:'0 auto'}}>
+          <div style={{textAlign:'center',marginBottom:36}}>
+            <div style={{fontSize:10,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:data.color,marginBottom:10}}>Çmimet</div>
+            <h2 style={{fontFamily:'Georgia,serif',fontSize:isMobile?24:isTablet?30:40,fontWeight:900,lineHeight:1.1}}>Transparent. Pa surpriza.</h2>
           </div>
-          <div className="g3" style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16 }}>
-            {data.plans.map((plan,i) => {
-              const [name, rest] = plan.split(' — ')
-              const [price, limit] = rest.split(' (')
-              const featured = i === 1
+          <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'repeat(3,1fr)',gap:14,maxWidth:isMobile?360:'100%',margin:'0 auto'}}>
+            {data.plans.map((plan,i)=>{
+              const [name,...rest]=plan.split(' — ')
+              const featured=i===1
               return (
-                <div key={i} style={{ borderRadius:16, padding:28, border:`2px solid ${featured?data.color:'#e4e4e7'}`, background:featured?'#18181b':'#fff', color:featured?'#fff':'#18181b', position:'relative', boxShadow:featured?'0 16px 48px rgba(0,0,0,.12)':'none' }}>
-                  {featured && <div style={{ position:'absolute', top:-11, left:'50%', transform:'translateX(-50%)', background:data.color, color:'#fff', fontSize:10, fontWeight:700, padding:'3px 12px', borderRadius:100, whiteSpace:'nowrap', textTransform:'uppercase' }}>⭐ Më i Popullar</div>}
-                  <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'.08em', color:featured?'rgba(255,255,255,.4)':'#a1a1aa', marginBottom:8 }}>{name}</div>
-                  <div style={{ fontFamily:'Georgia,serif', fontSize:36, fontWeight:900, lineHeight:1, marginBottom:6 }}>{price}</div>
-                  <div style={{ fontSize:12, color:featured?'rgba(255,255,255,.4)':'#71717a', marginBottom:20 }}>{limit?.replace(')','')}</div>
-                  <button onClick={()=>window.location.href='/apply'} style={{ display:'block', width:'100%', padding:'11px', borderRadius:9, fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit', border:featured?'none':'1.5px solid #e4e4e7', background:featured?'#fff':'transparent', color:'#18181b' }}>
+                <div key={i} style={{borderRadius:16,padding:isMobile?22:26,border:`2px solid ${featured?data.color:'#e4e4e7'}`,background:featured?'#18181b':'#fff',color:featured?'#fff':'#18181b',position:'relative',boxShadow:featured?'0 12px 40px rgba(0,0,0,.12)':'none',transition:'all .2s'}}
+                  onMouseEnter={e=>{if(!featured)e.currentTarget.style.borderColor='#18181b'}}
+                  onMouseLeave={e=>{if(!featured)e.currentTarget.style.borderColor='#e4e4e7'}}>
+                  {featured&&<div style={{position:'absolute',top:-11,left:'50%',transform:'translateX(-50%)',background:data.color,color:'#fff',fontSize:10,fontWeight:700,padding:'3px 12px',borderRadius:100,whiteSpace:'nowrap',textTransform:'uppercase'}}>⭐ Më i Popullar</div>}
+                  <div style={{fontSize:11,fontWeight:700,textTransform:'uppercase',letterSpacing:'.08em',color:featured?'rgba(255,255,255,.4)':'#a1a1aa',marginBottom:6}}>{name}</div>
+                  <div style={{fontFamily:'Georgia,serif',fontSize:isMobile?28:34,fontWeight:900,lineHeight:1,marginBottom:8}}>{rest[0]?.split(' · ')[0]}</div>
+                  <div style={{fontSize:12,color:featured?'rgba(255,255,255,.4)':'#71717a',marginBottom:18}}>{rest[0]?.split(' · ')[1]}</div>
+                  <button onClick={()=>window.location.href='/demo'} style={{display:'block',width:'100%',padding:'11px',borderRadius:9,fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:'inherit',border:featured?'none':'1.5px solid #e4e4e7',background:featured?'#fff':'transparent',color:'#18181b',transition:'all .15s'}}>
                     {i===2?'Na Kontaktoni':'Fillo Falas →'}
                   </button>
                 </div>
               )
             })}
           </div>
-          <div style={{ textAlign:'center', marginTop:20, fontSize:13, color:'#71717a' }}>
-            ✅ 30 ditë falas · 💵 Pa kartë krediti · 🔒 Anulo kurdo
-          </div>
+          <div style={{textAlign:'center',marginTop:16,fontSize:12,color:'#71717a'}}>✅ 30 ditë falas · 💵 Pa kartë krediti · 🔒 Anulo kurdo</div>
         </div>
       </section>
 
       {/* FAQ */}
-      <section style={{ padding:'80px 64px', background:'#fff' }} className="sp">
-        <div style={{ maxWidth:680, margin:'0 auto' }}>
-          <div style={{ textAlign:'center', marginBottom:40 }}>
-            <h2 style={{ fontFamily:'Georgia,serif', fontSize:'clamp(24px,3.5vw,40px)', fontWeight:900, lineHeight:1.1 }}>Pyetje të Shpeshta</h2>
+      <section style={{padding:`${isMobile?48:72}px ${px}px`,background:'#fff'}}>
+        <div style={{maxWidth:640,margin:'0 auto'}}>
+          <div style={{textAlign:'center',marginBottom:36}}>
+            <h2 style={{fontFamily:'Georgia,serif',fontSize:isMobile?24:isTablet?30:38,fontWeight:900}}>Pyetje të Shpeshta</h2>
           </div>
-          {FAQS.map((f,i) => (
-            <div key={i} style={{ borderBottom:'1px solid #e4e4e7' }}>
-              <button onClick={()=>setFaqOpen(faqOpen===i?null:i)} style={{ width:'100%', background:'none', border:'none', padding:'18px 0', display:'flex', justifyContent:'space-between', alignItems:'center', cursor:'pointer', fontFamily:'inherit', textAlign:'left', gap:14 }}>
-                <span style={{ fontSize:15, fontWeight:600, color:'#18181b' }}>{f.q}</span>
-                <span style={{ fontSize:20, color:'#a1a1aa', transition:'transform .25s', transform:faqOpen===i?'rotate(45deg)':'none', flexShrink:0 }}>+</span>
+          {FAQS.map((f,i)=>(
+            <div key={i} style={{borderBottom:'1px solid #e4e4e7'}}>
+              <button onClick={()=>setFaqOpen(faqOpen===i?null:i)} style={{width:'100%',background:'none',border:'none',padding:'16px 0',display:'flex',justifyContent:'space-between',alignItems:'center',cursor:'pointer',fontFamily:'inherit',textAlign:'left',gap:12}}>
+                <span style={{fontSize:isMobile?14:15,fontWeight:600,color:'#18181b'}}>{f.q}</span>
+                <span style={{fontSize:20,color:'#a1a1aa',transition:'transform .25s',transform:faqOpen===i?'rotate(45deg)':'none',flexShrink:0}}>+</span>
               </button>
-              <div style={{ overflow:'hidden', maxHeight:faqOpen===i?160:0, opacity:faqOpen===i?1:0, transition:'max-height .3s ease,opacity .25s ease' }}>
-                <p style={{ fontSize:14, color:'#52525b', lineHeight:1.8, paddingBottom:18 }}>{f.a}</p>
+              <div style={{overflow:'hidden',maxHeight:faqOpen===i?160:0,opacity:faqOpen===i?1:0,transition:'max-height .3s ease,opacity .25s ease'}}>
+                <p style={{fontSize:13,color:'#52525b',lineHeight:1.8,paddingBottom:16}}>{f.a}</p>
               </div>
             </div>
           ))}
@@ -406,34 +212,32 @@ export default function CategoryPage() {
       </section>
 
       {/* CTA */}
-      <section style={{ padding:'80px 64px', background:'#18181b', color:'#fff', textAlign:'center' }} className="sp">
-        <div style={{ maxWidth:560, margin:'0 auto' }}>
-          <div style={{ fontSize:40, marginBottom:16 }}>{data.icon}</div>
-          <h2 style={{ fontFamily:'Georgia,serif', fontSize:'clamp(28px,4vw,48px)', fontWeight:900, lineHeight:1.05, marginBottom:16 }}>
+      <section style={{padding:`${isMobile?48:72}px ${px}px`,background:'#18181b',color:'#fff',textAlign:'center'}}>
+        <div style={{maxWidth:520,margin:'0 auto'}}>
+          <div style={{fontSize:isMobile?36:44,marginBottom:14}}>{data.icon}</div>
+          <h2 style={{fontFamily:'Georgia,serif',fontSize:isMobile?26:isTablet?32:46,fontWeight:900,lineHeight:1.05,marginBottom:14}}>
             Gati të fillosh me {data.name}?
           </h2>
-          <p style={{ fontSize:16, color:'rgba(255,255,255,.45)', marginBottom:36, lineHeight:1.75 }}>
-            30 ditë falas. Pa kartë krediti. Setup 30 minuta.
+          <p style={{fontSize:isMobile?14:16,color:'rgba(255,255,255,.45)',marginBottom:32,lineHeight:1.75}}>
+            30 ditë falas. Pa kartë krediti. Setup 30 min.
           </p>
-          <button onClick={()=>window.location.href='/apply'} style={{ background:data.color, color:'#fff', border:'none', padding:'14px 40px', borderRadius:11, fontSize:16, fontWeight:700, cursor:'pointer', fontFamily:'inherit', transition:'all .2s', display:'inline-block' }}
-            onMouseEnter={e=>e.currentTarget.style.opacity='.9'} onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+          <button onClick={()=>window.location.href='/demo'} style={{background:data.color,color:'#fff',border:'none',padding:`${isMobile?12:14}px ${isMobile?28:40}px`,borderRadius:11,fontSize:isMobile?14:16,fontWeight:700,cursor:'pointer',fontFamily:'inherit',display:'inline-block',transition:'opacity .2s'}}
+            onMouseEnter={e=>e.currentTarget.style.opacity='.85'} onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
             Fillo 30 Ditë Falas →
           </button>
-          <div style={{ marginTop:16, fontSize:12, color:'rgba(255,255,255,.2)' }}>
-            ✅ 30 ditë falas · 💵 Pa kartë krediti · 🔒 Anulo kurdo
-          </div>
+          <div style={{marginTop:14,fontSize:12,color:'rgba(255,255,255,.2)'}}>✅ Falas · 💵 Pa kartë · 🔒 Anulo kurdo</div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer style={{ background:'#0a0a0a', padding:'24px 64px', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:12 }}>
-        <button onClick={()=>window.location.href='/'} style={{ display:'flex', alignItems:'center', gap:9, background:'none', border:'none', cursor:'pointer', padding:0 }}>
-          <span style={{ fontSize:18, color:'#fff', fontWeight:900, fontFamily:'Georgia,serif' }}>Vaqo</span>
+      <footer style={{background:'#0a0a0a',padding:`20px ${px}px`,display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:12}}>
+        <button onClick={()=>window.location.href='/'} style={{display:'flex',alignItems:'center',gap:8,background:'none',border:'none',cursor:'pointer',padding:0}}>
+          <span style={{fontSize:17,color:'#fff',fontWeight:900,fontFamily:'Georgia,serif'}}>Vaqo</span>
         </button>
-        <div style={{ fontSize:11, color:'rgba(255,255,255,.2)' }}>© 2026 Vaqo · Platforma Wellness #1 në Shqipëri 🇦🇱</div>
-        <div style={{ display:'flex', gap:16 }}>
-          {[['Explore','/explore'],['Apliko','/apply'],['Hyr','/login']].map(([l,h]) => (
-            <a key={l} href={h} style={{ color:'rgba(255,255,255,.25)', fontSize:12, textDecoration:'none' }}>{l}</a>
+        {!isMobile&&<div style={{fontSize:11,color:'rgba(255,255,255,.2)'}}>© 2026 Vaqo · Platforma Wellness #1 në Shqipëri 🇦🇱</div>}
+        <div style={{display:'flex',gap:14}}>
+          {[['Explore','/explore'],['Apliko','/apply'],['Hyr','/login']].map(([l,h])=>(
+            <a key={l} href={h} style={{color:'rgba(255,255,255,.25)',fontSize:12,textDecoration:'none'}}>{l}</a>
           ))}
         </div>
       </footer>
