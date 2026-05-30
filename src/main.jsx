@@ -10,6 +10,16 @@ import GymDashboard          from './pages/gym/GymDashboard.jsx'
 import NutritionistDashboard from './pages/nutritionist/NutritionistDashboard.jsx'
 import NutritionistApply     from './pages/nutritionist/NutritionistApply.jsx'
 import MemberApp             from './pages/member/MemberApp.jsx'
+import BarbershopDashboard   from './pages/barbershop/BarbershopDashboard.jsx'
+import SalonDashboard        from './pages/salon/SalonDashboard.jsx'
+import SpaDashboard          from './pages/spa/SpaDashboard.jsx'
+import YogaDashboard         from './pages/yoga/YogaDashboard.jsx'
+import CategoryPage          from './pages/categories/CategoryPage.jsx'
+import BookDemo              from './pages/auth/BookDemo.jsx'
+import Explore              from './pages/explore/Explore.jsx'
+import BusinessProfile      from './pages/explore/BusinessProfile.jsx'
+import Register              from './pages/auth/Register.jsx'
+import QRCheckin             from './pages/auth/QRCheckin.jsx'
 import './index.css'
 
 function Router() {
@@ -17,17 +27,23 @@ function Router() {
   const path = window.location.pathname
 
   if (loading) return (
-    <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',background:'#fafafa',gap:16}}>
-      <div style={{fontSize:44}}>💪</div>
-      <div style={{width:22,height:22,border:'2px solid #e4e4e7',borderTopColor:'#18181b',borderRadius:'50%',animation:'spin .7s linear infinite'}}/>
+    <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',background:'#fff',gap:12}}>
+      <div style={{width:42,height:42,borderRadius:10,background:'#18181b',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22}}>💪</div>
+      <div style={{width:20,height:20,border:'2px solid #e4e4e7',borderTopColor:'#18181b',borderRadius:'50%',animation:'spin .6s linear infinite'}}/>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
 
   // Public routes
+  if (path === '/explore')            return <Explore/>
+  if (path.startsWith('/category/'))  return <CategoryPage/>
+  if (path === '/demo')                return <BookDemo/>
+  if (path.startsWith('/b/'))         return <BusinessProfile/>
   if (path === '/apply')              return <Apply/>
   if (path === '/nutritionist/apply') return <NutritionistApply/>
   if (path === '/login' && !user)     return <Login/>
+  if (path === '/register')            return <Register/>
+  if (path.startsWith('/checkin/'))   return <QRCheckin/>
 
   // Logged in
   if (user) {
@@ -54,6 +70,13 @@ function Router() {
     if (profile.type === 'admin')        return <AdminPanel logout={logout}/>
     if (profile.type === 'nutritionist') return <NutritionistDashboard/>
     if (profile.type === 'member')       return <MemberApp/>
+    if (profile.type === 'client')          return <Explore/>
+    if (profile.type === 'barbershop')    return <BarbershopDashboard/>
+    if (profile.type === 'salon')           return <SalonDashboard/>
+    if (profile.type === 'spa')             return <SpaDashboard/>
+    if (profile.type === 'yoga')            return <YogaDashboard/>
+    if (profile.type === 'pilates')         return <YogaDashboard/>
+    if (profile.type === 'martial_arts')    return <YogaDashboard/>
     if (profile.type === 'gym' && profile.gym?.status === 'approved') return <GymDashboard/>
     if (profile.type === 'gym') return (
       <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#fafafa',padding:24}}>

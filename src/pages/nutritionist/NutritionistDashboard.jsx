@@ -344,7 +344,7 @@ export default function NutritionistDashboard() {
       <aside className={`sidebar ${sbOpen?'open':''}`}>
         <div className="sb-logo">
           <div className="sb-icon">🥗</div>
-          <div><div className="sb-name">FitPro</div><div className="sb-sub">Panel Dietologu</div></div>
+          <div><div className="sb-name">Vaqo</div><div className="sb-sub">Panel Dietologu</div></div>
         </div>
         <nav className="nav">
           {NAV.map(s=>(

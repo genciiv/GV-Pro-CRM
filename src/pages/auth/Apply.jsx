@@ -38,7 +38,7 @@ export default function Apply() {
       <nav style={{background:'#fff',borderBottom:'1px solid #e4e4e7',padding:'16px 40px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
         <div style={{display:'flex',alignItems:'center',gap:10,fontWeight:700,fontSize:16}}>
           <div style={{width:32,height:32,borderRadius:8,background:'#18181b',display:'flex',alignItems:'center',justifyContent:'center',fontSize:16}}>💪</div>
-          FitPro CRM
+          Vaqo
         </div>
         <a href="/login" style={{background:'#fff',border:'1px solid #e4e4e7',color:'#18181b',padding:'7px 16px',borderRadius:8,fontSize:13,fontWeight:500,textDecoration:'none'}}>Hyr →</a>
       </nav>

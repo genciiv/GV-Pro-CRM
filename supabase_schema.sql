@@ -681,11 +681,31 @@ select 'Proteinë Whey', 'Proteinë me cilësi të lartë, 24g proteina/serving'
 on conflict do nothing;
 
 insert into products (name, description, price, stock, brand, is_featured, commission_pct, category_id)
-select 'Bluzë Sportive FitPro', 'Bluzë premium me logo FitPro', 1500, 100, 'FitPro', false, 30, id from product_categories where name='Veshje Sportive' limit 1
+select 'Bluzë Sportive Vaqo', 'Bluzë premium me logo Vaqo', 1500, 100, 'Vaqo', false, 30, id from product_categories where name='Veshje Sportive' limit 1
 on conflict do nothing;
 
 insert into products (name, description, price, stock, brand, is_featured, commission_pct, category_id)
 select 'Doreza Gome', 'Doreza për stërvitje pesëngritje', 800, 30, 'ProGrip', false, 30, id from product_categories where name='Aksesorë' limit 1
 on conflict do nothing;
 
-select 'FitPro Ecosystem Schema ✅ U Instalua me Sukses!' as rezultati;
+select 'Vaqo Ecosystem Schema ✅ U Instalua me Sukses!' as rezultati;
+
+-- ─── DEMO REQUESTS ────────────────────────────────────────
+create table if not exists demo_requests (
+  id              uuid primary key default uuid_generate_v4(),
+  name            text not null,
+  phone           text not null,
+  email           text,
+  biz_type        text,
+  biz_name        text,
+  city            text,
+  preferred_hours text[],
+  message         text,
+  status          text default 'new' check (status in ('new','contacted','done','cancelled')),
+  notes           text,
+  created_at      timestamptz default now()
+);
+alter table demo_requests enable row level security;
+create policy "demo_ins" on demo_requests for insert with check (true);
+create policy "demo_sel" on demo_requests for select using (is_platform_admin());
+create policy "demo_upd" on demo_requests for update using (is_platform_admin());

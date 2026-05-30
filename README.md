@@ -1,9 +1,9 @@
-# 💪 FitPro Ecosystem — Platforma Fitness #1 Shqipëri
+# 💪 Vaqo Ecosystem — Platforma Fitness #1 Shqipëri
 
 ## Çfarë ka ky sistem
 
 ```
-FitPro Platform
+Vaqo Platform
 ├── 💪 CRM Palestra     — menaxhim i plotë
 ├── 🥗 Dietologë        — shitje dietash (70/30)
 ├── 🛒 Dyqani           — produkte sportive (30% komision)
@@ -61,4 +61,4 @@ npx vercel --prod
 ```
 
 ---
-*FitPro Ecosystem v2.0 — Bërë për Shqipërinë 🇦🇱*
+*Vaqo Ecosystem v2.0 — Bërë për Shqipërinë 🇦🇱*

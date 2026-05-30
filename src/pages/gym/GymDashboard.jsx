@@ -10,6 +10,8 @@ import {
   memberStatus, fmtNum, fmtDate, fmtTime, AVC, addDays, today
 } from '../../lib/db'
 import { StatCard, BarChart, Avatar, StatusBadge, Modal, Loading, Empty } from '../../components/UI'
+import QRCodeSVG, { printQR } from '../../components/QRCode'
+import { printInvoice } from '../../components/Invoice'
 import toast from 'react-hot-toast'
 
 const MONTHS = ['Jan','Feb','Mar','Pri','Maj','Qer','Kor','Gus','Set','Tet','Nën','Dhj']
@@ -345,16 +347,9 @@ function Members({ gymId, gymName }) {
                   <td style={{fontSize:12,color:m.days_remaining<=3?'var(--rd)':'var(--g500)'}}>{m.end_date?fmtDate(m.end_date):'—'}</td>
                   <td style={{fontWeight:600,textAlign:'center'}}>{m.checkins_this_month??0}</td>
                   <td onClick={e=>e.stopPropagation()}>
-                    <div style={{width:36,height:36,background:'var(--g100)',borderRadius:6,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,cursor:'pointer'}}
-                      title="Shiko QR" onClick={()=>{
-                        const w=window.open('','_blank','width=400,height=500')
-                        w.document.write(`<html><body style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;padding:20px">
-                        <h3 style="margin-bottom:16px">${m.full_name}</h3>
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${m.qr_code}" style="border-radius:8px;margin-bottom:16px"/>
-                        <p style="color:#666;font-size:13px">${m.qr_code}</p>
-                        <button onclick="window.print()" style="margin-top:16px;padding:8px 24px;cursor:pointer;border:none;background:#18181b;color:#fff;border-radius:8px;font-size:14px">🖨️ Printo</button>
-                        </body></html>`)
-                      }}>▦</div>
+                    <div style={{cursor:'pointer'}} title="Printo QR" onClick={()=>printQR(m.full_name, m.qr_code)}>
+                      <QRCodeSVG value={m.qr_code} size={36}/>
+                    </div>
                   </td>
                   <td onClick={e=>e.stopPropagation()}>
                     <div style={{display:'flex',gap:4}}>
@@ -487,9 +482,24 @@ function AddMemberModal({ gymId, plans, gymName, onClose, onSave }) {
                 📧 Dërgo Magic Link automatikisht
               </label>
               <div style={{fontSize:12,color:'#16a34a',lineHeight:1.6}}>
-                Anëtari merr email me link — klikoni dhe hyn direkt pa fjalëkalim. <strong>Kërkon email.</strong>
+                Anëtari merr email me linkun e regjistrimit. <strong>Kërkon email.</strong>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Register link to copy */}
+        <div style={{marginTop:10,background:'#eff6ff',border:'1px solid #dbeafe',borderRadius:10,padding:14}}>
+          <div style={{fontSize:12,fontWeight:600,color:'#1e40af',marginBottom:8}}>📋 Ose kopjo dhe dërgo manualisht:</div>
+          <div style={{background:'#fff',border:'1px solid #bfdbfe',borderRadius:8,padding:'8px 12px',fontSize:12,fontFamily:'monospace',color:'#1e40af',display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,flexWrap:'wrap'}}>
+            <span style={{wordBreak:'break-all'}}>{window.location.origin}/register</span>
+            <button type="button" className="btn btn-g btn-xs" style={{flexShrink:0}} onClick={()=>{
+              navigator.clipboard.writeText(window.location.origin+'/register')
+              toast.success('✅ Linku u kopjua!')
+            }}>📋 Kopjo</button>
+          </div>
+          <div style={{fontSize:11,color:'#3b82f6',marginTop:6,lineHeight:1.6}}>
+            I jep anëtarit këtë link + emailin e tij. Hyn vetë, vendos fjalëkalimin, pa ndihmën tënde.
           </div>
         </div>
       </form>
@@ -568,14 +578,17 @@ function MemberProfile({ memberId, gymId, plans, onBack }) {
                 try{const{sendMagicLink}=await import('../../lib/db');await sendMagicLink(m.email,'Palestra');toast.success('📧 Magic Link u dërgua!')}
                 catch(e){toast.error(e.message)}
               }}>📧 Magic Link</button>}
+              <button className="btn btn-s btn-sm" onClick={()=>{
+                const link = window.location.origin+'/register'
+                navigator.clipboard.writeText(link)
+                toast.success('✅ Linku u kopjua! Dërgo: ' + link)
+              }}>📋 Kopjo Linkun</button>
             </div>
           </div>
           {/* QR Code */}
-          <div style={{textAlign:'center'}}>
-            <img src={`https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${m.qr_code}`} alt="QR" style={{borderRadius:8,border:'2px solid var(--g200)',cursor:'pointer'}}
-              onClick={()=>{const w=window.open('','_blank','width=400,height=500');w.document.write(`<html><body style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;padding:20px"><h3>${m.full_name}</h3><img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${m.qr_code}" style="border-radius:8px;margin:16px 0"/><p style="color:#666;font-size:12px">${m.qr_code}</p><button onclick="window.print()" style="margin-top:16px;padding:8px 24px;border:none;background:#18181b;color:#fff;border-radius:8px;cursor:pointer">🖨️ Printo</button></body></html>`)}}
-              title="Kliko për të printuar"/>
-            <div style={{fontSize:10,color:'var(--g400)',marginTop:4}}>Kliko → Printo</div>
+          <div style={{textAlign:'center',cursor:'pointer'}} onClick={()=>printQR(m.full_name, m.qr_code)} title="Kliko për të printuar">
+            <QRCodeSVG value={m.qr_code} size={90}/>
+            <div style={{fontSize:10,color:'var(--g400)',marginTop:6}}>Kliko → Printo</div>
           </div>
         </div>
 
@@ -848,9 +861,20 @@ function Payments({ gymId }) {
                   <td style={{color:'var(--g500)'}}>💵 {p.method}</td>
                   <td style={{fontSize:12,color:'var(--g500)'}}>{fmtDate(p.created_at)}</td>
                   <td>
-                    {p.status==='paid'
-                      ?<span className="bdg bdg-gr">✅ Paguar</span>
-                      :<button className="btn btn-success btn-xs" onClick={async()=>{await markPaymentPaid(gymId,p.id);toast.success('✅ U pagua!');reload();rs()}}>💰 Paguaj</button>}
+                    <div style={{display:'flex',gap:6,alignItems:'center'}}>
+                      {p.status==='paid'
+                        ?<span className="bdg bdg-gr">✅ Paguar</span>
+                        :<button className="btn btn-success btn-xs" onClick={async()=>{await markPaymentPaid(gymId,p.id);toast.success('✅ U pagua!');reload();rs()}}>💰 Paguaj</button>}
+                      {p.status==='paid'&&<button className="btn btn-g btn-xs" title="Printo Faturën" onClick={()=>printInvoice({
+                        invoice_number:p.invoice_number,
+                        member:p.member,
+                        gym:null,
+                        plan:p.membership?.plan,
+                        amount:p.amount,
+                        method:p.method,
+                        date:p.paid_at||p.created_at
+                      })}>🧾</button>}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -1092,7 +1116,7 @@ export default function GymDashboard() {
   const [sbOpen, setSbOpen] = useState(false)
   const nav = id => { setPage(id); setSbOpen(false) }
 
-  const gymName  = profile?.gym?.name  || 'FitPro'
+  const gymName  = profile?.gym?.name  || 'Vaqo'
   const userName = profile?.data?.name || 'Admin'
   const userRole = profile?.data?.role || 'owner'
 
@@ -1113,7 +1137,7 @@ export default function GymDashboard() {
       <aside className={`sidebar ${sbOpen?'open':''}`}>
         <div className="sb-logo">
           <div className="sb-icon">💪</div>
-          <div><div className="sb-name">{gymName}</div><div className="sb-sub">FitPro CRM</div></div>
+          <div><div className="sb-name">{gymName}</div><div className="sb-sub">Vaqo</div></div>
         </div>
         <nav className="nav">
           {NAV.map(s=>(

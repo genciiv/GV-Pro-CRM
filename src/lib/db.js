@@ -26,24 +26,19 @@ export const canAddMember = async (gymId) => {
   return { allowed: count < limit, count, limit, plan }
 }
 
-// ─── MAGIC LINK via Edge Function ────────────────────────
+// ─── MAGIC LINK ───────────────────────────────────────────
 export const sendMagicLink = async (email, gymName, gymId, memberName) => {
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-  const anonKey    = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-  const res = await fetch(`${supabaseUrl}/functions/v1/invite-member`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${anonKey}`,
-      'apikey': anonKey,
-    },
-    body: JSON.stringify({ email, gymName, gymId, memberName }),
+  // Metoda 1: OTP direkt — punon nëse useri ekziston në Auth
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      emailRedirectTo: window.location.origin,
+      shouldCreateUser: true,
+      data: { gym_name: gymName, member_name: memberName }
+    }
   })
-
-  const data = await res.json()
-  if (!res.ok || data.error) throw new Error(data.error || 'Gabim gjatë dërgimit')
-  return data
+  if (error) throw new Error(error.message)
+  return { success: true }
 }
 
 export const memberStatus = (m) => {

@@ -737,7 +737,7 @@ export default function MemberApp() {
         <div style={{display:'flex',alignItems:'center',gap:8}}>
           <div style={{width:30,height:30,borderRadius:7,background:'#18181b',display:'flex',alignItems:'center',justifyContent:'center',fontSize:15}}>💪</div>
           <div>
-            <div style={{fontWeight:700,fontSize:14,lineHeight:1}}>FitPro</div>
+            <div style={{fontWeight:700,fontSize:14,lineHeight:1}}>Vaqo</div>
             <div style={{fontSize:10,color:'var(--g400)'}}>App Anëtarësh</div>
           </div>
         </div>

@@ -390,7 +390,7 @@ export default function ShopAdmin({ logout }) {
     <div className="app">
       <div className={`sbo ${sbOpen?'open':''}`} onClick={()=>setSbOpen(false)}/>
       <aside className={`sidebar ${sbOpen?'open':''}`}>
-        <div className="sb-logo"><div className="sb-icon">🛒</div><div><div className="sb-name">FitPro Shop</div><div className="sb-sub">Admin Panel</div></div></div>
+        <div className="sb-logo"><div className="sb-icon">🛒</div><div><div className="sb-name">Vaqo Shop</div><div className="sb-sub">Admin Panel</div></div></div>
         <nav className="nav">
           {NAV.map(s=>(
             <div key={s.s} className="nav-sec">

@@ -41,7 +41,7 @@ function GymAppRow({ app, onDone }) {
     if(!password.trim()){toast.error('Vendos fjalëkalimin');return}
     setLoading(true)
     try {
-      const{data:gym,error}=await supabase.from('gyms').insert({name:app.name,email:app.email,phone:app.phone,address:app.address,city:app.city,status:'approved',approved_at:new Date().toISOString()}).select().single()
+      const{data:gym,error}=await supabase.from('gyms').insert({name:app.name,email:app.email,phone:app.phone,address:app.address,city:app.city,status:'approved',business_type:bizType,approved_at:new Date().toISOString()}).select().single()
       if(error) throw new Error(error.message)
       await supabase.rpc('create_default_plans',{p_gym_id:gym.id})
       await supabase.from('gym_users').insert({gym_id:gym.id,name:app.owner_name,email:app.email,role:'owner'})
@@ -74,6 +74,18 @@ function GymAppRow({ app, onDone }) {
           {app.message&&<div style={{marginTop:6,color:'var(--g500)'}}>💬 {app.message}</div>}
         </div>
         <div className="fgp"><label>🔑 Fjalëkalimi për klientin *</label><input type="text" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Palestra2026!"/><span style={{fontSize:11,color:'var(--g500)'}}>Do ia telefonosh klientit</span></div>
+        <div className="fgp" style={{marginTop:12}}>
+          <label>🏢 Lloji i Biznesit</label>
+          <select value={bizType} onChange={e=>setBizType(e.target.value)} style={{background:'#fff',border:'1px solid #e4e4e7',borderRadius:8,padding:'8px 11px',fontFamily:'inherit',fontSize:13,width:'100%'}}>
+            <option value="gym">🏋️ Palestre / Gym</option>
+            <option value="barbershop">💈 Barbershop</option>
+            <option value="salon">💅 Sallon Bukurie</option>
+            <option value="spa">💆 Spa / Masazh</option>
+            <option value="yoga">🧘 Yoga / Pilates</option>
+            <option value="martial_arts">🥊 Arte Marciale</option>
+            <option value="other">🏢 Tjetër</option>
+          </select>
+        </div>
       </Modal>}
     </>
   )
@@ -127,6 +139,83 @@ function NutrAppRow({ app, onDone }) {
   )
 }
 
+function DemoRequestsTab() {
+  const [demos, setDemos] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  const BIZ_LABELS = {gym:'🏋️ Palestre',yoga:'🧘 Yoga',pilates:'🤸 Pilates',martial_arts:'🥊 Arte Marciale',dance:'💃 Vallëzim',fitness:'⚡ Fitness',barbershop:'💈 Barbershop',salon:'💅 Sallon',spa:'💆 Spa',wellness:'🌿 Wellness',other:'🏢 Tjetër'}
+  const STATUS_COLORS = {new:'var(--am)',contacted:'var(--bl)',done:'var(--gr)',cancelled:'var(--rd)'}
+  const STATUS_LABELS = {new:'🆕 E Re',contacted:'📞 Kontaktuar',done:'✅ Kryer',cancelled:'❌ Anuluar'}
+
+  useEffect(() => { load() }, [])
+
+  const load = async () => {
+    setLoading(true)
+    const { data } = await supabase.from('demo_requests').select('*').order('created_at', { ascending:false })
+    setDemos(data||[])
+    setLoading(false)
+  }
+
+  const updateStatus = async (id, status) => {
+    await supabase.from('demo_requests').update({ status }).eq('id', id)
+    load()
+  }
+
+  return (
+    <div className="page-in">
+      <div className="ph">
+        <div><div className="pt">📅 Demo Kërkesat</div><div className="ps">{demos.filter(d=>d.status==='new').length} të reja</div></div>
+        <button className="btn btn-s btn-sm" onClick={load}>↻</button>
+      </div>
+
+      {loading ? <div style={{padding:40,textAlign:'center',color:'var(--g400)'}}>Duke ngarkuar...</div> : demos.length===0 ? (
+        <div className="card" style={{padding:48,textAlign:'center'}}>
+          <div style={{fontSize:48,marginBottom:16}}>📅</div>
+          <div style={{fontFamily:'var(--fs)',fontSize:20,marginBottom:8}}>Asnjë kërkesë ende</div>
+          <div style={{fontSize:14,color:'var(--g500)'}}>Kërkesat e Book Demo shfaqen këtu</div>
+        </div>
+      ) : (
+        <div style={{display:'flex',flexDirection:'column',gap:12}}>
+          {demos.map(d => (
+            <div key={d.id} className="card" style={{padding:20}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',flexWrap:'wrap',gap:12}}>
+                <div style={{flex:1}}>
+                  <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
+                    <div style={{fontWeight:700,fontSize:16}}>{d.name}</div>
+                    <span style={{fontSize:11,fontWeight:700,color:'#fff',background:STATUS_COLORS[d.status],padding:'2px 10px',borderRadius:20}}>{STATUS_LABELS[d.status]}</span>
+                  </div>
+                  <div style={{display:'flex',gap:16,flexWrap:'wrap',fontSize:13,color:'var(--g600)',marginBottom:10}}>
+                    <span>📞 {d.phone}</span>
+                    {d.email&&<span>📧 {d.email}</span>}
+                    <span>📍 {d.city}</span>
+                    <span>{BIZ_LABELS[d.biz_type]||d.biz_type}</span>
+                    {d.biz_name&&<span>🏢 {d.biz_name}</span>}
+                  </div>
+                  {d.preferred_hours?.length>0&&(
+                    <div style={{fontSize:12,color:'var(--g500)',marginBottom:8}}>
+                      🕐 Orari: <strong>{d.preferred_hours.join(' · ')}</strong>
+                    </div>
+                  )}
+                  {d.message&&<div style={{fontSize:13,color:'var(--g600)',background:'var(--g50)',borderRadius:8,padding:'8px 12px'}}>{d.message}</div>}
+                  <div style={{fontSize:11,color:'var(--g400)',marginTop:8}}>
+                    {new Date(d.created_at).toLocaleString('sq-AL')}
+                  </div>
+                </div>
+                <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+                  <a href={`tel:${d.phone}`} className="btn btn-p btn-sm">📞 Telefono</a>
+                  {d.status==='new'&&<button className="btn btn-success btn-sm" onClick={()=>updateStatus(d.id,'contacted')}>Kontaktuar ✓</button>}
+                  {d.status==='contacted'&&<button className="btn btn-p btn-sm" onClick={()=>updateStatus(d.id,'done')}>Kryer ✓</button>}
+                  {d.status!=='cancelled'&&d.status!=='done'&&<button className="btn btn-danger btn-sm" onClick={()=>updateStatus(d.id,'cancelled')}>Anulo</button>}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function AdminPanel({ logout }) {
   const [tab,setTab]=useState('overview')
   const [sbOpen,setSbOpen]=useState(false)
@@ -144,16 +233,17 @@ export default function AdminPanel({ logout }) {
     {s:'Platforma',items:[{id:'overview',l:'Overview',i:'📊'},{id:'revenue',l:'Të Ardhurat',i:'💰'}]},
     {s:'Palestra',items:[{id:'gym_apps',l:'Aplikimet Palestra',i:'🏋️',badge:newGymApps},{id:'gyms',l:'Palestrat',i:'🏠'}]},
     {s:'Dietologë',items:[{id:'nutr_apps',l:'Aplikimet Dietolog',i:'🥗',badge:newNutrApps},{id:'nutritionists',l:'Dietologët',i:'👨‍⚕️'},{id:'diet_orders',l:'Porosi Dietash',i:'🛒'}]},
+    {s:'Demo Requests',items:[{id:'demos',l:'Book Demo Kërkesat',i:'📅',badge:0}]},
     {s:'Sistem',items:[{id:'guide',l:'Udhëzues',i:'📖'}]},
   ]
 
-  const TITLE_MAP={overview:'📊 Overview',revenue:'💰 Të Ardhurat',gym_apps:'🏋️ Aplikimet Palestra',gyms:'🏠 Palestrat',nutr_apps:'🥗 Aplikimet Dietolog',nutritionists:'👨‍⚕️ Dietologët',diet_orders:'🛒 Porosi Dietash',guide:'📖 Udhëzues'}
+  const TITLE_MAP={overview:'📊 Overview',revenue:'💰 Të Ardhurat',gym_apps:'🏋️ Aplikimet Palestra',gyms:'🏠 Palestrat',nutr_apps:'🥗 Aplikimet Dietolog',nutritionists:'👨‍⚕️ Dietologët',diet_orders:'🛒 Porosi Dietash',demos:'📅 Demo Kërkesat',guide:'📖 Udhëzues'}
 
   return (
     <div className="app">
       <div className={`sbo ${sbOpen?'open':''}`} onClick={()=>setSbOpen(false)}/>
       <aside className={`sidebar ${sbOpen?'open':''}`}>
-        <div className="sb-logo"><div className="sb-icon">⚡</div><div><div className="sb-name">FitPro Admin</div><div className="sb-sub">Platform Panel</div></div></div>
+        <div className="sb-logo"><div className="sb-icon">⚡</div><div><div className="sb-name">Vaqo Admin</div><div className="sb-sub">Platform Panel</div></div></div>
         <nav className="nav">
           {NAV_ITEMS.map(s=>(
             <div key={s.s} className="nav-sec">
@@ -354,6 +444,10 @@ export default function AdminPanel({ logout }) {
                 </table></div></div>
               )}
             </div>
+          )}
+
+          {tab==='demos'&&(
+            <DemoRequestsTab/>
           )}
 
           {tab==='guide'&&(
