@@ -17,6 +17,8 @@ import YogaDashboard         from './pages/yoga/YogaDashboard.jsx'
 import CategoryPage          from './pages/categories/CategoryPage.jsx'
 import BookDemo              from './pages/auth/BookDemo.jsx'
 import Pricing               from './pages/Pricing.jsx'
+import Blog                  from './pages/blog/Blog.jsx'
+import ArticlePage           from './pages/blog/ArticlePage.jsx'
 import Explore              from './pages/explore/Explore.jsx'
 import BusinessProfile      from './pages/explore/BusinessProfile.jsx'
 import Register              from './pages/auth/Register.jsx'
@@ -40,6 +42,8 @@ function Router() {
   if (path.startsWith('/category/'))  return <CategoryPage/>
   if (path === '/demo')                return <BookDemo/>
   if (path === '/pricing')              return <Pricing/>
+  if (path === '/blog')                 return <Blog/>
+  if (path.startsWith('/blog/'))        return <ArticlePage/>
   if (path.startsWith('/b/'))         return <BusinessProfile/>
   if (path === '/apply')              return <Apply/>
   if (path === '/nutritionist/apply') return <NutritionistApply/>
