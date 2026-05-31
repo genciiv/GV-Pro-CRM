@@ -218,6 +218,106 @@ function DemoRequestsTab() {
   )
 }
 
+function AffiliateAdminTab() {
+  const [pending, setPending] = useState([])
+  const [history, setHistory] = useState([])
+  const [loading, setLoading] = useState(true)
+  const fmt  = n => (n||0).toLocaleString('sq-AL')
+  const fmtL = n => `${fmt(n)} L`
+
+  useEffect(()=>{ loadData() },[])
+
+  const loadData = async () => {
+    setLoading(true)
+    const [{ data:pend },{ data:hist }] = await Promise.all([
+      supabase.from('affiliate_payments').select('*,referrer:referrer_gym_id(name,phone),referred:referred_gym_id(name)').eq('status','pending').order('created_at',{ascending:false}),
+      supabase.from('affiliate_payments').select('*,referrer:referrer_gym_id(name),referred:referred_gym_id(name)').eq('status','paid').order('paid_at',{ascending:false}).limit(50),
+    ])
+    setPending(pend||[])
+    setHistory(hist||[])
+    setLoading(false)
+  }
+
+  const markPaid = async (id) => {
+    await supabase.from('affiliate_payments').update({ status:'paid', paid_at: new Date().toISOString() }).eq('id',id)
+    toast.success('✅ Pagesa u shënua si e kryer')
+    loadData()
+  }
+
+  const totalPending = pending.reduce((s,p)=>s+(p.commission_amt||0),0)
+
+  return (
+    <div className="page-in">
+      <div className="ph">
+        <div><div className="pt">🤝 Affiliate — Komisione & Pagesat</div><div className="ps">{pending.length} pagesa pritje · {fmtL(totalPending)}</div></div>
+        <button className="btn btn-s btn-sm" onClick={loadData}>↻</button>
+      </div>
+
+      {loading ? <div style={{padding:40,textAlign:'center',color:'var(--g400)'}}>Duke ngarkuar...</div> : (
+        <>
+          {/* Pending payments */}
+          {pending.length>0&&(
+            <div className="card" style={{marginBottom:16}}>
+              <div style={{padding:'16px 20px',borderBottom:'1px solid var(--g100)',fontWeight:700,fontSize:14,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                <span>⏳ Komisione Pritje Pagese ({pending.length})</span>
+                <span style={{fontSize:13,color:'var(--am)',fontWeight:700}}>{fmtL(totalPending)} total</span>
+              </div>
+              {pending.map(p=>(
+                <div key={p.id} style={{display:'flex',alignItems:'center',gap:12,padding:'14px 20px',borderBottom:'1px solid var(--g50)',flexWrap:'wrap'}}>
+                  <div style={{flex:1,minWidth:200}}>
+                    <div style={{fontWeight:700,fontSize:14}}>{p.referrer?.name||'—'}</div>
+                    <div style={{fontSize:12,color:'var(--g500)',marginTop:2}}>
+                      Referoi: {p.referred?.name||'—'} · {p.month} · {p.commission_pct||10}%
+                    </div>
+                    {p.referrer?.phone&&<a href={`tel:${p.referrer.phone}`} style={{fontSize:12,color:'var(--pu)',textDecoration:'none',marginTop:2,display:'block'}}>📞 {p.referrer.phone}</a>}
+                  </div>
+                  <div style={{fontFamily:"'Georgia',serif",fontSize:28,fontWeight:900,color:'var(--am)'}}>{fmtL(p.commission_amt)}</div>
+                  <button className="btn btn-success btn-sm" onClick={()=>markPaid(p.id)}>✅ Shëno si Paguar</button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {pending.length===0&&(
+            <div className="card" style={{padding:40,textAlign:'center',marginBottom:16}}>
+              <div style={{fontSize:40,marginBottom:10}}>✅</div>
+              <div style={{fontFamily:"'Georgia',serif",fontSize:18,fontWeight:700}}>Asnjë komision pritje</div>
+              <div style={{fontSize:14,color:'var(--g500)',marginTop:6}}>Të gjitha pagesat janë kryer.</div>
+            </div>
+          )}
+
+          {/* History */}
+          {history.length>0&&(
+            <div className="card">
+              <div style={{padding:'16px 20px',borderBottom:'1px solid var(--g100)',fontWeight:700,fontSize:14}}>📋 Historia e Pagesave</div>
+              <div style={{overflowX:'auto'}}>
+                <table style={{width:'100%',borderCollapse:'collapse',fontSize:13}}>
+                  <thead><tr style={{borderBottom:'2px solid var(--g100)'}}>
+                    {['Referuesi','Biznesi','Muaji','Komisioni','Paguar'].map(h=>(
+                      <th key={h} style={{padding:'8px 16px',textAlign:'left',color:'var(--g500)',fontWeight:600}}>{h}</th>
+                    ))}
+                  </tr></thead>
+                  <tbody>
+                    {history.map(p=>(
+                      <tr key={p.id} style={{borderBottom:'1px solid var(--g50)'}}>
+                        <td style={{padding:'10px 16px',fontWeight:600}}>{p.referrer?.name||'—'}</td>
+                        <td style={{padding:'10px 16px',color:'var(--g600)'}}>{p.referred?.name||'—'}</td>
+                        <td style={{padding:'10px 16px',color:'var(--g600)'}}>{p.month}</td>
+                        <td style={{padding:'10px 16px',fontWeight:700,color:'var(--gr)'}}>{fmtL(p.commission_amt)}</td>
+                        <td style={{padding:'10px 16px',fontSize:11,color:'var(--g500)'}}>{p.paid_at?new Date(p.paid_at).toLocaleDateString('sq-AL'):'-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
 export default function AdminPanel({ logout }) {
   const [tab,setTab]=useState('overview')
   const [sbOpen,setSbOpen]=useState(false)
@@ -235,11 +335,12 @@ export default function AdminPanel({ logout }) {
     {s:'Platforma',items:[{id:'overview',l:'Overview',i:'📊'},{id:'platform_analytics',l:'Analytics Avancuar',i:'📈'},{id:'revenue',l:'Të Ardhurat',i:'💰'}]},
     {s:'Palestra',items:[{id:'gym_apps',l:'Aplikimet Palestra',i:'🏋️',badge:newGymApps},{id:'gyms',l:'Palestrat',i:'🏠'}]},
     {s:'Dietologë',items:[{id:'nutr_apps',l:'Aplikimet Dietolog',i:'🥗',badge:newNutrApps},{id:'nutritionists',l:'Dietologët',i:'👨‍⚕️'},{id:'diet_orders',l:'Porosi Dietash',i:'🛒'}]},
+    {s:'Affiliate',items:[{id:'affiliate_admin',l:'Komisione & Pagesat',i:'🤝',badge:0}]},
     {s:'Demo Requests',items:[{id:'demos',l:'Book Demo Kërkesat',i:'📅',badge:0}]},
     {s:'Sistem',items:[{id:'guide',l:'Udhëzues',i:'📖'}]},
   ]
 
-  const TITLE_MAP={overview:'📊 Overview',platform_analytics:'📈 Analytics Avancuar',revenue:'💰 Të Ardhurat',gym_apps:'🏋️ Aplikimet Palestra',gyms:'🏠 Palestrat',nutr_apps:'🥗 Aplikimet Dietolog',nutritionists:'👨‍⚕️ Dietologët',diet_orders:'🛒 Porosi Dietash',demos:'📅 Demo Kërkesat',guide:'📖 Udhëzues'}
+  const TITLE_MAP={overview:'📊 Overview',platform_analytics:'📈 Analytics Avancuar',affiliate_admin:'🤝 Affiliate — Komisione',revenue:'💰 Të Ardhurat',gym_apps:'🏋️ Aplikimet Palestra',gyms:'🏠 Palestrat',nutr_apps:'🥗 Aplikimet Dietolog',nutritionists:'👨‍⚕️ Dietologët',diet_orders:'🛒 Porosi Dietash',demos:'📅 Demo Kërkesat',guide:'📖 Udhëzues'}
 
   return (
     <div className="app">
@@ -450,6 +551,10 @@ export default function AdminPanel({ logout }) {
 
           {tab==='demos'&&(
             <DemoRequestsTab/>
+          )}
+
+          {tab==='affiliate_admin'&&(
+            <AffiliateAdminTab/>
           )}
 
           {tab==='platform_analytics'&&(

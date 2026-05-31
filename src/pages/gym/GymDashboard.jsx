@@ -15,6 +15,7 @@ import { printInvoice } from '../../components/Invoice'
 import toast from 'react-hot-toast'
 import { smsPaymentConfirm, smsMembershipExpiring } from '../../lib/sms'
 import AnalyticsDashboard from './AnalyticsDashboard'
+import AffiliateDashboard  from './AffiliateDashboard'
 import OnboardingFlow from '../../components/OnboardingFlow'
 import PushNotifButton from '../../components/PushNotifButton'
 
@@ -1107,7 +1108,7 @@ function Settings({ gymId }) {
 
 // ─── LAYOUT ──────────────────────────────────────────────
 const NAV = [
-  {s:'Kryesore', items:[{id:'dashboard',l:'Dashboard',i:'◻️'},{id:'analytics',l:'Analytics',i:'📊'},{id:'checkin',l:'QR Check-in',i:'📷'}]},
+  {s:'Kryesore', items:[{id:'dashboard',l:'Dashboard',i:'◻️'},{id:'analytics',l:'Analytics',i:'📊'},{id:'checkin',l:'QR Check-in',i:'📷'},{id:'affiliate',l:'Affiliate',i:'🤝'}]},
   {s:'Menaxhim', items:[{id:'members',l:'Anëtarët',i:'👥'},{id:'memberships',l:'Abonimet',i:'🎫'},{id:'payments',l:'Pagesat',i:'💰'}]},
   {s:'Analiza',  items:[{id:'reports',l:'Raporte',i:'📈'}]},
   {s:'Sistem',   items:[{id:'settings',l:'Konfigurimet',i:'⚙️'}]},
@@ -1136,6 +1137,7 @@ export default function GymDashboard() {
   const PAGE = {
     dashboard:   <Dashboard   gymId={gymId} setPage={nav}/>,
     analytics:   <AnalyticsDashboard gymId={gymId}/>,
+    affiliate:   <AffiliateDashboard gymId={gymId}/>,
     checkin:     <CheckIn     gymId={gymId}/>,
     members:     <Members     gymId={gymId} gymName={gymName}/>,
     memberships: <Memberships gymId={gymId}/>,
@@ -1216,6 +1218,7 @@ import { printInvoice } from '../../components/Invoice'
 import toast from 'react-hot-toast'
 import { smsPaymentConfirm, smsMembershipExpiring } from '../../lib/sms'
 import AnalyticsDashboard from './AnalyticsDashboard'
+import AffiliateDashboard  from './AffiliateDashboard'
 import OnboardingFlow from '../../components/OnboardingFlow'
 import PushNotifButton from '../../components/PushNotifButton'
 
@@ -2308,7 +2311,7 @@ function Settings({ gymId }) {
 
 // ─── LAYOUT ──────────────────────────────────────────────
 const NAV = [
-  {s:'Kryesore', items:[{id:'dashboard',l:'Dashboard',i:'◻️'},{id:'analytics',l:'Analytics',i:'📊'},{id:'checkin',l:'QR Check-in',i:'📷'}]},
+  {s:'Kryesore', items:[{id:'dashboard',l:'Dashboard',i:'◻️'},{id:'analytics',l:'Analytics',i:'📊'},{id:'checkin',l:'QR Check-in',i:'📷'},{id:'affiliate',l:'Affiliate',i:'🤝'}]},
   {s:'Menaxhim', items:[{id:'members',l:'Anëtarët',i:'👥'},{id:'memberships',l:'Abonimet',i:'🎫'},{id:'payments',l:'Pagesat',i:'💰'}]},
   {s:'Analiza',  items:[{id:'reports',l:'Raporte',i:'📈'}]},
   {s:'Sistem',   items:[{id:'settings',l:'Konfigurimet',i:'⚙️'}]},
@@ -2337,6 +2340,7 @@ export default function GymDashboard() {
   const PAGE = {
     dashboard:   <Dashboard   gymId={gymId} setPage={nav}/>,
     analytics:   <AnalyticsDashboard gymId={gymId}/>,
+    affiliate:   <AffiliateDashboard gymId={gymId}/>,
     checkin:     <CheckIn     gymId={gymId}/>,
     members:     <Members     gymId={gymId} gymName={gymName}/>,
     memberships: <Memberships gymId={gymId}/>,
