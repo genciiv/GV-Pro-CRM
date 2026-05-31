@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase'
 import { fmtNum, fmtDate, AVC } from '../../lib/db'
 import { StatCard, Modal, Loading, Empty, Avatar } from '../../components/UI'
 import toast from 'react-hot-toast'
+import PushNotifButton from '../../components/PushNotifButton'
 import { emailClassBookingConfirm } from '../../lib/email'
 
 const DAYS_AL = { Mon:'E Hënë', Tue:'E Martë', Wed:'E Mërkurë', Thu:'E Enjte', Fri:'E Premte', Sat:'E Shtunë', Sun:'E Diel' }
@@ -550,6 +551,7 @@ export default function YogaDashboard() {
           </div>
           <div className="tbr">
             <span style={{fontSize:11,color:'var(--gr)',fontWeight:600}}>● Live</span>
+            <PushNotifButton gymId={gymId}/>
             <span className="bdg bdg-pu">{bizIcon} {gymName}</span>
             <button className="btn btn-p btn-sm" onClick={()=>nav('new-class')}>+ Klasë</button>
           </div>

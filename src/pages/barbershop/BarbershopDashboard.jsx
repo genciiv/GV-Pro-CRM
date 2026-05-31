@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase'
 import { fmtNum, fmtDate, AVC } from '../../lib/db'
 import { StatCard, Modal, Loading, Empty, Avatar } from '../../components/UI'
 import toast from 'react-hot-toast'
+import PushNotifButton from '../../components/PushNotifButton'
 import { emailAppointmentConfirm } from '../../lib/email'
 import { smsAppointmentConfirm } from '../../lib/sms'
 import { smsAppointmentConfirm } from '../../lib/sms'
@@ -699,6 +700,7 @@ export default function BarbershopDashboard() {
           </div>
           <div className="tbr">
             <span style={{fontSize:11,color:'var(--gr)',fontWeight:600}}>● Live</span>
+            <PushNotifButton gymId={gymId}/>
             <span className="bdg bdg-gy">💈 {gymName}</span>
             <button className="btn btn-p btn-sm" onClick={()=>nav('new-appointment')}>+ Rezervim</button>
           </div>

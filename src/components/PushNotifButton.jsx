@@ -1,30 +1,33 @@
 // src/components/PushNotifButton.jsx
-// Butoni për aktivizimin e notifikimeve Push
-
 import { useState, useEffect } from 'react'
-import { requestSimplePermission, startRealtimeNotifications, notify } from '../lib/webpush'
+import { registerSW, requestPermission, hasPermission, startRealtime, notify, playSound } from '../lib/webpush'
 import { supabase } from '../lib/supabase'
 
 export default function PushNotifButton({ gymId }) {
-  const [status, setStatus] = useState('unknown') // unknown | granted | denied | unsupported
+  const [status, setStatus] = useState('unknown')  // unknown | granted | denied | unsupported
 
   useEffect(() => {
     if (!('Notification' in window)) return setStatus('unsupported')
     setStatus(Notification.permission)
-
-    // Auto-start realtime if already granted
+    // Regjistro SW gjithmonë
+    registerSW()
+    // Nëse tashmë ka leje, fillo realtime
     if (Notification.permission === 'granted' && gymId) {
-      startRealtimeNotifications(gymId, supabase)
+      startRealtime(gymId, supabase)
     }
   }, [gymId])
 
   async function enable() {
-    const ok = await requestSimplePermission()
+    await registerSW()
+    const ok = await requestPermission()
     if (ok) {
       setStatus('granted')
-      startRealtimeNotifications(gymId, supabase)
+      startRealtime(gymId, supabase)
       // Test notification
-      setTimeout(() => notify('✅ Notifikimet u aktivizuan!', 'Do të merrni njoftime për rezervime, pagesa dhe anëtarë të rinj.'), 500)
+      setTimeout(() => {
+        playSound('member')
+        notify('✅ Njoftime të aktivizuara!', 'Do merrni njoftime për rezervime, pagesa dhe anëtarë.')
+      }, 300)
     } else {
       setStatus('denied')
     }
@@ -32,20 +35,25 @@ export default function PushNotifButton({ gymId }) {
 
   if (status === 'unsupported') return null
 
-  if (status === 'granted') {
-    return (
-      <div style={{ display:'flex', alignItems:'center', gap:8, padding:'7px 14px', background:'#f0fdf4', border:'1px solid #bbf7d0', borderRadius:9, fontSize:13, color:'#15803d', fontWeight:600 }}>
-        <div style={{ width:8, height:8, borderRadius:'50%', background:'#16a34a', animation:'pulse 2s infinite' }}/>
-        Njoftime aktive
-        <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}`}</style>
-      </div>
-    )
-  }
+  if (status === 'granted') return (
+    <div style={{ display:'flex', alignItems:'center', gap:7, padding:'6px 13px', background:'#f0fdf4', border:'1px solid #bbf7d0', borderRadius:8, fontSize:12, color:'#15803d', fontWeight:600, userSelect:'none' }}>
+      <style>{`@keyframes vaqo-pulse{0%,100%{opacity:1}50%{opacity:.3}}`}</style>
+      <div style={{ width:7, height:7, borderRadius:'50%', background:'#16a34a', animation:'vaqo-pulse 2s ease-in-out infinite' }}/>
+      Live
+    </div>
+  )
+
+  if (status === 'denied') return (
+    <div title="Hap browser settings dhe lejo notifikimet" style={{ display:'flex', alignItems:'center', gap:7, padding:'6px 13px', background:'#fef2f2', border:'1px solid #fecaca', borderRadius:8, fontSize:12, color:'#dc2626', fontWeight:600, cursor:'help' }}>
+      🔕 Bllokuar
+    </div>
+  )
 
   return (
-    <button onClick={enable} style={{ display:'flex', alignItems:'center', gap:8, padding:'7px 14px', background:'#f5f3ff', border:'1px solid #ddd6fe', borderRadius:9, fontSize:13, color:'#7c3aed', fontWeight:600, cursor:'pointer', fontFamily:'inherit', transition:'all .2s' }}
-      onMouseEnter={e=>e.currentTarget.style.background='#ede9fe'}
-      onMouseLeave={e=>e.currentTarget.style.background='#f5f3ff'}>
+    <button onClick={enable} style={{ display:'flex', alignItems:'center', gap:7, padding:'6px 13px', background:'#f5f3ff', border:'1px solid #ddd6fe', borderRadius:8, fontSize:12, color:'#7c3aed', fontWeight:600, cursor:'pointer', fontFamily:'inherit', transition:'all .2s' }}
+      onMouseEnter={e => e.currentTarget.style.background = '#ede9fe'}
+      onMouseLeave={e => e.currentTarget.style.background = '#f5f3ff'}
+      title="Aktivizo njoftime push për rezervime, pagesa dhe anëtarë">
       🔔 Aktivizo Njoftimet
     </button>
   )

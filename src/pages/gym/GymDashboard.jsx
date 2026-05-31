@@ -1189,6 +1189,7 @@ export default function GymDashboard() {
             <div className="tb-title">{TITLES[page]||'Dashboard'}</div>
           </div>
           <div className="tbr">
+            <PushNotifButton gymId={gymId}/>
             <span style={{fontSize:11,color:'var(--gr)',fontWeight:600}}>● Live</span>
             <span className="bdg bdg-gy">{gymName}</span>
             <button className="btn btn-p btn-sm" onClick={()=>nav('members')}>+ Anëtar i Ri</button>
@@ -2389,6 +2390,7 @@ export default function GymDashboard() {
             <div className="tb-title">{TITLES[page]||'Dashboard'}</div>
           </div>
           <div className="tbr">
+            <PushNotifButton gymId={gymId}/>
             <span style={{fontSize:11,color:'var(--gr)',fontWeight:600}}>● Live</span>
             <span className="bdg bdg-gy">{gymName}</span>
             <button className="btn btn-p btn-sm" onClick={()=>nav('members')}>+ Anëtar i Ri</button>

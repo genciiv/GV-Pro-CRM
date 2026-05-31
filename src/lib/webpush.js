@@ -1,202 +1,139 @@
 // src/lib/webpush.js
-// Web Push Notifications — Rezervim, Pagesa, Anëtar i ri
+// Web Push Notifications — pa VAPID, direkt nga browser
 
-const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || ''
-
-// ── Konverto VAPID key ────────────────────────────────────
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4)
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
-  const rawData = window.atob(base64)
-  return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)))
-}
-
-// ── Kërko leje për notifikime ─────────────────────────────
-export async function requestPushPermission() {
-  if (!('Notification' in window)) return { ok: false, reason: 'not_supported' }
-  if (!('serviceWorker' in navigator)) return { ok: false, reason: 'no_sw' }
-
-  const permission = await Notification.requestPermission()
-  if (permission !== 'granted') return { ok: false, reason: 'denied' }
-
+// ── Regjistro Service Worker ──────────────────────────────
+export async function registerSW() {
+  if (!('serviceWorker' in navigator)) return false
   try {
-    const registration = await navigator.serviceWorker.ready
-    const subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-    })
-    return { ok: true, subscription }
-  } catch (err) {
-    return { ok: false, reason: err.message }
+    await navigator.serviceWorker.register('/sw.js')
+    return true
+  } catch(e) {
+    console.warn('SW registration failed:', e)
+    return false
   }
 }
 
-// ── Dërgo notifikim lokal (pa server) ────────────────────
-// Kjo funksionon pa VAPID — direkt nga browser
-export function notify(title, body, options = {}) {
-  if (!('Notification' in window)) return
-  if (Notification.permission !== 'granted') return
-
-  const notification = new Notification(title, {
-    body,
-    icon: '/favicon.svg',
-    badge: '/favicon.svg',
-    vibrate: [200, 100, 200],
-    tag: options.tag || 'vaqo',
-    requireInteraction: options.requireInteraction || false,
-    silent: options.silent || false,
-    ...options,
-  })
-
-  notification.onclick = () => {
-    window.focus()
-    if (options.url) window.location.href = options.url
-    notification.close()
-  }
-
-  return notification
-}
-
-// ── Kërko leje pa VAPID (simpler) ────────────────────────
-export async function requestSimplePermission() {
+// ── Kërko leje ───────────────────────────────────────────
+export async function requestPermission() {
   if (!('Notification' in window)) return false
   if (Notification.permission === 'granted') return true
   if (Notification.permission === 'denied') return false
-
   const result = await Notification.requestPermission()
   return result === 'granted'
 }
 
-// ── Notifikime specifike të Vaqo ─────────────────────────
+export function hasPermission() {
+  return 'Notification' in window && Notification.permission === 'granted'
+}
 
-export function notifyNewBooking(appointment) {
-  const time = appointment.start_time?.slice(0,5)
-  const date = new Date(appointment.appointment_date).toLocaleDateString('sq-AL', { weekday:'short', day:'numeric', month:'short' })
-  notify(
-    `📅 Rezervim i Ri!`,
-    `${appointment.client_name} · ${appointment.service?.name || 'Shërbim'}\n${date} ora ${time}`,
-    { tag:'booking', url:'/dashboard', requireInteraction: true }
-  )
-  // Sound via AudioContext
+// ── Dërgo notifikim browser ───────────────────────────────
+export function notify(title, body, options = {}) {
+  if (!hasPermission()) return
+  const n = new Notification(title, {
+    body,
+    icon:    '/favicon.svg',
+    badge:   '/favicon.svg',
+    tag:     options.tag || 'vaqo-' + Date.now(),
+    vibrate: [200, 100, 200],
+    requireInteraction: options.requireInteraction || false,
+    silent:  options.silent || false,
+  })
+  if (options.url) n.onclick = () => { window.focus(); window.location.href = options.url; n.close() }
+  // Auto-close after 6s
+  if (!options.requireInteraction) setTimeout(() => n.close(), 6000)
+  return n
+}
+
+// ── Tinguj me Web Audio API ───────────────────────────────
+export function playSound(type = 'booking') {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)()
+    const sequences = {
+      booking: [[523,.12,.28],[659,.10,.0],[784,.14,.0]],   // C-E-G  ding ding ding
+      payment: [[784,.10,.0],[1047,.10,.0],[1319,.16,.0]],   // G-C-E  bing!
+      member:  [[523,.08,.0],[659,.08,.0],[784,.08,.0],[1047,.2,.0]], // tada!
+      checkin: [[880,.06,.0],[1108,.08,.0]],                  // quick beep
+    }
+    const notes = sequences[type] || sequences.booking
+    let t = ctx.currentTime
+    notes.forEach(([freq, dur, delay]) => {
+      t += delay
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain); gain.connect(ctx.destination)
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(freq, t)
+      gain.gain.setValueAtTime(0.25, t)
+      gain.gain.exponentialRampToValueAtTime(0.001, t + dur)
+      osc.start(t); osc.stop(t + dur + 0.05)
+      t += dur
+    })
+  } catch(e) {}
+}
+
+// ── Notifikime specifike ──────────────────────────────────
+export function notifyBooking(appt) {
+  const time = appt.start_time?.slice(0,5)
+  const date = appt.appointment_date
+    ? new Date(appt.appointment_date).toLocaleDateString('sq-AL',{weekday:'short',day:'numeric',month:'short'})
+    : ''
   playSound('booking')
+  notify(
+    '📅 Rezervim i Ri!',
+    `${appt.client_name || 'Klient'} · ${appt.service_name || 'Shërbim'}\n${date} ora ${time}`,
+    { tag:'booking', requireInteraction: true, url: '/#bookings' }
+  )
 }
 
-export function notifyNewPayment(payment) {
-  notify(
-    `💰 Pagesa e Re!`,
-    `${payment.member_name || 'Klient'} · ${payment.amount?.toLocaleString('sq-AL')} L`,
-    { tag:'payment', url:'/dashboard/payments' }
-  )
+export function notifyPayment(pay) {
   playSound('payment')
-}
-
-export function notifyNewMember(member) {
   notify(
-    `🎉 Anëtar i Ri!`,
-    `${member.first_name} ${member.last_name} u regjistrua`,
-    { tag:'member', url:'/dashboard/members' }
+    '💰 Pagesa e Re!',
+    `${pay.member_name || 'Klient'} · ${(pay.amount||0).toLocaleString('sq-AL')} L`,
+    { tag:'payment', url: '/#payments' }
   )
-  playSound('success')
 }
 
-export function notifyMembershipExpiring(member, daysLeft) {
+export function notifyMember(member) {
+  playSound('member')
   notify(
-    `⚠️ Abonim po Skadon`,
-    `${member.first_name} ${member.last_name} · ${daysLeft} ditë të mbetura`,
-    { tag:`expiring-${member.id}`, url:'/dashboard/memberships' }
+    '🎉 Anëtar i Ri!',
+    `${member.first_name || ''} ${member.last_name || ''} u regjistrua`,
+    { tag:'member', url: '/#members' }
   )
 }
 
 export function notifyCheckin(member) {
+  playSound('checkin')
   notify(
-    `🚪 Check-in`,
-    `${member.first_name} ${member.last_name} hyri`,
-    { tag:'checkin', silent: true }
+    '🚪 Check-in',
+    `${member.first_name || ''} ${member.last_name || ''} hyri`,
+    { tag:'checkin', silent: false }
   )
 }
 
-// ── Tinguj me Web Audio API ───────────────────────────────
-function playSound(type) {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)()
-    const osc = ctx.createOscillator()
-    const gain = ctx.createGain()
-    osc.connect(gain)
-    gain.connect(ctx.destination)
+// ── Realtime listener (Supabase) ──────────────────────────
+let channel = null
 
-    const sounds = {
-      booking: { freq:[523, 659, 784], dur:0.12, vol:0.3 },
-      payment: { freq:[659, 784, 1047], dur:0.1, vol:0.25 },
-      success: { freq:[523, 659, 784, 1047], dur:0.08, vol:0.2 },
-    }
+export function startRealtime(gymId, supabaseClient) {
+  if (channel) { channel.unsubscribe(); channel = null }
+  if (!gymId || !supabaseClient) return
 
-    const s = sounds[type] || sounds.booking
-    let time = ctx.currentTime
-
-    s.freq.forEach(freq => {
-      const o = ctx.createOscillator()
-      const g = ctx.createGain()
-      o.connect(g); g.connect(ctx.destination)
-      o.frequency.setValueAtTime(freq, time)
-      o.type = 'sine'
-      g.gain.setValueAtTime(s.vol, time)
-      g.gain.exponentialRampToValueAtTime(0.001, time + s.dur)
-      o.start(time); o.stop(time + s.dur)
-      time += s.dur * 0.8
-    })
-  } catch(e) {
-    // Audio not supported — silently fail
-  }
-}
-
-// ── Realtime listener — dëgjon rezervimet e reja ─────────
-let realtimeChannel = null
-
-export function startRealtimeNotifications(gymId, supabase) {
-  if (realtimeChannel) realtimeChannel.unsubscribe()
-
-  realtimeChannel = supabase
-    .channel(`gym-${gymId}-notifications`)
-    .on('postgres_changes', {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'appointments',
-      filter: `gym_id=eq.${gymId}`,
-    }, payload => {
-      if (!payload.new.is_test) notifyNewBooking(payload.new)
-    })
-    .on('postgres_changes', {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'payments',
-      filter: `gym_id=eq.${gymId}`,
-    }, payload => {
-      notifyNewPayment(payload.new)
-    })
-    .on('postgres_changes', {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'members',
-      filter: `gym_id=eq.${gymId}`,
-    }, payload => {
-      notifyNewMember(payload.new)
-    })
-    .on('postgres_changes', {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'checkins',
-      filter: `gym_id=eq.${gymId}`,
-    }, payload => {
-      notifyCheckin(payload.new)
-    })
+  channel = supabaseClient
+    .channel(`push-${gymId}`)
+    .on('postgres_changes', { event:'INSERT', schema:'public', table:'appointments', filter:`gym_id=eq.${gymId}` },
+      p => { if (!p.new.is_test) notifyBooking(p.new) })
+    .on('postgres_changes', { event:'INSERT', schema:'public', table:'payments', filter:`gym_id=eq.${gymId}` },
+      p => notifyPayment(p.new))
+    .on('postgres_changes', { event:'INSERT', schema:'public', table:'members', filter:`gym_id=eq.${gymId}` },
+      p => notifyMember(p.new))
+    .on('postgres_changes', { event:'INSERT', schema:'public', table:'checkins', filter:`gym_id=eq.${gymId}` },
+      p => notifyCheckin(p.new))
     .subscribe()
 
-  return realtimeChannel
+  return channel
 }
 
-export function stopRealtimeNotifications() {
-  if (realtimeChannel) {
-    realtimeChannel.unsubscribe()
-    realtimeChannel = null
-  }
+export function stopRealtime() {
+  if (channel) { channel.unsubscribe(); channel = null }
 }
