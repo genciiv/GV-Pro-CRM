@@ -738,3 +738,10 @@ SELECT
 FROM members m
 LEFT JOIN member_memberships mm ON mm.member_id = m.id AND mm.status = 'active'
 LEFT JOIN plans p ON p.id = mm.plan_id;
+
+-- ── ONBOARDING ────────────────────────────────────────────
+ALTER TABLE gyms ADD COLUMN IF NOT EXISTS onboarding_done boolean DEFAULT false;
+ALTER TABLE gyms ADD COLUMN IF NOT EXISTS onboarding_step int DEFAULT 1;
+
+-- ── APPOINTMENTS is_test ──────────────────────────────────
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS is_test boolean DEFAULT false;

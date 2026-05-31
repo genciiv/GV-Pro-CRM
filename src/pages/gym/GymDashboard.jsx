@@ -15,6 +15,8 @@ import { printInvoice } from '../../components/Invoice'
 import toast from 'react-hot-toast'
 import { smsPaymentConfirm, smsMembershipExpiring } from '../../lib/sms'
 import AnalyticsDashboard from './AnalyticsDashboard'
+import OnboardingFlow from '../../components/OnboardingFlow'
+import PushNotifButton from '../../components/PushNotifButton'
 
 const MONTHS = ['Jan','Feb','Mar','Pri','Maj','Qer','Kor','Gus','Set','Tet','Nën','Dhj']
 
@@ -1115,8 +1117,17 @@ const TITLES={dashboard:'Dashboard',checkin:'QR Check-in',members:'Anëtarët',m
 export default function GymDashboard() {
   const { profile, gymId, logout } = useAuth()
   const [page,   setPage]   = useState('dashboard')
+  const [showOnboarding, setShowOnboarding] = useState(false)
   const [sbOpen, setSbOpen] = useState(false)
   const nav = id => { setPage(id); setSbOpen(false) }
+
+  // Check if onboarding needed
+  useEffect(()=>{
+    if (!gymId) return
+    supabase.from('gyms').select('onboarding_done').eq('id',gymId).single().then(({data})=>{
+      if (data && !data.onboarding_done) setShowOnboarding(true)
+    })
+  },[gymId])
 
   const gymName  = profile?.gym?.name  || 'Vaqo'
   const userName = profile?.data?.name || 'Admin'
@@ -1135,6 +1146,12 @@ export default function GymDashboard() {
 
   return (
     <div className="app">
+      {/* Onboarding overlay */}
+      {showOnboarding&&(
+        <div style={{position:'fixed',inset:0,zIndex:9999}}>
+          <OnboardingFlow gymId={gymId} onComplete={()=>setShowOnboarding(false)}/>
+        </div>
+      )}
       <div className={`sbo ${sbOpen?'open':''}`} onClick={()=>setSbOpen(false)}/>
 
       <aside className={`sidebar ${sbOpen?'open':''}`}>
@@ -1198,6 +1215,8 @@ import { printInvoice } from '../../components/Invoice'
 import toast from 'react-hot-toast'
 import { smsPaymentConfirm, smsMembershipExpiring } from '../../lib/sms'
 import AnalyticsDashboard from './AnalyticsDashboard'
+import OnboardingFlow from '../../components/OnboardingFlow'
+import PushNotifButton from '../../components/PushNotifButton'
 
 const MONTHS = ['Jan','Feb','Mar','Pri','Maj','Qer','Kor','Gus','Set','Tet','Nën','Dhj']
 
@@ -2298,8 +2317,17 @@ const TITLES={dashboard:'Dashboard',checkin:'QR Check-in',members:'Anëtarët',m
 export default function GymDashboard() {
   const { profile, gymId, logout } = useAuth()
   const [page,   setPage]   = useState('dashboard')
+  const [showOnboarding, setShowOnboarding] = useState(false)
   const [sbOpen, setSbOpen] = useState(false)
   const nav = id => { setPage(id); setSbOpen(false) }
+
+  // Check if onboarding needed
+  useEffect(()=>{
+    if (!gymId) return
+    supabase.from('gyms').select('onboarding_done').eq('id',gymId).single().then(({data})=>{
+      if (data && !data.onboarding_done) setShowOnboarding(true)
+    })
+  },[gymId])
 
   const gymName  = profile?.gym?.name  || 'Vaqo'
   const userName = profile?.data?.name || 'Admin'
@@ -2318,6 +2346,12 @@ export default function GymDashboard() {
 
   return (
     <div className="app">
+      {/* Onboarding overlay */}
+      {showOnboarding&&(
+        <div style={{position:'fixed',inset:0,zIndex:9999}}>
+          <OnboardingFlow gymId={gymId} onComplete={()=>setShowOnboarding(false)}/>
+        </div>
+      )}
       <div className={`sbo ${sbOpen?'open':''}`} onClick={()=>setSbOpen(false)}/>
 
       <aside className={`sidebar ${sbOpen?'open':''}`}>

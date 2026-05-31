@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import AdminAnalytics from './AdminAnalytics'
+import PushNotifButton from '../../components/PushNotifButton'
 import { useAsync } from '../../hooks/useAsync'
 import { supabase } from '../../lib/supabase'
 import { fmtDate, fmtNum } from '../../lib/db'
@@ -230,14 +232,14 @@ export default function AdminPanel({ logout }) {
   const reloadAll=()=>{ro();rga();rna();rg();rn()}
 
   const NAV_ITEMS=[
-    {s:'Platforma',items:[{id:'overview',l:'Overview',i:'📊'},{id:'revenue',l:'Të Ardhurat',i:'💰'}]},
+    {s:'Platforma',items:[{id:'overview',l:'Overview',i:'📊'},{id:'platform_analytics',l:'Analytics Avancuar',i:'📈'},{id:'revenue',l:'Të Ardhurat',i:'💰'}]},
     {s:'Palestra',items:[{id:'gym_apps',l:'Aplikimet Palestra',i:'🏋️',badge:newGymApps},{id:'gyms',l:'Palestrat',i:'🏠'}]},
     {s:'Dietologë',items:[{id:'nutr_apps',l:'Aplikimet Dietolog',i:'🥗',badge:newNutrApps},{id:'nutritionists',l:'Dietologët',i:'👨‍⚕️'},{id:'diet_orders',l:'Porosi Dietash',i:'🛒'}]},
     {s:'Demo Requests',items:[{id:'demos',l:'Book Demo Kërkesat',i:'📅',badge:0}]},
     {s:'Sistem',items:[{id:'guide',l:'Udhëzues',i:'📖'}]},
   ]
 
-  const TITLE_MAP={overview:'📊 Overview',revenue:'💰 Të Ardhurat',gym_apps:'🏋️ Aplikimet Palestra',gyms:'🏠 Palestrat',nutr_apps:'🥗 Aplikimet Dietolog',nutritionists:'👨‍⚕️ Dietologët',diet_orders:'🛒 Porosi Dietash',demos:'📅 Demo Kërkesat',guide:'📖 Udhëzues'}
+  const TITLE_MAP={overview:'📊 Overview',platform_analytics:'📈 Analytics Avancuar',revenue:'💰 Të Ardhurat',gym_apps:'🏋️ Aplikimet Palestra',gyms:'🏠 Palestrat',nutr_apps:'🥗 Aplikimet Dietolog',nutritionists:'👨‍⚕️ Dietologët',diet_orders:'🛒 Porosi Dietash',demos:'📅 Demo Kërkesat',guide:'📖 Udhëzues'}
 
   return (
     <div className="app">
@@ -266,7 +268,7 @@ export default function AdminPanel({ logout }) {
             <button className="hmbg" style={{display:'flex',alignItems:'center',justifyContent:'center'}} onClick={()=>setSbOpen(s=>!s)}>☰</button>
             <div className="tb-title">{TITLE_MAP[tab]}</div>
           </div>
-          <div className="tbr"><button className="btn btn-s btn-sm" onClick={reloadAll}>↻</button><span className="bdg bdg-pu">⚡ Admin</span></div>
+          <div className="tbr"><PushNotifButton gymId="admin"/><button className="btn btn-s btn-sm" onClick={reloadAll}>↻</button><span className="bdg bdg-pu">⚡ Admin</span></div>
         </div>
 
         <div className="content">
@@ -448,6 +450,10 @@ export default function AdminPanel({ logout }) {
 
           {tab==='demos'&&(
             <DemoRequestsTab/>
+          )}
+
+          {tab==='platform_analytics'&&(
+            <AdminAnalytics/>
           )}
 
           {tab==='guide'&&(

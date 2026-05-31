@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import { t, useLanguage, setLanguage } from "../lib/i18n"
+import { VaqoLogo, VaqoIcon } from "../components/VaqoLogo"
 
 function useW() {
   const [w,setW]=useState(typeof window!=='undefined'?window.innerWidth:1200)
@@ -83,9 +84,8 @@ export default function VaqoLanding({ onApply, onLogin }) {
       {/* ── NAV ── */}
       <nav style={{position:'sticky',top:0,zIndex:200,height:60,padding:`0 ${px}px`,display:'flex',alignItems:'center',justifyContent:'space-between',background:scrolled||menuOpen?'rgba(255,255,255,.97)':'transparent',backdropFilter:scrolled||menuOpen?'blur(20px)':'none',borderBottom:scrolled||menuOpen?'1px solid rgba(0,0,0,.07)':'none',transition:'all .3s'}}>
         {/* Logo */}
-        <button onClick={()=>window.scrollTo({top:0,behavior:'smooth'})} style={{display:'flex',alignItems:'center',gap:9,background:'none',border:'none',cursor:'pointer',padding:0}}>
-          <div style={{width:34,height:34,borderRadius:9,background:'#18181b',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18}}>💪</div>
-          <span style={{fontSize:22,fontWeight:900,letterSpacing:'-.3px'}}>Vaqo</span>
+        <button onClick={()=>window.scrollTo({top:0,behavior:'smooth'})} style={{background:'none',border:'none',cursor:'pointer',padding:0}}>
+          <VaqoLogo size="md"/>
         </button>
 
         {/* Desktop */}
