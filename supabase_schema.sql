@@ -709,3 +709,32 @@ alter table demo_requests enable row level security;
 create policy "demo_ins" on demo_requests for insert with check (true);
 create policy "demo_sel" on demo_requests for select using (is_platform_admin());
 create policy "demo_upd" on demo_requests for update using (is_platform_admin());
+
+-- ── ANALYTICS: Add last_checkin to members ───────────────
+ALTER TABLE members ADD COLUMN IF NOT EXISTS last_checkin timestamptz;
+
+-- Auto-update last_checkin when checkin happens
+CREATE OR REPLACE FUNCTION update_last_checkin()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE members SET last_checkin = NEW.created_at WHERE id = NEW.member_id;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS on_checkin_update_member ON checkins;
+CREATE TRIGGER on_checkin_update_member
+  AFTER INSERT ON checkins
+  FOR EACH ROW EXECUTE FUNCTION update_last_checkin();
+
+-- View: members_with_status (used by analytics)
+CREATE OR REPLACE VIEW members_with_status AS
+SELECT
+  m.*,
+  mm.end_date AS membership_end,
+  mm.status AS membership_status,
+  p.name AS plan_name,
+  EXTRACT(DAY FROM (mm.end_date - NOW()))::int AS days_remaining
+FROM members m
+LEFT JOIN member_memberships mm ON mm.member_id = m.id AND mm.status = 'active'
+LEFT JOIN plans p ON p.id = mm.plan_id;

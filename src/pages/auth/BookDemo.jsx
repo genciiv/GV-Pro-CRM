@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { emailDemoRequest } from '../../lib/email'
+import { smsDemoConfirm } from '../../lib/sms'
 
 const BIZ_TYPES = [
   {value:'gym',label:'🏋️ Palestre & Gym'},{value:'yoga',label:'🧘 Yoga Studio'},
@@ -56,6 +57,10 @@ export default function BookDemo() {
         biz_type: form.biz_type, biz_name: form.biz_name,
         city: form.city, preferred_hours: form.preferred_hours, message: form.message
       }})
+      // SMS konfirmim te klienti
+      if (form.phone) {
+        await smsDemoConfirm({ demoRequest: { name: form.name, phone: form.phone, biz_type: form.biz_type } })
+      }
       setStep(2)
     } catch(e){setError(e.message)}
     finally{setLoading(false)}

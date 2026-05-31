@@ -6,6 +6,9 @@ import { fmtNum, fmtDate, AVC } from '../../lib/db'
 import { StatCard, Modal, Loading, Empty, Avatar } from '../../components/UI'
 import toast from 'react-hot-toast'
 import { emailAppointmentConfirm } from '../../lib/email'
+import { smsAppointmentConfirm } from '../../lib/sms'
+import { smsAppointmentConfirm } from '../../lib/sms'
+import { smsAppointmentConfirm } from '../../lib/sms'
 
 const DAYS_AL = { Mon:'E Hënë', Tue:'E Martë', Wed:'E Mërkurë', Thu:'E Enjte', Fri:'E Premte', Sat:'E Shtunë', Sun:'E Diel' }
 const DAYS    = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
@@ -165,6 +168,18 @@ function NewAppointment({ gymId, onDone }) {
             price: selSvc?.price
           },
           gym: gymData.data
+        })
+      }
+      // Dërgo SMS konfirmimi
+      if (form.phone) {
+        const gymD = gymData?.data || {}
+        await smsAppointmentConfirm({
+          appointment: {
+            client_phone: form.phone, client_name: form.name,
+            service: { name: selSvc?.name }, staff: selStaff,
+            appointment_date: selDate, start_time: selSlot+':00', price: selSvc?.price
+          },
+          gym: gymD, channel: 'sms'
         })
       }
       onDone()
