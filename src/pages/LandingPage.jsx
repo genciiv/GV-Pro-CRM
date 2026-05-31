@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import { t, useLanguage, setLanguage } from "../lib/i18n"
 import { VaqoLogo, VaqoIcon } from "../components/VaqoLogo"
+import { VideoSection } from "../components/DemoVideo"
 
 function useW() {
   const [w,setW]=useState(typeof window!=='undefined'?window.innerWidth:1200)
@@ -393,6 +394,9 @@ export default function VaqoLanding({ onApply, onLogin }) {
           <button onClick={()=>go('/demo')} style={{...btn('#c8a96e'),padding:`${isMobile?12:13}px ${isMobile?28:36}px`,fontSize:isMobile?14:15}}>{T.howItWorks.cta}</button>
         </div>
       </section>
+
+      {/* ── VIDEO ── */}
+      <VideoSection/>
 
       {/* ── CALCULATOR ── */}
       <section style={{padding:`${isMobile?48:80}px ${px}px`,background:'#fff'}}>

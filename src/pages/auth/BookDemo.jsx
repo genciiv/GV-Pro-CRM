@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { emailDemoRequest } from '../../lib/email'
 import { smsDemoConfirm } from '../../lib/sms'
+import DemoVideo from '../../components/DemoVideo'
 
 const BIZ_TYPES = [
   {value:'gym',label:'🏋️ Palestre & Gym'},{value:'yoga',label:'🧘 Yoga Studio'},
@@ -226,6 +227,12 @@ export default function BookDemo() {
                   <div style={{fontSize:12,color:'#71717a'}}>FitZone Gym, Tiranë</div>
                 </div>
               </div>
+            </div>
+
+            {/* Video preview */}
+            <div style={{marginBottom:14}}>
+              <div style={{fontSize:12,fontWeight:700,color:'#52525b',marginBottom:10,fontFamily:'system-ui'}}>📹 Shiko Demo (3 min)</div>
+              <DemoVideo compact={true}/>
             </div>
 
             {/* Trust */}
