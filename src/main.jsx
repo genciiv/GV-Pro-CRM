@@ -18,6 +18,9 @@ import CategoryPage          from './pages/categories/CategoryPage.jsx'
 import BookDemo              from './pages/auth/BookDemo.jsx'
 import Pricing               from './pages/Pricing.jsx'
 import Blog                  from './pages/blog/Blog.jsx'
+import Terms                 from './pages/legal/Terms.jsx'
+import Privacy               from './pages/legal/Privacy.jsx'
+import GDPR                  from './pages/legal/GDPR.jsx'
 import ArticlePage           from './pages/blog/ArticlePage.jsx'
 import Explore              from './pages/explore/Explore.jsx'
 import BusinessProfile      from './pages/explore/BusinessProfile.jsx'
@@ -44,6 +47,9 @@ function Router() {
   if (path === '/pricing')              return <Pricing/>
   if (path === '/blog')                 return <Blog/>
   if (path.startsWith('/blog/'))        return <ArticlePage/>
+  if (path === '/terms')                return <Terms/>
+  if (path === '/privacy')              return <Privacy/>
+  if (path === '/gdpr')                 return <GDPR/>
   if (path.startsWith('/b/'))         return <BusinessProfile/>
   if (path === '/apply')              return <Apply/>
   if (path === '/nutritionist/apply') return <NutritionistApply/>
