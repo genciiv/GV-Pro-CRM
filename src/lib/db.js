@@ -198,6 +198,19 @@ export const addMember = async (gymId, f, gymName='') => {
     })
   }
 
+  // Email mirëseardhje
+  if (f.email && m) {
+    try {
+      const { emailMemberWelcome } = await import('./email')
+      const { data: gym } = await supabase.from('gyms').select('name,phone').eq('id',gymId).single()
+      const { data: plan } = f.planId ? await supabase.from('plans').select('name').eq('id',f.planId).single() : { data: null }
+      await emailMemberWelcome({
+        member: { email: f.email, first_name: f.firstName, last_name: f.lastName },
+        plan, gym
+      })
+    } catch(e) { console.warn('Welcome email failed:', e.message) }
+  }
+
   // Dërgo Magic Link nëse ka email
   if (f.email && f.sendMagicLink) {
     try {

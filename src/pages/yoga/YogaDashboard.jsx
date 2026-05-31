@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase'
 import { fmtNum, fmtDate, AVC } from '../../lib/db'
 import { StatCard, Modal, Loading, Empty, Avatar } from '../../components/UI'
 import toast from 'react-hot-toast'
+import { emailClassBookingConfirm } from '../../lib/email'
 
 const DAYS_AL = { Mon:'E Hënë', Tue:'E Martë', Wed:'E Mërkurë', Thu:'E Enjte', Fri:'E Premte', Sat:'E Shtunë', Sun:'E Diel' }
 const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
@@ -303,7 +304,17 @@ function ClassesList({ gymId }) {
         client_email: bookForm.email||null,
         status: 'confirmed', price_paid: cls.price, payment_status:'unpaid',
       })
-      toast.success('✅ Rezervimi u bë!'); setShowBook(null); reload()
+      toast.success('✅ Rezervimi u bë!')
+      // Email konfirmimi
+      if (bookForm.email) {
+        const gymData = await supabase.from('gyms').select('name,phone').eq('id',gymId).single()
+        await emailClassBookingConfirm({
+          booking: { client_email: bookForm.email, client_name: bookForm.name },
+          yogaClass: showBook,
+          gym: gymData.data
+        })
+      }
+      setShowBook(null); reload()
     } catch(e) { toast.error(e.message) }
     finally { setBooking(false) }
   }

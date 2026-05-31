@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase'
 import { fmtNum, fmtDate, AVC } from '../../lib/db'
 import { StatCard, Modal, Loading, Empty, Avatar } from '../../components/UI'
 import toast from 'react-hot-toast'
+import { emailAppointmentConfirm } from '../../lib/email'
 
 const DAYS_AL = { Mon:'E Hënë', Tue:'E Martë', Wed:'E Mërkurë', Thu:'E Enjte', Fri:'E Premte', Sat:'E Shtunë', Sun:'E Diel' }
 const DAYS    = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
@@ -153,6 +154,19 @@ function NewAppointment({ gymId, onDone }) {
       })
       if (error) throw new Error(error.message)
       toast.success('✅ Rezervimi u shtua!')
+      // Dërgo email konfirmimi
+      if (form.email) {
+        const gymData = await supabase.from('gyms').select('name,phone,address,city').eq('id',gymId).single()
+        await emailAppointmentConfirm({
+          appointment: {
+            client_email: form.email, client_name: form.name,
+            service: { name: selSvc?.name }, staff: selStaff,
+            appointment_date: selDate, start_time: selSlot+':00',
+            price: selSvc?.price
+          },
+          gym: gymData.data
+        })
+      }
       onDone()
     } catch(e) { toast.error(e.message) }
     finally { setSaving(false) }

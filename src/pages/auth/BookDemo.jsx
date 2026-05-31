@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
+import { emailDemoRequest } from '../../lib/email'
 
 const BIZ_TYPES = [
   {value:'gym',label:'🏋️ Palestre & Gym'},{value:'yoga',label:'🧘 Yoga Studio'},
@@ -49,6 +50,12 @@ export default function BookDemo() {
         preferred_hours:form.preferred_hours,message:form.message.trim()||null,status:'new',
       })
       if (err) throw new Error(err.message)
+      // Dërgo njoftim email te admin
+      await emailDemoRequest({ demoRequest: {
+        name: form.name, phone: form.phone, email: form.email,
+        biz_type: form.biz_type, biz_name: form.biz_name,
+        city: form.city, preferred_hours: form.preferred_hours, message: form.message
+      }})
       setStep(2)
     } catch(e){setError(e.message)}
     finally{setLoading(false)}
