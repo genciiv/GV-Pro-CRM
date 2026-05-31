@@ -16,6 +16,7 @@ import SpaDashboard          from './pages/spa/SpaDashboard.jsx'
 import YogaDashboard         from './pages/yoga/YogaDashboard.jsx'
 import CategoryPage          from './pages/categories/CategoryPage.jsx'
 import BookDemo              from './pages/auth/BookDemo.jsx'
+import Pricing               from './pages/Pricing.jsx'
 import Explore              from './pages/explore/Explore.jsx'
 import BusinessProfile      from './pages/explore/BusinessProfile.jsx'
 import Register              from './pages/auth/Register.jsx'
@@ -38,6 +39,7 @@ function Router() {
   if (path === '/explore')            return <Explore/>
   if (path.startsWith('/category/'))  return <CategoryPage/>
   if (path === '/demo')                return <BookDemo/>
+  if (path === '/pricing')              return <Pricing/>
   if (path.startsWith('/b/'))         return <BusinessProfile/>
   if (path === '/apply')              return <Apply/>
   if (path === '/nutritionist/apply') return <NutritionistApply/>

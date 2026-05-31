@@ -234,7 +234,7 @@ export default function VaqoLanding({ onApply, onLogin }) {
               )}
             </div>
 
-            <button className="nav-btn" onClick={()=>{const el=document.getElementById('pricing');if(el)el.scrollIntoView({behavior:'smooth'});else{window.location.href='/#pricing'}}} style={{ ...btn("none","#18181b"), padding:"7px 13px", fontSize:14, fontWeight:500, borderRadius:8 }}>Çmimet</button>
+            <button className="nav-btn" onClick={()=>window.location.href='/pricing'} style={{ ...btn("none","#18181b"), padding:"7px 13px", fontSize:14, fontWeight:500, borderRadius:8 }}>Çmimet</button>
             <button className="nav-btn" onClick={()=>window.location.href='/nutritionist/apply'} style={{ ...btn("none","#18181b"), padding:"7px 13px", fontSize:14, fontWeight:500, borderRadius:8 }}>Dietologë</button>
             <button className="nav-btn" onClick={()=>window.location.href='/explore'} style={{ ...btn("none","#18181b"), padding:"7px 13px", fontSize:14, fontWeight:500, borderRadius:8 }}>🔍 Explore</button>
             <div style={{ width:1, height:18, background:"rgba(0,0,0,.1)", margin:"0 4px" }}/>
