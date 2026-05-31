@@ -546,7 +546,13 @@ function MemberProfile({ memberId, gymId, plans, onBack }) {
   const doRenew = async () => {
     if (!selPlan) return
     await renewMembership(gymId, m.id, selPlan)
-    toast.success('✅ Abonimi u rinovua!'); setShowRenew(false); reload(); reloadMss()
+    toast.success('✅ Abonimi u rinovua!')
+      // SMS konfirmim pagese
+      try {
+        const {data:mem} = await supabase.from('members').select('phone,first_name,last_name').eq('id',memberId).single()
+        const {data:gym} = await supabase.from('gyms').select('name,phone').eq('id',gymId).single()
+        if (mem?.phone) await smsPaymentConfirm({ member:mem, amount:form.amount||0, plan:{name:selPlan?.name}, gym, channel:'sms' })
+      } catch(e){}; setShowRenew(false); reload(); reloadMss()
   }
 
   const doEdit = async () => {
@@ -1749,7 +1755,13 @@ function MemberProfile({ memberId, gymId, plans, onBack }) {
   const doRenew = async () => {
     if (!selPlan) return
     await renewMembership(gymId, m.id, selPlan)
-    toast.success('✅ Abonimi u rinovua!'); setShowRenew(false); reload(); reloadMss()
+    toast.success('✅ Abonimi u rinovua!')
+      // SMS konfirmim pagese
+      try {
+        const {data:mem} = await supabase.from('members').select('phone,first_name,last_name').eq('id',memberId).single()
+        const {data:gym} = await supabase.from('gyms').select('name,phone').eq('id',gymId).single()
+        if (mem?.phone) await smsPaymentConfirm({ member:mem, amount:form.amount||0, plan:{name:selPlan?.name}, gym, channel:'sms' })
+      } catch(e){}; setShowRenew(false); reload(); reloadMss()
   }
 
   const doEdit = async () => {

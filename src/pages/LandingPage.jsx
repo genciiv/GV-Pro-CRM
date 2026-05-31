@@ -462,7 +462,7 @@ export default function VaqoLanding({ onApply, onLogin }) {
                     </li>
                   ))}
                 </ul>
-                <button onClick={()=>i===2?go('tel:+355690000000'):go('/demo')} style={{display:'block',width:'100%',padding:12,borderRadius:9,fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:'inherit',border:p.featured?'none':'1.5px solid #e4e4e7',background:p.featured?'#fff':'transparent',color:'#18181b'}}>
+                <button onClick={()=>i===2?go('tel:+3556922910410'):go('/demo')} style={{display:'block',width:'100%',padding:12,borderRadius:9,fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:'inherit',border:p.featured?'none':'1.5px solid #e4e4e7',background:p.featured?'#fff':'transparent',color:'#18181b'}}>
                   {i===0?T.pricing.cta1:i===1?T.pricing.cta2:T.pricing.cta3}
                 </button>
               </div>

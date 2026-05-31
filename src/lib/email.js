@@ -9,7 +9,6 @@ const ANON_KEY     = import.meta.env.VITE_SUPABASE_ANON_KEY
 // Funksioni bazë i dërgimit
 async function sendEmail(type, to, data) {
   if (!to || !to.includes('@')) {
-    console.log(`Email skipped — no valid email for type: ${type}`)
     return { skipped: true }
   }
 
@@ -25,7 +24,6 @@ async function sendEmail(type, to, data) {
     })
     const result = await res.json()
     if (!res.ok) throw new Error(result.error || 'Email failed')
-    console.log(`✅ Email sent: ${type} → ${to}`)
     return result
   } catch (err) {
     // Mos bllo UI nëse emaili dështon
@@ -167,8 +165,6 @@ export async function sendDailyReminders(gymId) {
       })
       await new Promise(r => setTimeout(r, 200))
     }
-
-    console.log(`✅ Daily reminders sent for gym ${gymId}`)
     return { appointments: appointments?.length || 0, expiring: expiring?.length || 0 }
   } catch (err) {
     console.error('Daily reminders error:', err)

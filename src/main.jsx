@@ -26,6 +26,7 @@ import Explore              from './pages/explore/Explore.jsx'
 import BusinessProfile      from './pages/explore/BusinessProfile.jsx'
 import Register              from './pages/auth/Register.jsx'
 import QRCheckin             from './pages/auth/QRCheckin.jsx'
+import Shop                  from './pages/shop/Shop.jsx'
 import './index.css'
 
 function Router() {
@@ -56,6 +57,7 @@ function Router() {
   if (path === '/login' && !user)     return <Login/>
   if (path === '/register')            return <Register/>
   if (path.startsWith('/checkin/'))   return <QRCheckin/>
+  if (path === '/shop')               return <Shop/>
 
   // Logged in
   if (user) {
@@ -97,6 +99,26 @@ function Router() {
           <div style={{fontFamily:'serif',fontSize:22,marginBottom:12}}>Duke u aprovuar</div>
           <div style={{fontSize:14,color:'#71717a',marginBottom:24}}>Do t'ju njoftojmë brenda 24 orësh.</div>
           <button onClick={logout} style={{background:'#18181b',color:'#fff',border:'none',padding:'10px 24px',borderRadius:8,fontSize:14,fontWeight:600,cursor:'pointer'}}>Dil</button>
+        </div>
+      </div>
+    )
+  }
+
+  // 404 for unknown logged-out paths
+  if (path !== '/' && !user && path !== '/login' && path !== '/apply' && path !== '/register' &&
+      path !== '/nutritionist/apply' && !path.startsWith('/checkin/') &&
+      !path.startsWith('/b/') && !path.startsWith('/category/') && !path.startsWith('/blog/') &&
+      !['explore','demo','pricing','blog','terms','privacy','gdpr','shop'].includes(path.slice(1))) {
+    return (
+      <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#fafafa',fontFamily:'system-ui,sans-serif',padding:24}}>
+        <div style={{textAlign:'center',maxWidth:400}}>
+          <div style={{fontFamily:'Georgia,serif',fontSize:120,fontWeight:900,color:'#e4e4e7',lineHeight:1}}>404</div>
+          <div style={{fontFamily:'Georgia,serif',fontSize:24,fontWeight:900,marginBottom:10,marginTop:-10}}>Faqja nuk u gjet</div>
+          <div style={{fontSize:14,color:'#71717a',marginBottom:28,lineHeight:1.7}}>URL-ja <code style={{background:'#f4f4f5',padding:'2px 6px',borderRadius:4}}>{path}</code> nuk ekziston.</div>
+          <div style={{display:'flex',gap:10,justifyContent:'center'}}>
+            <a href="/" style={{background:'#18181b',color:'#fff',padding:'11px 24px',borderRadius:9,fontSize:14,fontWeight:700,textDecoration:'none'}}>← Kryefaqja</a>
+            <a href="/explore" style={{background:'#fff',color:'#18181b',border:'1px solid #e4e4e7',padding:'11px 20px',borderRadius:9,fontSize:14,fontWeight:500,textDecoration:'none'}}>🔍 Explore</a>
+          </div>
         </div>
       </div>
     )

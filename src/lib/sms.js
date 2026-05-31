@@ -7,7 +7,6 @@ const ANON_KEY     = import.meta.env.VITE_SUPABASE_ANON_KEY
 // channel: 'sms' | 'whatsapp' | 'both'
 async function sendSMS(type, to, data, channel = 'sms') {
   if (!to || to.length < 9) {
-    console.log(`SMS skipped — no valid phone for: ${type}`)
     return { skipped: true }
   }
 
@@ -23,7 +22,6 @@ async function sendSMS(type, to, data, channel = 'sms') {
     })
     const result = await res.json()
     if (!res.ok) throw new Error(result.error || 'SMS failed')
-    console.log(`✅ SMS [${type}] → ${to}`)
     return result
   } catch (err) {
     // Mos bllo UI nëse SMS dështon

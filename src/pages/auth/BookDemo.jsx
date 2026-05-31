@@ -99,7 +99,7 @@ export default function BookDemo() {
           <div style={{width:30,height:30,borderRadius:8,background:'#18181b',display:'flex',alignItems:'center',justifyContent:'center',fontSize:16}}>💪</div>
           <span style={{fontSize:18,fontWeight:900,color:'#18181b',fontFamily:'Georgia,serif'}}>Vaqo</span>
         </button>
-        {!isMobile&&<div style={{fontSize:13,color:'#71717a'}}>Pyetje? <a href="tel:+355690000000" style={{color:'#18181b',fontWeight:700,textDecoration:'none'}}>Na telefono</a></div>}
+        {!isMobile&&<div style={{fontSize:13,color:'#71717a'}}>Pyetje? <a href="tel:+3556922910410" style={{color:'#18181b',fontWeight:700,textDecoration:'none'}}>Na telefono</a></div>}
       </nav>
 
       <div style={{maxWidth:960,margin:'0 auto',padding:`${isMobile?28:48}px ${px}px 64px`}}>

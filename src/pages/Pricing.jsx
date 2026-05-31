@@ -173,7 +173,7 @@ export default function Pricing() {
                   ))}
                 </div>
 
-                <button onClick={()=>p.name==='Business'?window.location.href='tel:+355690000000':window.location.href='/demo'}
+                <button onClick={()=>p.name==='Business'?window.location.href='tel:+3556922910410':window.location.href='/demo'}
                   style={{display:'block',width:'100%',padding:'13px',borderRadius:10,fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:'inherit',transition:'all .2s',border:p.featured?'none':'1.5px solid #e4e4e7',background:p.featured?'#fff':'transparent',color:p.featured?'#18181b':'#18181b'}}
                   onMouseEnter={e=>{e.currentTarget.style.background=p.featured?'#f5f5f5':'#18181b';e.currentTarget.style.color=p.featured?'#18181b':'#fff'}}
                   onMouseLeave={e=>{e.currentTarget.style.background=p.featured?'#fff':'transparent';e.currentTarget.style.color='#18181b'}}>

@@ -745,3 +745,96 @@ ALTER TABLE gyms ADD COLUMN IF NOT EXISTS onboarding_step int DEFAULT 1;
 
 -- ── APPOINTMENTS is_test ──────────────────────────────────
 ALTER TABLE appointments ADD COLUMN IF NOT EXISTS is_test boolean DEFAULT false;
+
+-- ── AFFILIATE PROGRAM ─────────────────────────────────────
+
+-- Referral codes for each gym
+create table if not exists affiliate_codes (
+  id           uuid primary key default uuid_generate_v4(),
+  gym_id       uuid references gyms(id) on delete cascade,
+  code         text unique not null,  -- e.g. "FITZONE20"
+  clicks       int default 0,
+  created_at   timestamptz default now()
+);
+
+-- Each referral relationship
+create table if not exists referrals (
+  id              uuid primary key default uuid_generate_v4(),
+  referrer_gym_id uuid references gyms(id),   -- who referred
+  referred_gym_id uuid references gyms(id),   -- who signed up
+  code            text not null,
+  status          text default 'pending'       -- pending|active|cancelled
+    check (status in ('pending','active','cancelled')),
+  commission_pct  int default 10,
+  created_at      timestamptz default now(),
+  activated_at    timestamptz
+);
+
+-- Monthly commission payments
+create table if not exists affiliate_payments (
+  id              uuid primary key default uuid_generate_v4(),
+  referrer_gym_id uuid references gyms(id),
+  referred_gym_id uuid references gyms(id),
+  referral_id     uuid references referrals(id),
+  month           text not null,               -- "2026-01"
+  referred_plan   text,
+  plan_price      int,
+  commission_pct  int default 10,
+  commission_amt  int not null,                -- në L
+  status          text default 'pending'
+    check (status in ('pending','paid','cancelled')),
+  paid_at         timestamptz,
+  notes           text,
+  created_at      timestamptz default now()
+);
+
+-- RLS
+alter table affiliate_codes    enable row level security;
+alter table referrals          enable row level security;
+alter table affiliate_payments enable row level security;
+
+-- Gym sees own affiliate data
+create policy "aff_code_own"  on affiliate_codes    for all using (gym_id = get_gym_id());
+create policy "aff_ref_own"   on referrals          for all using (referrer_gym_id = get_gym_id());
+create policy "aff_pay_own"   on affiliate_payments for all using (referrer_gym_id = get_gym_id());
+-- Admin sees all
+create policy "aff_code_adm"  on affiliate_codes    for all using (is_platform_admin());
+create policy "aff_ref_adm"   on referrals          for all using (is_platform_admin());
+create policy "aff_pay_adm"   on affiliate_payments for all using (is_platform_admin());
+
+-- Auto-generate referral code when gym is approved
+create or replace function generate_affiliate_code()
+returns trigger as $$
+declare
+  code text;
+  base text;
+begin
+  if new.status = 'approved' and old.status != 'approved' then
+    base := upper(regexp_replace(new.name, '[^A-Za-z0-9]', '', 'g'));
+    base := substring(base, 1, 6);
+    code := base || floor(random()*90+10)::text;
+    insert into affiliate_codes(gym_id, code) values(new.id, code)
+    on conflict(code) do nothing;
+  end if;
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists on_gym_approved_affiliate on gyms;
+create trigger on_gym_approved_affiliate
+  after update on gyms for each row execute function generate_affiliate_code();
+
+-- View: affiliate summary per gym
+create or replace view affiliate_summary as
+select
+  ac.gym_id,
+  ac.code,
+  ac.clicks,
+  count(r.id) filter (where r.status='active')  as active_referrals,
+  count(r.id)                                    as total_referrals,
+  coalesce(sum(ap.commission_amt) filter (where ap.status='paid'),0)    as total_earned,
+  coalesce(sum(ap.commission_amt) filter (where ap.status='pending'),0) as pending_earnings
+from affiliate_codes ac
+left join referrals r          on r.referrer_gym_id = ac.gym_id
+left join affiliate_payments ap on ap.referrer_gym_id = ac.gym_id
+group by ac.gym_id, ac.code, ac.clicks;

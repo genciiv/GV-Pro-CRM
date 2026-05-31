@@ -1,10 +1,13 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useAuth } from '../../lib/auth'
 import { useAsync } from '../../hooks/useAsync'
 import { supabase } from '../../lib/supabase'
 import { fmtNum, fmtDate, AVC } from '../../lib/db'
 import { StatCard, Modal, Loading, Empty, Avatar } from '../../components/UI'
 import toast from 'react-hot-toast'
+import OnboardingFlow from '../../components/OnboardingFlow'
+import AnalyticsDashboard from '../gym/AnalyticsDashboard'
+import AffiliateDashboard from '../gym/AffiliateDashboard'
 import PushNotifButton from '../../components/PushNotifButton'
 import { emailAppointmentConfirm } from '../../lib/email'
 import { smsAppointmentConfirm } from '../../lib/sms'
@@ -650,6 +653,13 @@ const NAV = [
 const TITLES = { dashboard:'Dashboard', 'new-appointment':'Rezervim i Ri', appointments:'Rezervimet', staff:'Stafi / Berberët', services:'Shërbimet' }
 
 export default function BarbershopDashboard() {
+  const [showOnboarding, setShowOnboarding] = React.useState(false)
+  React.useEffect(()=>{
+    if(!gymId)return
+    supabase.from('gyms').select('onboarding_done').eq('id',gymId).single().then(({data})=>{
+      if(data&&!data.onboarding_done)setShowOnboarding(true)
+    })
+  },[gymId])
   const { profile, gymId, logout } = useAuth()
   const [page,   setPage]   = useState('dashboard')
   const [sbOpen, setSbOpen] = useState(false)
@@ -667,6 +677,11 @@ export default function BarbershopDashboard() {
 
   return (
     <div className="app">
+      {showOnboarding&&(
+        <div style={{position:'fixed',inset:0,zIndex:9999}}>
+          <OnboardingFlow gymId={gymId} onComplete={()=>setShowOnboarding(false)}/>
+        </div>
+      )}
       <div className={`sbo ${sbOpen?'open':''}`} onClick={()=>setSbOpen(false)}/>
       <aside className={`sidebar ${sbOpen?'open':''}`}>
         <div className="sb-logo">

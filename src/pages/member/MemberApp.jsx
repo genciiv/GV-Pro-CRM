@@ -704,13 +704,93 @@ function Profile({ member, onUpdate }) {
   )
 }
 
+// ── QR CODE TAB ───────────────────────────────────────────
+function MemberQR({ member }) {
+  const qrData = member ? `vaqo-checkin:${member.id}` : ''
+  const [copied, setCopied] = useState(false)
+  return (
+    <div style={{padding:24}}>
+      <div className="card" style={{padding:28,textAlign:'center'}}>
+        <div style={{fontFamily:'var(--fs)',fontSize:20,fontWeight:900,marginBottom:6}}>📷 QR Kodi Juaj</div>
+        <div style={{fontSize:13,color:'var(--g500)',marginBottom:24}}>Skanoje te hyrja e palestrës për check-in automatik</div>
+        {member?.qr_code ? (
+          <img src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(member.qr_code)}`}
+            alt="QR Code" style={{width:220,height:220,borderRadius:12,border:'4px solid var(--g100)',margin:'0 auto 20px',display:'block'}}/>
+        ) : (
+          <div style={{width:220,height:220,borderRadius:12,border:'4px solid var(--g100)',margin:'0 auto 20px',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',background:'var(--g50)',gap:12}}>
+            <div style={{fontSize:48}}>📷</div>
+            <div style={{fontSize:13,color:'var(--g500)'}}>Generim QR...</div>
+          </div>
+        )}
+        <div style={{background:'var(--g50)',borderRadius:10,padding:'10px 16px',marginBottom:16,fontSize:13,color:'var(--g600)'}}>
+          ID: <strong>{member?.id?.slice(0,8).toUpperCase()}</strong>
+        </div>
+        <div style={{fontSize:13,color:'var(--g500)',lineHeight:1.7}}>
+          ✅ Hyr çdo ditë pa nevojë për letër<br/>
+          📱 Ruaje screenshot-in në telefon
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── BOOKINGS TAB ───────────────────────────────────────────
+function MemberBookings({ member }) {
+  const [bookings, setBookings] = useState([])
+  const [loading, setLoading] = useState(true)
+  useEffect(() => {
+    if (!member?.id) return
+    supabase.from('appointments').select('*,service:services(name),staff(name)').eq('client_email', member.email).order('appointment_date',{ascending:false}).limit(20)
+      .then(({data}) => { setBookings(data||[]); setLoading(false) })
+  }, [member])
+  const upcomingCount = bookings.filter(b => b.appointment_date >= new Date().toISOString().split('T')[0]).length
+  return (
+    <div style={{padding:24}}>
+      <div className="card" style={{padding:20,marginBottom:14}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+          <div style={{fontFamily:'var(--fs)',fontSize:18,fontWeight:900}}>📅 Rezervimet e Mia</div>
+          {upcomingCount>0&&<span style={{background:'#dbeafe',color:'#1d4ed8',fontSize:11,fontWeight:700,padding:'3px 10px',borderRadius:20}}>{upcomingCount} të ardhshme</span>}
+        </div>
+        {loading ? <div style={{textAlign:'center',color:'var(--g400)',padding:20}}>Duke ngarkuar...</div>
+        : bookings.length===0 ? (
+          <div style={{textAlign:'center',padding:32}}>
+            <div style={{fontSize:40,marginBottom:10}}>📅</div>
+            <div style={{fontSize:16,fontWeight:700,marginBottom:6}}>Asnjë rezervim</div>
+            <div style={{fontSize:13,color:'var(--g500)'}}>Rezervimet tuaja shfaqen këtu</div>
+          </div>
+        ) : bookings.map(b => {
+          const isPast = b.appointment_date < new Date().toISOString().split('T')[0]
+          return (
+            <div key={b.id} style={{display:'flex',gap:12,padding:'12px 0',borderBottom:'1px solid var(--g100)',opacity:isPast?.6:1}}>
+              <div style={{width:44,height:44,borderRadius:10,background:isPast?'var(--g100)':'#dbeafe',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,flexShrink:0}}>
+                {isPast?'✅':'📅'}
+              </div>
+              <div style={{flex:1}}>
+                <div style={{fontWeight:700,fontSize:14}}>{b.service?.name||'Shërbim'}</div>
+                <div style={{fontSize:12,color:'var(--g500)',marginTop:2}}>
+                  {new Date(b.appointment_date).toLocaleDateString('sq-AL',{weekday:'short',day:'numeric',month:'short'})} · {b.start_time?.slice(0,5)}
+                  {b.staff?.name&&` · ${b.staff.name}`}
+                </div>
+              </div>
+              <div style={{fontSize:12,fontWeight:700,color:isPast?'var(--g400)':'var(--bl)',alignSelf:'center'}}>
+                {isPast?'E kryer':'E ardhshme'}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // ── LAYOUT ────────────────────────────────────────────────
 const NAV = [
-  {id:'home',    label:'Kryefaqja', icon:'🏠'},
-  {id:'workout', label:'Stërvitje', icon:'💪'},
-  {id:'diet',    label:'Dieta',     icon:'🥗'},
-  {id:'stats',   label:'Statistika',icon:'📊'},
-  {id:'profile', label:'Profili',   icon:'👤'},
+  {id:'home',     label:'Kryefaqja', icon:'🏠'},
+  {id:'qr',       label:'QR Kodi',   icon:'📷'},
+  {id:'bookings', label:'Rezervime', icon:'📅'},
+  {id:'workout',  label:'Stërvitje', icon:'💪'},
+  {id:'diet',     label:'Dieta',     icon:'🥗'},
+  {id:'profile',  label:'Profili',   icon:'👤'},
 ]
 
 export default function MemberApp() {
@@ -723,11 +803,12 @@ export default function MemberApp() {
   if (loading || !member) return <Loading/>
 
   const PAGE = {
-    home:    <Home    member={member} setTab={setTab}/>,
-    workout: <WorkoutPlans member={member}/>,
-    diet:    <Diet    member={member}/>,
-    stats:   <Stats   member={member}/>,
-    profile: <Profile member={member} onUpdate={reload}/>,
+    home:     <Home    member={member} setTab={setTab}/>,
+    qr:       <MemberQR member={member}/>,
+    bookings: <MemberBookings member={member}/>,
+    workout:  <WorkoutPlans member={member}/>,
+    diet:     <Diet    member={member}/>,
+    profile:  <Profile member={member} onUpdate={reload}/>,
   }
 
   return (
