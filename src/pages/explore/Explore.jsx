@@ -15,7 +15,7 @@ const BIZ_TYPES = {
 const CITIES = ['Të Gjitha', 'Tiranë', 'Durrës', 'Shkodër', 'Vlorë', 'Elbasan', 'Korçë', 'Fier', 'Berat', 'Lushnjë']
 
 async function getBusinesses(type, city, search) {
-  let q = supabase.from('public_businesses').select('*')
+  let q = supabase.from('gyms').select('id,name,city,address,business_type,rating,review_count,logo_url,description,phone,slug,latitude,longitude').eq('status','approved')
   if (type && type !== 'all') q = q.eq('business_type', type)
   if (city && city !== 'Të Gjitha') q = q.eq('city', city)
   if (search) q = q.ilike('name', `%${search}%`)
@@ -226,7 +226,7 @@ export default function Explore() {
           <div style={{ marginBottom:24 }}>
             <ExploreMap
               businesses={businesses}
-              onSelect={biz=>window.location.href=`/b/${biz.slug}`}
+              onSelect={biz=>window.location.href=`/b/${biz.slug||biz.id}`}
               style={{ height:500 }}
             />
           </div>
@@ -258,7 +258,7 @@ export default function Explore() {
         ) : (
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:20, animation:'fadeUp .3s ease' }} className="grid">
             {businesses.map(biz=>(
-              <BusinessCard key={biz.id} biz={biz} onClick={()=>go(`/b/${biz.slug}`)}/>
+              <BusinessCard key={biz.id} biz={biz} onClick={()=>go(`/b/${biz.slug||biz.id}`)}/>
             ))}
           </div>
         )}

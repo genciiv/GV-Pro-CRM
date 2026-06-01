@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
 import { useAsync } from '../../hooks/useAsync'
 import {
@@ -13,7 +14,7 @@ import { StatCard, BarChart, Avatar, StatusBadge, Modal, Loading, Empty } from '
 import QRCodeSVG, { printQR } from '../../components/QRCode'
 import { printInvoice } from '../../components/Invoice'
 import toast from 'react-hot-toast'
-import AppointmentCalendar from '../../pages/appointments/AppointmentCalendar'
+import AppointmentCalendar from '../appointments/AppointmentCalendar'
 import { smsPaymentConfirm, smsMembershipExpiring } from '../../lib/sms'
 import AnalyticsDashboard from './AnalyticsDashboard'
 import AffiliateDashboard  from './AffiliateDashboard'
@@ -1120,7 +1121,7 @@ const NAV = [
   {s:'Analiza',  items:[{id:'reports',l:'Raporte',i:'📈'}]},
   {s:'Sistem',   items:[{id:'settings',l:'Konfigurimet',i:'⚙️'}]},
 ]
-const TITLES={dashboard:'Dashboard',checkin:'QR Check-in',members:'Anëtarët',memberships:'Abonimet',payments:'Pagesat',reports:'Raporte',settings:'Konfigurimet'}
+const TITLES={setup:'🚀 Setup Wizard',dashboard:'Dashboard',checkin:'QR Check-in',members:'Anëtarët',memberships:'Abonimet',payments:'Pagesat',reports:'Raporte',settings:'Konfigurimet'}
 
 export default function GymDashboard() {
   const { profile, gymId, logout } = useAuth()
@@ -1129,20 +1130,26 @@ export default function GymDashboard() {
   const [sbOpen, setSbOpen] = useState(false)
   const nav = id => { setPage(id); setSbOpen(false) }
 
-  // Check if onboarding needed
+  // Onboarding disabled - user triggers manually via Setup Wizard
   useEffect(()=>{
     if (!gymId) return
-    supabase.from('gyms').select('onboarding_done').eq('id',gymId).single().then(({data})=>{
-      if (data && !data.onboarding_done) setShowOnboarding(true)
-    })
+    // Silently mark onboarding as done for existing gyms
+    const markDone = async () => {
+      try {
+        await supabase.from('gyms').update({onboarding_done:true}).eq('id',gymId).eq('onboarding_done',false)
+      } catch(e) {}
+    }
+    markDone()
   },[gymId])
 
   const gymName  = profile?.gym?.name  || 'Vaqo'
+  const gymSlug  = profile?.gym?.slug  || gymId || ''
   const userName = profile?.data?.name || 'Admin'
   const userRole = profile?.data?.role || 'owner'
 
   const PAGE = {
     calendar:    <AppointmentCalendar gymId={gymId}/>,
+    setup:       <div style={{position:'relative',height:'calc(100vh - 54px)',overflow:'hidden'}}><OnboardingFlow gymId={gymId} onComplete={()=>nav('dashboard')}/></div>,
     dashboard:   <Dashboard   gymId={gymId} setPage={nav}/>,
     analytics:   <AnalyticsDashboard gymId={gymId}/>,
     affiliate:   <AffiliateDashboard gymId={gymId}/>,
@@ -1160,6 +1167,14 @@ export default function GymDashboard() {
       {showOnboarding&&(
         <div style={{position:'fixed',inset:0,zIndex:9999}}>
           <OnboardingFlow gymId={gymId} onComplete={()=>setShowOnboarding(false)}/>
+          <button
+            onClick={async()=>{
+              await supabase.from('gyms').update({onboarding_done:true}).eq('id',gymId).catch(()=>{})
+              setShowOnboarding(false)
+            }}
+            style={{position:'fixed',top:14,right:16,zIndex:10000,background:'rgba(0,0,0,.5)',color:'#fff',border:'none',padding:'7px 16px',borderRadius:8,fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:'inherit'}}>
+            Kalon →
+          </button>
         </div>
       )}
       <div className={`sbo ${sbOpen?'open':''}`} onClick={()=>setSbOpen(false)}/>

@@ -95,7 +95,10 @@ function Router() {
     if (profile.type === 'yoga')            return <YogaDashboard/>
     if (profile.type === 'pilates')         return <YogaDashboard/>
     if (profile.type === 'martial_arts')    return <YogaDashboard/>
-    if (profile.type === 'gym' && profile.gym?.status === 'approved') return <GymDashboard/>
+    if (profile.type === 'dance')           return <YogaDashboard/>
+    if (profile.type === 'fitness')         return <GymDashboard/>
+    if (profile.type === 'wellness')        return <SpaDashboard/>
+    if (profile.gym?.status === 'approved') return <GymDashboard/>
     if (profile.type === 'gym') return (
       <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#fafafa',padding:24}}>
         <div style={{background:'#fff',borderRadius:16,padding:48,maxWidth:440,width:'100%',textAlign:'center',boxShadow:'0 4px 24px rgba(0,0,0,.08)'}}>

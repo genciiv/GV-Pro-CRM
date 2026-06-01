@@ -41,13 +41,14 @@ export default function PublicBooking() {
 
   // ── Load gym by slug
   useEffect(()=>{
-    supabase.from('gyms').select('id,name,city,address,phone,email,logo_url,business_type').eq('slug',slug).eq('status','approved').single()
+    supabase.from('gyms').select('id,name,city,address,phone,email,logo_url,business_type,slug').or(`slug.eq.${slug},id.eq.${slug}`).eq('status','approved').limit(1)
       .then(({data,error:err})=>{
-        if (err || !data) { setError('Biznesi nuk u gjet'); setLoading(false); return }
-        setGym(data)
+        const bizData = Array.isArray(data) ? data[0] : data
+        if (err || !bizData) { setError('Biznesi nuk u gjet'); setLoading(false); return }
+        setGym(bizData)
         return Promise.all([
-          supabase.from('services').select('id,name,price,duration_min,description').eq('gym_id',data.id).eq('is_active',true).order('sort_order'),
-          supabase.from('staff').select('id,first_name,last_name,speciality,avatar_url').eq('gym_id',data.id).eq('is_active',true),
+          supabase.from('services').select('id,name,price,duration_min,description').eq('gym_id',bizData.id).eq('is_active',true).order('sort_order'),
+          supabase.from('staff').select('id,first_name,last_name,speciality,avatar_url').eq('gym_id',bizData.id).eq('is_active',true),
         ])
       })
       .then(([svcRes, staffRes]) => {

@@ -23,8 +23,31 @@ function Stars({ rating, size=16 }) {
 }
 
 async function getBusiness(slug) {
-  const { data } = await supabase.from('public_businesses').select('*').eq('slug', slug).single()
-  return data
+  if (!slug) return null
+  // Try by slug first
+  const { data: bySlug } = await supabase
+    .from('gyms')
+    .select('*')
+    .eq('slug', slug)
+    .eq('status', 'approved')
+    .single()
+  if (bySlug) return bySlug
+  // Try by id (UUID)
+  if (slug.includes('-') && slug.length > 30) {
+    const { data: byId } = await supabase
+      .from('gyms')
+      .select('*')
+      .eq('id', slug)
+      .single()
+    if (byId) return byId
+  }
+  // Try name search
+  const { data: byName } = await supabase
+    .from('gyms')
+    .select('*')
+    .ilike('name', `%${slug.replace(/-/g,' ')}%`)
+    .limit(1)
+  return byName?.[0] || null
 }
 async function getStaff(gymId) {
   const { data } = await supabase.from('staff').select('*').eq('gym_id', gymId).eq('is_active', true).order('name')
@@ -315,7 +338,14 @@ export default function BusinessProfile() {
       {biz && (
         <div style={{ maxWidth:900, margin:'0 auto', padding:'0 24px 32px' }}>
           <div style={{ fontWeight:700, fontSize:15, marginBottom:12 }}>📍 Lokacioni</div>
-          <BusinessMap business={biz} style={{ height:240, border:'1px solid #e4e4e7' }}/>
+          {(biz.latitude && biz.longitude) ? (
+            <BusinessMap business={biz} style={{ height:240, border:'1px solid #e4e4e7' }}/>
+          ) : (
+            <div style={{ height:120, background:'#f4f6fa', borderRadius:10, display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column', gap:8, border:'1px solid #e8eaef' }}>
+              <div style={{ fontSize:28 }}>📍</div>
+              <div style={{ fontSize:13, color:'#9aa0b0' }}>{biz.address ? `${biz.address}, ${biz.city}` : biz.city || 'Lokacioni nuk është vendosur'}</div>
+            </div>
+          )}
           {biz.address && <div style={{ marginTop:10, fontSize:13, color:'#71717a' }}>📍 {biz.address}, {biz.city}</div>}
         </div>
       )}
