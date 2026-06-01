@@ -838,3 +838,33 @@ from affiliate_codes ac
 left join referrals r          on r.referrer_gym_id = ac.gym_id
 left join affiliate_payments ap on ap.referrer_gym_id = ac.gym_id
 group by ac.gym_id, ac.code, ac.clicks;
+
+-- ── SLUG FOR PUBLIC BOOKING ───────────────────────────────
+ALTER TABLE gyms ADD COLUMN IF NOT EXISTS slug text unique;
+
+-- Auto-generate slug from name
+CREATE OR REPLACE FUNCTION generate_gym_slug()
+RETURNS TRIGGER AS $$
+DECLARE
+  base_slug text;
+  final_slug text;
+  counter int := 0;
+BEGIN
+  base_slug := lower(regexp_replace(NEW.name, '[^a-zA-Z0-9]+', '-', 'g'));
+  base_slug := trim(both '-' from base_slug);
+  final_slug := base_slug;
+  WHILE EXISTS (SELECT 1 FROM gyms WHERE slug = final_slug AND id != NEW.id) LOOP
+    counter := counter + 1;
+    final_slug := base_slug || '-' || counter;
+  END LOOP;
+  NEW.slug := final_slug;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS set_gym_slug ON gyms;
+CREATE TRIGGER set_gym_slug BEFORE INSERT OR UPDATE OF name ON gyms
+  FOR EACH ROW WHEN (NEW.slug IS NULL) EXECUTE FUNCTION generate_gym_slug();
+
+-- Backfill existing gyms
+UPDATE gyms SET name = name WHERE slug IS NULL;

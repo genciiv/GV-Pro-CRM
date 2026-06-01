@@ -165,13 +165,13 @@ function Home({ member, setTab }) {
           <div className="card-hd"><div className="card-t">💪 Stërvitjet e Fundit</div></div>
           <div>
             {(logs||[]).slice(0,4).map((l,i)=>(
-              <div key={l.id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 16px',borderBottom:i<Math.min((logs||[]).length,4)-1?'1px solid var(--g100)':'none'}}>
+              <div key={l.id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 16px',borderBottom:i<Math.min((logs||[]).length,4)-1?'1px solid var(--border)':'none'}}>
                 <div>
                   <div style={{fontWeight:500,fontSize:13}}>{l.session?.title||'Stërvitje'}</div>
-                  <div style={{fontSize:11,color:'var(--g400)',marginTop:2}}>{fmtDate(l.logged_at)}</div>
+                  <div style={{fontSize:11,color:'var(--tx4)',marginTop:2}}>{fmtDate(l.logged_at)}</div>
                 </div>
                 <div style={{display:'flex',alignItems:'center',gap:10}}>
-                  {l.duration_minutes&&<span style={{fontSize:12,color:'var(--g500)'}}>⏱ {l.duration_minutes} min</span>}
+                  {l.duration_minutes&&<span style={{fontSize:12,color:'var(--tx3)'}}>⏱ {l.duration_minutes} min</span>}
                   {l.rating&&<span style={{fontSize:12}}>{'⭐'.repeat(l.rating)}</span>}
                 </div>
               </div>
@@ -234,7 +234,7 @@ function WorkoutPlans({ member }) {
               {plan.trainer&&<span style={{fontSize:12,color:'rgba(255,255,255,.6)'}}>👤 {plan.trainer.name}</span>}
             </div>
           </div>
-          {plan.description&&<div style={{padding:'14px 20px',fontSize:13,color:'var(--g600)',lineHeight:1.6}}>{plan.description}</div>}
+          {plan.description&&<div style={{padding:'14px 20px',fontSize:13,color:'var(--tx2)',lineHeight:1.6}}>{plan.description}</div>}
         </div>
 
         {/* Sessions */}
@@ -250,23 +250,23 @@ function WorkoutPlans({ member }) {
                   </div>
                   <div>
                     <div style={{fontWeight:600,fontSize:14}}>{session.title}</div>
-                    <div style={{fontSize:12,color:'var(--g400)',marginTop:2}}>{(session.exercises||[]).length} ushtrime</div>
+                    <div style={{fontSize:12,color:'var(--tx4)',marginTop:2}}>{(session.exercises||[]).length} ushtrime</div>
                   </div>
                 </div>
                 <div style={{display:'flex',gap:8,alignItems:'center'}}>
                   <button className="btn btn-p btn-sm" onClick={e=>{e.stopPropagation();setLogModal(session)}}
                     style={{fontSize:11}}>✅ Regjistro</button>
-                  <span style={{fontSize:14,color:'var(--g400)',transform:selectedSession?.id===session.id?'rotate(180deg)':'none',transition:'transform .2s'}}>▾</span>
+                  <span style={{fontSize:14,color:'var(--tx4)',transform:selectedSession?.id===session.id?'rotate(180deg)':'none',transition:'transform .2s'}}>▾</span>
                 </div>
               </div>
 
               {selectedSession?.id===session.id&&(
-                <div style={{borderTop:'1px solid var(--g100)'}}>
-                  {session.notes&&<div style={{padding:'10px 18px',background:'var(--g50)',fontSize:12,color:'var(--g600)',lineHeight:1.6}}>📝 {session.notes}</div>}
+                <div style={{borderTop:'1px solid var(--border)'}}>
+                  {session.notes&&<div style={{padding:'10px 18px',background:'var(--surface2)',fontSize:12,color:'var(--tx2)',lineHeight:1.6}}>📝 {session.notes}</div>}
                   <div>
                     {(session.exercises||[]).sort((a,b)=>a.sort_order-b.sort_order).map((ex,i)=>(
-                      <div key={ex.id} style={{display:'flex',gap:16,padding:'14px 18px',borderBottom:i<session.exercises.length-1?'1px solid var(--g100)':'none',alignItems:'flex-start'}}>
-                        <div style={{width:28,height:28,borderRadius:'50%',background:'var(--g100)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,flexShrink:0,color:'var(--g600)'}}>{i+1}</div>
+                      <div key={ex.id} style={{display:'flex',gap:16,padding:'14px 18px',borderBottom:i<session.exercises.length-1?'1px solid var(--border)':'none',alignItems:'flex-start'}}>
+                        <div style={{width:28,height:28,borderRadius:'50%',background:'var(--border)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,flexShrink:0,color:'var(--tx2)'}}>{i+1}</div>
                         <div style={{flex:1}}>
                           <div style={{fontWeight:600,fontSize:14,marginBottom:6}}>{ex.name}</div>
                           <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
@@ -275,7 +275,7 @@ function WorkoutPlans({ member }) {
                             {ex.weight&&<span className="bdg bdg-bl">⚖️ {ex.weight}</span>}
                             {ex.rest_seconds&&<span className="bdg bdg-am">⏱ {ex.rest_seconds}s pushim</span>}
                           </div>
-                          {ex.notes&&<div style={{fontSize:12,color:'var(--g500)',marginTop:6,lineHeight:1.5}}>💬 {ex.notes}</div>}
+                          {ex.notes&&<div style={{fontSize:12,color:'var(--tx3)',marginTop:6,lineHeight:1.5}}>💬 {ex.notes}</div>}
                         </div>
                       </div>
                     ))}
@@ -298,8 +298,8 @@ function WorkoutPlans({ member }) {
       {loading?<Loading/>:(plans||[]).length===0?(
         <div className="card" style={{padding:48,textAlign:'center'}}>
           <div style={{fontSize:48,marginBottom:16}}>💪</div>
-          <div style={{fontFamily:'var(--fs)',fontSize:20,marginBottom:8}}>Asnjë plan ende</div>
-          <div style={{fontSize:14,color:'var(--g500)',lineHeight:1.7}}>
+          <div style={{fontFamily:'Georgia,serif',fontSize:20,marginBottom:8}}>Asnjë plan ende</div>
+          <div style={{fontSize:14,color:'var(--tx3)',lineHeight:1.7}}>
             Trajneri yt do të krijojë planin e stërvitjes.<br/>Kontakto recepsionin për të filluar.
           </div>
         </div>
@@ -313,14 +313,14 @@ function WorkoutPlans({ member }) {
                 <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:12}}>
                   <div>
                     <div style={{fontWeight:700,fontSize:16,marginBottom:4}}>{plan.title}</div>
-                    <div style={{fontSize:12,color:'var(--g500)'}}>
+                    <div style={{fontSize:12,color:'var(--tx3)'}}>
                       {plan.trainer&&`👤 ${plan.trainer.name} · `}
                       📅 {plan.duration_weeks} javë · 💪 {plan.days_per_week} ditë/javë
                     </div>
                   </div>
                   <span className="bdg bdg-gr">Aktiv</span>
                 </div>
-                {plan.description&&<div style={{fontSize:13,color:'var(--g600)',lineHeight:1.6,marginBottom:12}}>{plan.description}</div>}
+                {plan.description&&<div style={{fontSize:13,color:'var(--tx2)',lineHeight:1.6,marginBottom:12}}>{plan.description}</div>}
                 <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
                   <span className="bdg bdg-gy">📋 {(plan.sessions||[]).length} seanca</span>
                   <span className="bdg bdg-gy">🏋️ {(plan.sessions||[]).reduce((a,s)=>a+(s.exercises||[]).length,0)} ushtrime</span>
@@ -413,8 +413,8 @@ function Diet({ member }) {
         ml?<Loading/>:(myDiets||[]).length===0?(
           <div className="card" style={{padding:48,textAlign:'center'}}>
             <div style={{fontSize:48,marginBottom:16}}>🥗</div>
-            <div style={{fontFamily:'var(--fs)',fontSize:20,marginBottom:8}}>Asnjë dietë ende</div>
-            <div style={{fontSize:14,color:'var(--g500)',marginBottom:20}}>Bli planin e parë të dietës nga dietologët tanë</div>
+            <div style={{fontFamily:'Georgia,serif',fontSize:20,marginBottom:8}}>Asnjë dietë ende</div>
+            <div style={{fontSize:14,color:'var(--tx3)',marginBottom:20}}>Bli planin e parë të dietës nga dietologët tanë</div>
             <button className="btn btn-p" onClick={()=>setTab('shop')}>Shiko Dietat →</button>
           </div>
         ):(
@@ -424,7 +424,7 @@ function Diet({ member }) {
                 <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:12}}>
                   <div>
                     <div style={{fontWeight:700,fontSize:16,marginBottom:4}}>{order.diet_plan?.title}</div>
-                    <div style={{fontSize:12,color:'var(--g500)'}}>👨‍⚕️ {order.diet_plan?.nutritionist?.name}</div>
+                    <div style={{fontSize:12,color:'var(--tx3)'}}>👨‍⚕️ {order.diet_plan?.nutritionist?.name}</div>
                   </div>
                   <span className="bdg bdg-gr">✅ Aktive</span>
                 </div>
@@ -434,14 +434,14 @@ function Diet({ member }) {
                   <span className="bdg bdg-gy">🍽️ {order.diet_plan?.meals_per_day} vakte</span>
                 </div>
                 {order.access_until&&(
-                  <div style={{background:'var(--g50)',borderRadius:8,padding:'10px 12px',fontSize:12,color:'var(--g600)'}}>
+                  <div style={{background:'var(--surface2)',borderRadius:8,padding:'10px 12px',fontSize:12,color:'var(--tx2)'}}>
                     📅 Akses deri: <strong>{fmtDate(order.access_until)}</strong>
                   </div>
                 )}
                 {(order.diet_plan?.includes||[]).length>0&&(
                   <div style={{marginTop:12}}>
                     {(order.diet_plan.includes||[]).map((inc,i)=>(
-                      <div key={i} style={{fontSize:12,color:'var(--g600)',display:'flex',gap:6,marginBottom:4}}>
+                      <div key={i} style={{fontSize:12,color:'var(--tx2)',display:'flex',gap:6,marginBottom:4}}>
                         <span style={{color:'var(--gr)'}}>✓</span>{inc}
                       </div>
                     ))}
@@ -464,14 +464,14 @@ function Diet({ member }) {
                 <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:10}}>
                   <div style={{flex:1}}>
                     <div style={{fontWeight:700,fontSize:15,marginBottom:4}}>{diet.title}</div>
-                    <div style={{fontSize:12,color:'var(--g500)'}}>👨‍⚕️ {diet.nutritionist?.name} · 🎯 {GOAL_LABELS[diet.goal]||diet.goal}</div>
+                    <div style={{fontSize:12,color:'var(--tx3)'}}>👨‍⚕️ {diet.nutritionist?.name} · 🎯 {GOAL_LABELS[diet.goal]||diet.goal}</div>
                   </div>
                   <div style={{textAlign:'right',flexShrink:0,marginLeft:12}}>
-                    <div style={{fontFamily:'var(--fs)',fontSize:22,fontWeight:900}}>{fmtNum(diet.price)}</div>
-                    <div style={{fontSize:11,color:'var(--g400)'}}>ALL</div>
+                    <div style={{fontFamily:'Georgia,serif',fontSize:22,fontWeight:900}}>{fmtNum(diet.price)}</div>
+                    <div style={{fontSize:11,color:'var(--tx4)'}}>ALL</div>
                   </div>
                 </div>
-                {diet.description&&<div style={{fontSize:13,color:'var(--g600)',lineHeight:1.6,marginBottom:10}}>{diet.description}</div>}
+                {diet.description&&<div style={{fontSize:13,color:'var(--tx2)',lineHeight:1.6,marginBottom:10}}>{diet.description}</div>}
                 <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:10}}>
                   <span className="bdg bdg-gy">📅 {diet.duration_weeks} javë</span>
                   {diet.calories_per_day&&<span className="bdg bdg-gr">🔥 {diet.calories_per_day} kcal</span>}
@@ -481,13 +481,13 @@ function Diet({ member }) {
                 {(diet.includes||[]).length>0&&(
                   <div style={{display:'flex',flexDirection:'column',gap:3}}>
                     {(diet.includes||[]).slice(0,3).map((inc,i)=>(
-                      <div key={i} style={{fontSize:12,color:'var(--g600)',display:'flex',gap:6}}>
+                      <div key={i} style={{fontSize:12,color:'var(--tx2)',display:'flex',gap:6}}>
                         <span style={{color:'var(--gr)'}}>✓</span>{inc}
                       </div>
                     ))}
                   </div>
                 )}
-                <div style={{marginTop:12,padding:'10px 14px',background:'var(--g50)',borderRadius:8,fontSize:12,color:'var(--g500)'}}>
+                <div style={{marginTop:12,padding:'10px 14px',background:'var(--surface2)',borderRadius:8,fontSize:12,color:'var(--tx3)'}}>
                   💵 Pagesa cash te recepsioni pas porosisë
                 </div>
               </div>
@@ -501,10 +501,10 @@ function Diet({ member }) {
           <><button className="btn btn-s" onClick={()=>setShowOrder(null)}>Anulo</button>
           <button className="btn btn-p" onClick={placeOrder} disabled={ordering}>{ordering?'Duke dërguar...':'📩 Porosit'}</button></>
         }>
-          <div style={{background:'var(--g50)',borderRadius:10,padding:14,marginBottom:16,fontSize:13,lineHeight:1.8}}>
+          <div style={{background:'var(--surface2)',borderRadius:10,padding:14,marginBottom:16,fontSize:13,lineHeight:1.8}}>
             <div><strong>{showOrder.title}</strong></div>
-            <div style={{color:'var(--g500)'}}>👨‍⚕️ {showOrder.nutritionist?.name}</div>
-            <div style={{fontWeight:700,color:'var(--g900)',marginTop:6,fontSize:16}}>{fmtNum(showOrder.price)} ALL</div>
+            <div style={{color:'var(--tx3)'}}>👨‍⚕️ {showOrder.nutritionist?.name}</div>
+            <div style={{fontWeight:700,color:'var(--tx)',marginTop:6,fontSize:16}}>{fmtNum(showOrder.price)} ALL</div>
           </div>
           <div className="alert al-bl" style={{marginBottom:16}}>💵 Pas porosisë, paguaj cash te recepsioni i palestrës.</div>
           <div style={{display:'flex',flexDirection:'column',gap:12}}>
@@ -570,9 +570,9 @@ function Stats({ member }) {
             <div style={{display:'flex',alignItems:'flex-end',gap:10,height:120}}>
               {ciByMonth.map((m,i)=>(
                 <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:5,height:'100%',justifyContent:'flex-end'}}>
-                  {m.count>0&&<div style={{fontSize:11,color:'var(--g500)',fontWeight:600}}>{m.count}</div>}
-                  <div style={{width:'100%',height:m.count>0?`${Math.round(m.count/maxCi*100)}%`:'4px',background:m.count>0?'#18181b':'var(--g200)',borderRadius:'4px 4px 0 0',minHeight:4,transition:'height .5s ease'}}/>
-                  <div style={{fontSize:11,color:'var(--g400)'}}>{m.label}</div>
+                  {m.count>0&&<div style={{fontSize:11,color:'var(--tx3)',fontWeight:600}}>{m.count}</div>}
+                  <div style={{width:'100%',height:m.count>0?`${Math.round(m.count/maxCi*100)}%`:'4px',background:m.count>0?'#18181b':'var(--border)',borderRadius:'4px 4px 0 0',minHeight:4,transition:'height .5s ease'}}/>
+                  <div style={{fontSize:11,color:'var(--tx4)'}}>{m.label}</div>
                 </div>
               ))}
             </div>
@@ -590,10 +590,10 @@ function Stats({ member }) {
               {(logs||[]).map(l=>(
                 <tr key={l.id}>
                   <td style={{fontWeight:500}}>{l.session?.title||'Stërvitje'}</td>
-                  <td style={{fontSize:12,color:'var(--g500)'}}>{fmtDate(l.logged_at)}</td>
-                  <td style={{color:'var(--g600)'}}>{l.duration_minutes?`${l.duration_minutes} min`:'—'}</td>
+                  <td style={{fontSize:12,color:'var(--tx3)'}}>{fmtDate(l.logged_at)}</td>
+                  <td style={{color:'var(--tx2)'}}>{l.duration_minutes?`${l.duration_minutes} min`:'—'}</td>
                   <td>{l.rating?'⭐'.repeat(l.rating):'—'}</td>
-                  <td style={{fontSize:12,color:'var(--g500)',maxWidth:150}}>{l.notes||'—'}</td>
+                  <td style={{fontSize:12,color:'var(--tx3)',maxWidth:150}}>{l.notes||'—'}</td>
                 </tr>
               ))}
             </tbody>
@@ -617,7 +617,7 @@ function Profile({ member, onUpdate }) {
     ? Math.round(form.weight / Math.pow(form.height/100, 2) * 10) / 10
     : null
   const bmiLabel = !bmi?'—':bmi<18.5?'Nënpeshë':bmi<25?'Normal':bmi<30?'Mbipeshë':'Obezitet'
-  const bmiColor = !bmi?'var(--g400)':bmi<18.5?'var(--ac)':bmi<25?'var(--gr)':bmi<30?'var(--am)':'var(--rd)'
+  const bmiColor = !bmi?'var(--tx4)':bmi<18.5?'var(--bl)':bmi<25?'var(--gr)':bmi<30?'var(--am)':'var(--rd)'
 
   const save = async () => {
     setSaving(true)
@@ -657,15 +657,15 @@ function Profile({ member, onUpdate }) {
 
       {/* BMI Card */}
       {bmi&&(
-        <div style={{background:'#fff',border:'1px solid var(--g200)',borderRadius:14,padding:20,marginBottom:16,display:'flex',alignItems:'center',gap:20,boxShadow:'var(--sh)'}}>
+        <div style={{background:'#fff',border:'1px solid var(--border)',borderRadius:14,padding:20,marginBottom:16,display:'flex',alignItems:'center',gap:20,boxShadow:'var(--sh)'}}>
           <div style={{textAlign:'center',flex:1}}>
-            <div style={{fontSize:11,color:'var(--g400)',marginBottom:4}}>BMI</div>
-            <div style={{fontFamily:'var(--fs)',fontSize:40,fontWeight:900,color:bmiColor,lineHeight:1}}>{bmi}</div>
+            <div style={{fontSize:11,color:'var(--tx4)',marginBottom:4}}>BMI</div>
+            <div style={{fontFamily:'Georgia,serif',fontSize:40,fontWeight:900,color:bmiColor,lineHeight:1}}>{bmi}</div>
           </div>
-          <div style={{width:1,height:60,background:'var(--g100)'}}/>
+          <div style={{width:1,height:60,background:'var(--border)'}}/>
           <div style={{flex:2}}>
             <div style={{fontWeight:600,fontSize:16,color:bmiColor,marginBottom:4}}>{bmiLabel}</div>
-            <div style={{fontSize:12,color:'var(--g500)',lineHeight:1.6}}>
+            <div style={{fontSize:12,color:'var(--tx3)',lineHeight:1.6}}>
               {bmi<18.5?'Ke nevojë për të fituar peshë':bmi<25?'Peshë e shëndetshme — vazhdoni kështu!':bmi<30?'Rekomandohet aktivitet fizik':'Konsultohuni me mjekun'}
             </div>
           </div>
@@ -711,21 +711,21 @@ function MemberQR({ member }) {
   return (
     <div style={{padding:24}}>
       <div className="card" style={{padding:28,textAlign:'center'}}>
-        <div style={{fontFamily:'var(--fs)',fontSize:20,fontWeight:900,marginBottom:6}}>📷 QR Kodi Juaj</div>
-        <div style={{fontSize:13,color:'var(--g500)',marginBottom:24}}>Skanoje te hyrja e palestrës për check-in automatik</div>
+        <div style={{fontFamily:'Georgia,serif',fontSize:20,fontWeight:900,marginBottom:6}}>📷 QR Kodi Juaj</div>
+        <div style={{fontSize:13,color:'var(--tx3)',marginBottom:24}}>Skanoje te hyrja e palestrës për check-in automatik</div>
         {member?.qr_code ? (
           <img src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(member.qr_code)}`}
-            alt="QR Code" style={{width:220,height:220,borderRadius:12,border:'4px solid var(--g100)',margin:'0 auto 20px',display:'block'}}/>
+            alt="QR Code" style={{width:220,height:220,borderRadius:12,border:'4px solid var(--border)',margin:'0 auto 20px',display:'block'}}/>
         ) : (
-          <div style={{width:220,height:220,borderRadius:12,border:'4px solid var(--g100)',margin:'0 auto 20px',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',background:'var(--g50)',gap:12}}>
+          <div style={{width:220,height:220,borderRadius:12,border:'4px solid var(--border)',margin:'0 auto 20px',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',background:'var(--surface2)',gap:12}}>
             <div style={{fontSize:48}}>📷</div>
-            <div style={{fontSize:13,color:'var(--g500)'}}>Generim QR...</div>
+            <div style={{fontSize:13,color:'var(--tx3)'}}>Generim QR...</div>
           </div>
         )}
-        <div style={{background:'var(--g50)',borderRadius:10,padding:'10px 16px',marginBottom:16,fontSize:13,color:'var(--g600)'}}>
+        <div style={{background:'var(--surface2)',borderRadius:10,padding:'10px 16px',marginBottom:16,fontSize:13,color:'var(--tx2)'}}>
           ID: <strong>{member?.id?.slice(0,8).toUpperCase()}</strong>
         </div>
-        <div style={{fontSize:13,color:'var(--g500)',lineHeight:1.7}}>
+        <div style={{fontSize:13,color:'var(--tx3)',lineHeight:1.7}}>
           ✅ Hyr çdo ditë pa nevojë për letër<br/>
           📱 Ruaje screenshot-in në telefon
         </div>
@@ -748,31 +748,31 @@ function MemberBookings({ member }) {
     <div style={{padding:24}}>
       <div className="card" style={{padding:20,marginBottom:14}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-          <div style={{fontFamily:'var(--fs)',fontSize:18,fontWeight:900}}>📅 Rezervimet e Mia</div>
+          <div style={{fontFamily:'Georgia,serif',fontSize:18,fontWeight:900}}>📅 Rezervimet e Mia</div>
           {upcomingCount>0&&<span style={{background:'#dbeafe',color:'#1d4ed8',fontSize:11,fontWeight:700,padding:'3px 10px',borderRadius:20}}>{upcomingCount} të ardhshme</span>}
         </div>
-        {loading ? <div style={{textAlign:'center',color:'var(--g400)',padding:20}}>Duke ngarkuar...</div>
+        {loading ? <div style={{textAlign:'center',color:'var(--tx4)',padding:20}}>Duke ngarkuar...</div>
         : bookings.length===0 ? (
           <div style={{textAlign:'center',padding:32}}>
             <div style={{fontSize:40,marginBottom:10}}>📅</div>
             <div style={{fontSize:16,fontWeight:700,marginBottom:6}}>Asnjë rezervim</div>
-            <div style={{fontSize:13,color:'var(--g500)'}}>Rezervimet tuaja shfaqen këtu</div>
+            <div style={{fontSize:13,color:'var(--tx3)'}}>Rezervimet tuaja shfaqen këtu</div>
           </div>
         ) : bookings.map(b => {
           const isPast = b.appointment_date < new Date().toISOString().split('T')[0]
           return (
-            <div key={b.id} style={{display:'flex',gap:12,padding:'12px 0',borderBottom:'1px solid var(--g100)',opacity:isPast?.6:1}}>
-              <div style={{width:44,height:44,borderRadius:10,background:isPast?'var(--g100)':'#dbeafe',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,flexShrink:0}}>
+            <div key={b.id} style={{display:'flex',gap:12,padding:'12px 0',borderBottom:'1px solid var(--border)',opacity:isPast?.6:1}}>
+              <div style={{width:44,height:44,borderRadius:10,background:isPast?'var(--border)':'#dbeafe',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,flexShrink:0}}>
                 {isPast?'✅':'📅'}
               </div>
               <div style={{flex:1}}>
                 <div style={{fontWeight:700,fontSize:14}}>{b.service?.name||'Shërbim'}</div>
-                <div style={{fontSize:12,color:'var(--g500)',marginTop:2}}>
+                <div style={{fontSize:12,color:'var(--tx3)',marginTop:2}}>
                   {new Date(b.appointment_date).toLocaleDateString('sq-AL',{weekday:'short',day:'numeric',month:'short'})} · {b.start_time?.slice(0,5)}
                   {b.staff?.name&&` · ${b.staff.name}`}
                 </div>
               </div>
-              <div style={{fontSize:12,fontWeight:700,color:isPast?'var(--g400)':'var(--bl)',alignSelf:'center'}}>
+              <div style={{fontSize:12,fontWeight:700,color:isPast?'var(--tx4)':'var(--bl)',alignSelf:'center'}}>
                 {isPast?'E kryer':'E ardhshme'}
               </div>
             </div>
@@ -812,14 +812,14 @@ export default function MemberApp() {
   }
 
   return (
-    <div style={{minHeight:'100vh',background:'var(--g50)',paddingBottom:80}}>
+    <div style={{minHeight:'100vh',background:'var(--surface2)',paddingBottom:80}}>
       {/* Top bar */}
-      <div style={{background:'#fff',borderBottom:'1px solid var(--g200)',padding:'14px 16px',display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky',top:0,zIndex:50}}>
+      <div style={{background:'#fff',borderBottom:'1px solid var(--border)',padding:'14px 16px',display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky',top:0,zIndex:50}}>
         <div style={{display:'flex',alignItems:'center',gap:8}}>
           <div style={{width:30,height:30,borderRadius:7,background:'#18181b',display:'flex',alignItems:'center',justifyContent:'center',fontSize:15}}>💪</div>
           <div>
             <div style={{fontWeight:700,fontSize:14,lineHeight:1}}>Vaqo</div>
-            <div style={{fontSize:10,color:'var(--g400)'}}>App Anëtarësh</div>
+            <div style={{fontSize:10,color:'var(--tx4)'}}>App Anëtarësh</div>
           </div>
         </div>
         <button onClick={logout} className="btn btn-g btn-sm" style={{fontSize:12}}>Dil →</button>
@@ -831,7 +831,7 @@ export default function MemberApp() {
       </div>
 
       {/* Bottom nav */}
-      <div style={{position:'fixed',bottom:0,left:0,right:0,background:'#fff',borderTop:'1px solid var(--g200)',display:'flex',zIndex:50,boxShadow:'0 -4px 12px rgba(0,0,0,.06)'}}>
+      <div style={{position:'fixed',bottom:0,left:0,right:0,background:'#fff',borderTop:'1px solid var(--border)',display:'flex',zIndex:50,boxShadow:'0 -4px 12px rgba(0,0,0,.06)'}}>
         {NAV.map(item=>(
           <button key={item.id} onClick={()=>setTab(item.id)}
             style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'10px 4px',background:'none',border:'none',cursor:'pointer',gap:3,transition:'all .12s',color:tab===item.id?'#18181b':'#a1a1aa'}}>

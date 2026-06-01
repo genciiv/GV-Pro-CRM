@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+Allow: /blog/
+Allow: /blog/*
+Allow: /category/*
+Allow: /b/*
+Allow: /explore
+Allow: /pricing
+Allow: /terms
+Allow: /privacy
+Allow: /gdpr
+
+Disallow: /login
+Disallow: /register
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /apply
+Disallow: /reset-password
+
+Sitemap: https://vaqo.al/sitemap.xml

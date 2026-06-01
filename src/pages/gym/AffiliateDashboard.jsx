@@ -23,6 +23,10 @@ export default function AffiliateDashboard({ gymId }) {
   const [copied,    setCopied]    = useState(false)
   const [copiedUrl, setCopiedUrl] = useState(false)
   const [tab,       setTab]       = useState('overview')
+  const [copMsg1,   setCopMsg1]   = useState(false)
+  const [copMsg2,   setCopMsg2]   = useState(false)
+  const [copLnk1,   setCopLnk1]   = useState(false)
+  const [copLnk2,   setCopLnk2]   = useState(false)
 
   useEffect(() => { load() }, [gymId])
 
@@ -304,29 +308,24 @@ export default function AffiliateDashboard({ gymId }) {
             {/* Share messages */}
             <div style={{background:'#fff',border:'1px solid #e4e4e7',borderRadius:14,padding:24}}>
               <div style={{fontWeight:700,fontSize:14,marginBottom:16}}>📱 Mesazhe Gati për WhatsApp / SMS</div>
-              {[
-                {
-                  title:'Mesazh i shkurtër',
-                  text:`Hej! Po përdor Vaqo për menaxhimin e biznesit tim dhe jam shumë i kënaqur. Nëse dëshiron të provosh, regjistrohu me kodin tim "${data?.code}" dhe merr 30 ditë falas: ${refUrl}`,
-                },
-                {
-                  title:'Mesazh i detajuar',
-                  text:`Hej! Kam filluar të përdor Vaqo — platformën shqiptare për menaxhimin e bizneseve wellness. Ka rezervime online, QR check-in, pagesa automatike dhe shumë të tjera. 30 ditë falas pa kartë krediti. Regjistrohu me kodin tim "${data?.code}": ${refUrl}`,
-                },
-              ].map((msg,i)=>{
-                const [cop, setCop] = useState(false)
-                return (
-                  <div key={i} style={{background:'#f8f8f8',borderRadius:10,padding:16,marginBottom:10}}>
-                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
-                      <span style={{fontSize:12,fontWeight:700,color:'#52525b'}}>{msg.title}</span>
-                      <button onClick={()=>copyText(msg.text,setCop)} style={{background:cop?'#16a34a':'#18181b',color:'#fff',border:'none',padding:'5px 12px',borderRadius:7,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:'inherit',transition:'all .2s'}}>
-                        {cop?'✅ Kopjuar':'📋 Kopjo'}
-                      </button>
-                    </div>
-                    <div style={{fontSize:13,color:'#52525b',lineHeight:1.6}}>{msg.text}</div>
-                  </div>
-                )
-              })}
+              <div style={{background:'#f8f8f8',borderRadius:10,padding:16,marginBottom:10}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+                  <span style={{fontSize:12,fontWeight:700,color:'#52525b'}}>Mesazh i shkurtër</span>
+                  <button onClick={()=>copyText(`Hej! Po përdor Vaqo për menaxhimin e biznesit tim dhe jam shumë i kënaqur. Nëse dëshiron të provosh, regjistrohu me kodin tim "${data?.code}" dhe merr 30 ditë falas: ${refUrl}`,setCopMsg1)} style={{background:copMsg1?'#16a34a':'#18181b',color:'#fff',border:'none',padding:'5px 12px',borderRadius:7,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:'inherit',transition:'all .2s'}}>
+                    {copMsg1?'✅ Kopjuar':'📋 Kopjo'}
+                  </button>
+                </div>
+                <div style={{fontSize:13,color:'#52525b',lineHeight:1.6}}>{`Hej! Po përdor Vaqo për menaxhimin e biznesit tim dhe jam shumë i kënaqur. Nëse dëshiron të provosh, regjistrohu me kodin tim "${data?.code}" dhe merr 30 ditë falas: ${refUrl}`}</div>
+              </div>
+              <div style={{background:'#f8f8f8',borderRadius:10,padding:16,marginBottom:10}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+                  <span style={{fontSize:12,fontWeight:700,color:'#52525b'}}>Mesazh i detajuar</span>
+                  <button onClick={()=>copyText(`Hej! Kam filluar të përdor Vaqo — platformën shqiptare për menaxhimin e bizneseve wellness. Ka rezervime online, QR check-in, pagesa automatike dhe shumë të tjera. 30 ditë falas pa kartë krediti. Regjistrohu me kodin tim "${data?.code}": ${refUrl}`,setCopMsg2)} style={{background:copMsg2?'#16a34a':'#18181b',color:'#fff',border:'none',padding:'5px 12px',borderRadius:7,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:'inherit',transition:'all .2s'}}>
+                    {copMsg2?'✅ Kopjuar':'📋 Kopjo'}
+                  </button>
+                </div>
+                <div style={{fontSize:13,color:'#52525b',lineHeight:1.6}}>{`Hej! Kam filluar të përdor Vaqo — platformën shqiptare për menaxhimin e bizneseve wellness. Ka rezervime online, QR check-in, pagesa automatike dhe shumë të tjera. 30 ditë falas pa kartë krediti. Regjistrohu me kodin tim "${data?.code}": ${refUrl}`}</div>
+              </div>
             </div>
 
             {/* Social share */}
@@ -351,25 +350,22 @@ export default function AffiliateDashboard({ gymId }) {
             <div style={{background:'#fff',border:'1px solid #e4e4e7',borderRadius:14,padding:24}}>
               <div style={{fontWeight:700,fontSize:14,marginBottom:14}}>🔗 Linqet e Referimit</div>
               {[
-                { label:'Link Aplikimi (rekomanduar)', url:refUrl, desc:'Shkon direkt te formulari i aplikimit me kodin tuaj pre-filled' },
-                { label:'Link Landing Page', url:refLink, desc:'Shkon te kryefaqja e Vaqo me kodin tuaj' },
-              ].map((l,i)=>{
-                const [c,setC] = useState(false)
-                return (
+                { label:'Link Aplikimi (rekomanduar)', url:refUrl, desc:'Shkon direkt te formulari i aplikimit me kodin tuaj pre-filled', cop:copLnk1, setCop:setCopLnk1 },
+                { label:'Link Landing Page', url:refLink, desc:'Shkon te kryefaqja e Vaqo me kodin tuaj', cop:copLnk2, setCop:setCopLnk2 },
+              ].map((l,i)=>(
                   <div key={i} style={{marginBottom:12}}>
                     <div style={{fontSize:12,fontWeight:600,color:'#52525b',marginBottom:4}}>{l.label}</div>
                     <div style={{display:'flex',gap:8,alignItems:'center'}}>
                       <div style={{flex:1,background:'#f4f4f5',borderRadius:8,padding:'8px 12px',fontSize:12,color:'#71717a',fontFamily:'monospace',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
                         {l.url}
                       </div>
-                      <button onClick={()=>copyText(l.url,setC)} style={{background:c?'#16a34a':'#18181b',color:'#fff',border:'none',padding:'8px 14px',borderRadius:8,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:'inherit',flexShrink:0,transition:'all .2s'}}>
+                      <button onClick={()=>copyText(l.url,l.setCop)} style={{background:c?'#16a34a':'#18181b',color:'#fff',border:'none',padding:'8px 14px',borderRadius:8,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:'inherit',flexShrink:0,transition:'all .2s'}}>
                         {c?'✅':'📋'}
                       </button>
                     </div>
                     <div style={{fontSize:11,color:'#a1a1aa',marginTop:4}}>{l.desc}</div>
                   </div>
-                )
-              })}
+              ))}
             </div>
 
             {/* Terms */}

@@ -85,8 +85,8 @@ function MyPlans({ nutritionistId }) {
         (plans||[]).length === 0 ? (
           <div className="card" style={{padding:60,textAlign:'center'}}>
             <div style={{fontSize:48,marginBottom:16}}>🥗</div>
-            <div style={{fontFamily:'var(--fs)',fontSize:22,marginBottom:8}}>Asnjë plan ende</div>
-            <div style={{fontSize:14,color:'var(--g500)',marginBottom:24}}>Shto planin e parë të dietës dhe fillo të fitosh</div>
+            <div style={{fontFamily:'Georgia,serif',fontSize:22,marginBottom:8}}>Asnjë plan ende</div>
+            <div style={{fontSize:14,color:'var(--tx3)',marginBottom:24}}>Shto planin e parë të dietës dhe fillo të fitosh</div>
             <button className="btn btn-p" onClick={()=>setShowAdd(true)}>+ Shto Planin e Parë</button>
           </div>
         ) : (
@@ -97,15 +97,15 @@ function MyPlans({ nutritionistId }) {
                   <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:12}}>
                     <div>
                       <div style={{fontWeight:700,fontSize:16,marginBottom:4}}>{p.title}</div>
-                      <div style={{fontSize:12,color:'var(--g500)'}}>{GOALS[p.goal]||p.goal}</div>
+                      <div style={{fontSize:12,color:'var(--tx3)'}}>{GOALS[p.goal]||p.goal}</div>
                     </div>
                     <div style={{textAlign:'right'}}>
-                      <div style={{fontFamily:'var(--fs)',fontSize:24,fontWeight:900}}>{fmtNum(p.price)}</div>
-                      <div style={{fontSize:11,color:'var(--g400)'}}>ALL</div>
+                      <div style={{fontFamily:'Georgia,serif',fontSize:24,fontWeight:900}}>{fmtNum(p.price)}</div>
+                      <div style={{fontSize:11,color:'var(--tx4)'}}>ALL</div>
                     </div>
                   </div>
 
-                  {p.description && <div style={{fontSize:13,color:'var(--g600)',marginBottom:12,lineHeight:1.6}}>{p.description}</div>}
+                  {p.description && <div style={{fontSize:13,color:'var(--tx2)',marginBottom:12,lineHeight:1.6}}>{p.description}</div>}
 
                   <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:14}}>
                     <span className="bdg bdg-bl">📅 {p.duration_weeks} javë</span>
@@ -117,7 +117,7 @@ function MyPlans({ nutritionistId }) {
                   {(p.includes||[]).length > 0 && (
                     <div style={{marginBottom:14}}>
                       {(p.includes||[]).slice(0,3).map((inc,i)=>(
-                        <div key={i} style={{fontSize:12,color:'var(--g600)',display:'flex',gap:6,marginBottom:3}}>
+                        <div key={i} style={{fontSize:12,color:'var(--tx2)',display:'flex',gap:6,marginBottom:3}}>
                           <span style={{color:'var(--gr)'}}>✓</span>{inc}
                         </div>
                       ))}
@@ -188,12 +188,12 @@ function MyOrders({ nutritionistId }) {
               {(orders||[]).length===0?<tr><td colSpan={7}><Empty icon="🛒" title="Asnjë porosi ende" sub="Porositë shfaqen kur klientët blejnë dietat tuaja"/></td></tr>:
               (orders||[]).map(o=>(
                 <tr key={o.id}>
-                  <td style={{fontFamily:'monospace',fontSize:11,color:'var(--g400)'}}>{o.invoice_number}</td>
-                  <td><div><div style={{fontWeight:500}}>{o.buyer_name}</div><div style={{fontSize:11,color:'var(--g400)'}}>{o.buyer_email}</div></div></td>
+                  <td style={{fontFamily:'monospace',fontSize:11,color:'var(--tx4)'}}>{o.invoice_number}</td>
+                  <td><div><div style={{fontWeight:500}}>{o.buyer_name}</div><div style={{fontSize:11,color:'var(--tx4)'}}>{o.buyer_email}</div></div></td>
                   <td><span className="bdg bdg-gy">{o.diet_plan?.title||'—'}</span></td>
                   <td style={{fontWeight:500}}>{fmtNum(o.amount)} L</td>
                   <td style={{fontWeight:700,color:'var(--gr)'}}>{fmtNum(o.nutritionist_amount)} L</td>
-                  <td style={{fontSize:12,color:'var(--g500)'}}>{fmtDate(o.created_at)}</td>
+                  <td style={{fontSize:12,color:'var(--tx3)'}}>{fmtDate(o.created_at)}</td>
                   <td>{o.status==='paid'?<span className="bdg bdg-gr">✅ Paguar</span>:<span className="bdg bdg-am">⏳ Pritje</span>}</td>
                 </tr>
               ))}
@@ -254,8 +254,8 @@ function MyProfile({ nutritionist, reload }) {
                 ['💰 Total i fituar', fmtNum(nutritionist.total_earned||0)+' L'],
                 ['⭐ Komisioni', (nutritionist.commission_pct||70)+'%'],
               ].map(([l,v])=>(
-                <div key={l} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid var(--g100)'}}>
-                  <span style={{fontSize:13,color:'var(--g600)'}}>{l}</span>
+                <div key={l} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid var(--border)'}}>
+                  <span style={{fontSize:13,color:'var(--tx2)'}}>{l}</span>
                   <span style={{fontWeight:600,fontSize:14}}>{v}</span>
                 </div>
               ))}
@@ -263,7 +263,7 @@ function MyProfile({ nutritionist, reload }) {
           </div>
           <div className="card">
             <div className="card-hd"><div className="card-t">💡 Këshilla</div></div>
-            <div className="card-b" style={{fontSize:13,color:'var(--g600)',lineHeight:1.8}}>
+            <div className="card-b" style={{fontSize:13,color:'var(--tx2)',lineHeight:1.8}}>
               <div style={{marginBottom:8}}>✅ Shto foto profili për besueshmëri më të lartë</div>
               <div style={{marginBottom:8}}>✅ Shkruaj bio të detajuar</div>
               <div style={{marginBottom:8}}>✅ Vendos çmime competitive (1,500-5,000 L)</div>
@@ -309,12 +309,12 @@ export default function NutritionistDashboard() {
       <div className="g2">
         <div className="card" style={{padding:32,textAlign:'center'}}>
           <div style={{fontSize:48,marginBottom:12}}>🥗</div>
-          <div style={{fontFamily:'var(--fs)',fontSize:20,marginBottom:8}}>Shto Planin e Parë</div>
-          <div style={{fontSize:13,color:'var(--g500)',marginBottom:20}}>Fillo të shesësh dietat tua tek mijëra anëtarë</div>
+          <div style={{fontFamily:'Georgia,serif',fontSize:20,marginBottom:8}}>Shto Planin e Parë</div>
+          <div style={{fontSize:13,color:'var(--tx3)',marginBottom:20}}>Fillo të shesësh dietat tua tek mijëra anëtarë</div>
           <button className="btn btn-p" onClick={()=>nav('plans')}>Shko te Planet →</button>
         </div>
         <div className="card" style={{padding:32}}>
-          <div style={{fontFamily:'var(--fs)',fontSize:18,marginBottom:16}}>💡 Si Funksionon</div>
+          <div style={{fontFamily:'Georgia,serif',fontSize:18,marginBottom:16}}>💡 Si Funksionon</div>
           {[
             ['1','Shto një plan diete me çmimin tënd'],
             ['2','Klientët e palestrëve e shohin dhe blejnë'],
@@ -322,8 +322,8 @@ export default function NutritionistDashboard() {
             ['4','Pagesa bëhet cash te palestra'],
           ].map(([n,t])=>(
             <div key={n} style={{display:'flex',gap:12,marginBottom:12,alignItems:'flex-start'}}>
-              <div style={{width:24,height:24,borderRadius:'50%',background:'var(--g900)',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700,flexShrink:0}}>{n}</div>
-              <div style={{fontSize:13,color:'var(--g600)',lineHeight:1.5}}>{t}</div>
+              <div style={{width:24,height:24,borderRadius:'50%',background:'var(--tx)',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700,flexShrink:0}}>{n}</div>
+              <div style={{fontSize:13,color:'var(--tx2)',lineHeight:1.5}}>{t}</div>
             </div>
           ))}
         </div>

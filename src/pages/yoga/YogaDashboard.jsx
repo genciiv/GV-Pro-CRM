@@ -5,6 +5,9 @@ import { supabase } from '../../lib/supabase'
 import { fmtNum, fmtDate, AVC } from '../../lib/db'
 import { StatCard, Modal, Loading, Empty, Avatar } from '../../components/UI'
 import toast from 'react-hot-toast'
+import AppointmentCalendar from '../appointments/AppointmentCalendar'
+import AnalyticsDashboard from '../gym/AnalyticsDashboard'
+import AffiliateDashboard from '../gym/AffiliateDashboard'
 import OnboardingFlow from '../../components/OnboardingFlow'
 import PushNotifButton from '../../components/PushNotifButton'
 import { emailClassBookingConfirm } from '../../lib/email'
@@ -97,7 +100,7 @@ function Dashboard({ gymId, setPage }) {
               const confirmed = (c.bookings||[]).filter(b=>b.status==='confirmed').length
               const pct = c.capacity ? Math.round(confirmed/c.capacity*100) : 0
               return (
-                <div key={c.id} style={{display:'flex',alignItems:'center',gap:12,padding:'14px 18px',borderBottom:i<classes.length-1?'1px solid var(--g100)':'none',flexWrap:'wrap'}}>
+                <div key={c.id} style={{display:'flex',alignItems:'center',gap:12,padding:'14px 18px',borderBottom:i<classes.length-1?'1px solid var(--border)':'none',flexWrap:'wrap'}}>
                   <div style={{width:52,height:52,borderRadius:12,background:'linear-gradient(135deg,#7c3aed,#2563eb)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
                     <div style={{textAlign:'center'}}>
                       <div style={{fontWeight:800,fontSize:13,color:'#fff',lineHeight:1}}>{c.start_time?.slice(0,5)}</div>
@@ -106,7 +109,7 @@ function Dashboard({ gymId, setPage }) {
                   </div>
                   <div style={{flex:1,minWidth:150}}>
                     <div style={{fontWeight:700,fontSize:15,marginBottom:3}}>{c.class_type} <span className="bdg bdg-pu" style={{fontSize:10}}>{LEVELS[c.level]||c.level}</span></div>
-                    <div style={{fontSize:12,color:'var(--g500)'}}>👤 {c.instructor?.name||'—'} · 💰 {fmtNum(c.price)} L</div>
+                    <div style={{fontSize:12,color:'var(--tx3)'}}>👤 {c.instructor?.name||'—'} · 💰 {fmtNum(c.price)} L</div>
                   </div>
                   <div style={{textAlign:'right',minWidth:100}}>
                     <div style={{fontWeight:700,fontSize:14,marginBottom:4}}>{confirmed} / {c.capacity||'∞'}</div>
@@ -257,10 +260,10 @@ function NewClass({ gymId, onDone }) {
             </div>
             {form.is_recurring&&(
               <>
-                <div style={{fontSize:12,color:'var(--g500)',marginBottom:12}}>Zgjidh ditët — do të shtohet për 4 javët e ardhshme</div>
+                <div style={{fontSize:12,color:'var(--tx3)',marginBottom:12}}>Zgjidh ditët — do të shtohet për 4 javët e ardhshme</div>
                 <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
                   {DAYS.map(d=>(
-                    <button key={d} type="button" onClick={()=>toggleDay(d)} style={{padding:'7px 11px',borderRadius:8,border:`1.5px solid ${form.recurring_days.includes(d)?'var(--pu)':'var(--g200)'}`,background:form.recurring_days.includes(d)?'var(--pul)':'#fff',color:form.recurring_days.includes(d)?'var(--pu)':'var(--g600)',fontSize:12,fontWeight:600,cursor:'pointer',transition:'all .15s'}}>
+                    <button key={d} type="button" onClick={()=>toggleDay(d)} style={{padding:'7px 11px',borderRadius:8,border:`1.5px solid ${form.recurring_days.includes(d)?'var(--pu)':'var(--border)'}`,background:form.recurring_days.includes(d)?'var(--pul)':'#fff',color:form.recurring_days.includes(d)?'var(--pu)':'var(--tx2)',fontSize:12,fontWeight:600,cursor:'pointer',transition:'all .15s'}}>
                       {DAYS_AL[d]?.slice(0,3)}
                     </button>
                   ))}
@@ -337,7 +340,7 @@ function ClassesList({ gymId }) {
         <div style={{display:'flex',flexDirection:'column',gap:20}}>
           {Object.entries(grouped).map(([date, dayClasses])=>(
             <div key={date}>
-              <div style={{fontWeight:700,fontSize:13,color:'var(--g500)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:10,paddingBottom:6,borderBottom:'1px solid var(--g200)'}}>
+              <div style={{fontWeight:700,fontSize:13,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:10,paddingBottom:6,borderBottom:'1px solid var(--border)'}}>
                 📅 {fmtDate(date)} — {new Date(date+'T00:00:00').toLocaleDateString('sq-AL',{weekday:'long'})}
               </div>
               <div style={{display:'flex',flexDirection:'column',gap:10}}>
@@ -361,24 +364,24 @@ function ClassesList({ gymId }) {
                                 {c.class_type}
                                 {c.is_cancelled&&<span className="bdg bdg-rd" style={{marginLeft:8}}>Anuluar</span>}
                               </div>
-                              <div style={{fontSize:12,color:'var(--g500)',display:'flex',gap:12,flexWrap:'wrap'}}>
+                              <div style={{fontSize:12,color:'var(--tx3)',display:'flex',gap:12,flexWrap:'wrap'}}>
                                 {c.instructor&&<span>👤 {c.instructor.name}</span>}
                                 <span>{LEVELS[c.level]||c.level}</span>
                                 <span>💰 {fmtNum(c.price)} L</span>
                               </div>
                             </div>
                             <div style={{textAlign:'right'}}>
-                              <div style={{fontWeight:700,fontSize:16,marginBottom:4,color:isFull?'var(--rd)':'var(--g900)'}}>{confirmed}{c.capacity?` / ${c.capacity}`:''} 👥</div>
+                              <div style={{fontWeight:700,fontSize:16,marginBottom:4,color:isFull?'var(--rd)':'var(--tx)'}}>{confirmed}{c.capacity?` / ${c.capacity}`:''} 👥</div>
                               {c.capacity&&<div className="prog" style={{width:80,marginLeft:'auto'}}><div className="pf" style={{width:`${pct}%`,background:pct>=90?'var(--rd)':pct>=70?'var(--am)':'var(--pu)'}}/></div>}
                             </div>
                           </div>
                           {/* Booked clients */}
                           {selected===c.id&&(c.bookings||[]).length>0&&(
-                            <div style={{marginTop:10,padding:12,background:'var(--g50)',borderRadius:8}}>
-                              <div style={{fontSize:11,fontWeight:700,color:'var(--g500)',marginBottom:8,textTransform:'uppercase'}}>Klientët ({confirmed})</div>
+                            <div style={{marginTop:10,padding:12,background:'var(--surface2)',borderRadius:8}}>
+                              <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',marginBottom:8,textTransform:'uppercase'}}>Klientët ({confirmed})</div>
                               <div style={{display:'flex',flexDirection:'column',gap:4}}>
                                 {(c.bookings||[]).filter(b=>b.status==='confirmed').map(b=>(
-                                  <div key={b.id} style={{fontSize:12,color:'var(--g700)',display:'flex',justifyContent:'space-between'}}>
+                                  <div key={b.id} style={{fontSize:12,color:'var(--tx2)',display:'flex',justifyContent:'space-between'}}>
                                     <span>👤 {b.client_name}</span>
                                     <button className="btn btn-danger btn-xs" onClick={async()=>{await supabase.from('yoga_bookings').update({status:'cancelled'}).eq('id',b.id);reload()}}>✕</button>
                                   </div>
@@ -465,12 +468,12 @@ function Instructors({ gymId }) {
                 <Avatar color={s.avatar_color||0} name={s.name} size="lg"/>
                 <div style={{flex:1}}>
                   <div style={{fontWeight:700,fontSize:16}}>{s.name}</div>
-                  <div style={{fontSize:12,color:'var(--g500)',marginTop:3}}>{s.speciality||'Instruktor'}</div>
-                  {s.phone&&<div style={{fontSize:12,color:'var(--g400)',marginTop:2}}>📞 {s.phone}</div>}
+                  <div style={{fontSize:12,color:'var(--tx3)',marginTop:3}}>{s.speciality||'Instruktor'}</div>
+                  {s.phone&&<div style={{fontSize:12,color:'var(--tx4)',marginTop:2}}>📞 {s.phone}</div>}
                 </div>
                 <button className="btn btn-g btn-xs" onClick={()=>startEdit(s)}>✏️</button>
               </div>
-              {s.bio&&<div style={{fontSize:13,color:'var(--g600)',lineHeight:1.6,background:'var(--g50)',borderRadius:8,padding:'8px 12px'}}>{s.bio}</div>}
+              {s.bio&&<div style={{fontSize:13,color:'var(--tx2)',lineHeight:1.6,background:'var(--surface2)',borderRadius:8,padding:'8px 12px'}}>{s.bio}</div>}
             </div>
           ))}
         </div>
@@ -494,10 +497,11 @@ function Instructors({ gymId }) {
 
 // ── LAYOUT ────────────────────────────────────────────────
 const NAV = [
-  {s:'Kryesore', items:[{id:'dashboard',l:'Dashboard',i:'📊'},{id:'new-class',l:'Klasë e Re',i:'➕'},{id:'classes',l:'Të gjitha Klasat',i:'📅'}]},
+  {s:'Kryesore', items:[{id:'dashboard',l:'Dashboard',i:'📊'},{id:'calendar',l:'Kalendari',i:'📅'},{id:'new-class',l:'Klasë e Re',i:'➕'},{id:'classes',l:'Të gjitha Klasat',i:'📋'}]},
   {s:'Menaxhim', items:[{id:'instructors',l:'Instruktorët',i:'🧘'}]},
+  {s:'Rritje', items:[{id:'analytics',l:'Analytics',i:'📈'},{id:'affiliate',l:'Affiliate',i:'🤝'}]},
 ]
-const TITLES = { dashboard:'Dashboard', 'new-class':'Klasë e Re', classes:'Klasat', instructors:'Instruktorët' }
+const TITLES = { dashboard:'Dashboard', calendar:'📅 Kalendari', 'new-class':'Klasë e Re', classes:'Klasat', instructors:'Instruktorët', analytics:'📊 Analytics', affiliate:'🤝 Affiliate' }
 
 export default function YogaDashboard() {
   const [showOnboarding, setShowOnboarding] = React.useState(false)
@@ -519,9 +523,12 @@ export default function YogaDashboard() {
 
   const PAGE = {
     dashboard:    <Dashboard   gymId={gymId} setPage={nav}/>,
+    calendar:     <AppointmentCalendar gymId={gymId}/>,
     'new-class':  <NewClass    gymId={gymId} onDone={()=>nav('classes')}/>,
     classes:      <ClassesList gymId={gymId}/>,
     instructors:  <Instructors gymId={gymId}/>,
+    analytics:    <AnalyticsDashboard gymId={gymId}/>,
+    affiliate:    <AffiliateDashboard gymId={gymId}/>,
   }
 
   return (
@@ -564,6 +571,7 @@ export default function YogaDashboard() {
           </div>
           <div className="tbr">
             <span style={{fontSize:11,color:'var(--gr)',fontWeight:600}}>● Live</span>
+            <a href={`/book/${gymId}`} target='_blank' style={{fontSize:11,color:'var(--pu)',fontWeight:600,textDecoration:'none',background:'var(--pul)',padding:'4px 10px',borderRadius:20,border:'1px solid var(--pum)'}}>🔗 Booking Link</a>
             <PushNotifButton gymId={gymId}/>
             <span className="bdg bdg-pu">{bizIcon} {gymName}</span>
             <button className="btn btn-p btn-sm" onClick={()=>nav('new-class')}>+ Klasë</button>

@@ -33,9 +33,9 @@ export function BarChart({ data=[] }) {
     <div style={{display:'flex',alignItems:'flex-end',gap:6,height:140}}>
       {data.map((v,i)=>(
         <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:4,height:'100%',justifyContent:'flex-end'}}>
-          {v>0&&<div style={{fontSize:9,color:'var(--g500)',fontWeight:600}}>{Math.round(v/1000)}K</div>}
-          <div style={{width:'100%',height:v>0?`${(v/max)*100}%`:'3px',background:v>0?'var(--g900)':'var(--g200)',borderRadius:'4px 4px 0 0',minHeight:3}}/>
-          <div style={{fontSize:9,color:'var(--g400)'}}>{MONTHS[i]}</div>
+          {v>0&&<div style={{fontSize:9,color:'var(--tx3)',fontWeight:600}}>{Math.round(v/1000)}K</div>}
+          <div style={{width:'100%',height:v>0?`${(v/max)*100}%`:'3px',background:v>0?'var(--tx)':'var(--border)',borderRadius:'4px 4px 0 0',minHeight:3}}/>
+          <div style={{fontSize:9,color:'var(--tx4)'}}>{MONTHS[i]}</div>
         </div>
       ))}
     </div>
@@ -67,6 +67,42 @@ export function Empty({ icon='📭', title='Asnjë të dhënë', sub='' }) {
       <div className="ei">{icon}</div>
       <div className="et">{title}</div>
       {sub&&<div className="es">{sub}</div>}
+    </div>
+  )
+}
+
+
+// Skeleton loading components
+export function SkeletonCard({ h = 80 }) {
+  return (
+    <div style={{background:"#fff",border:"1px solid var(--border)",borderRadius:12,padding:18,boxShadow:"var(--sh)",overflow:"hidden",position:"relative"}}>
+      <style>{`@keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}`}</style>
+      <div style={{height:h,background:"linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%)",backgroundSize:"800px 100%",animation:"shimmer 1.5s infinite",borderRadius:8}}/>
+    </div>
+  )
+}
+
+export function SkeletonRow() {
+  return (
+    <div style={{display:"flex",alignItems:"center",gap:12,padding:"12px 0",borderBottom:"1px solid var(--border)"}}>
+      <div style={{width:36,height:36,borderRadius:"50%",background:"#f0f0f0",flexShrink:0,animation:"shimmer 1.5s infinite",backgroundImage:"linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%)",backgroundSize:"400px 100%"}}/>
+      <div style={{flex:1}}>
+        <div style={{height:13,background:"#f0f0f0",borderRadius:6,marginBottom:6,width:"60%",animation:"shimmer 1.5s infinite",backgroundImage:"linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%)",backgroundSize:"400px 100%"}}/>
+        <div style={{height:11,background:"#f0f0f0",borderRadius:6,width:"40%",animation:"shimmer 1.5s infinite",backgroundImage:"linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%)",backgroundSize:"400px 100%"}}/>
+      </div>
+    </div>
+  )
+}
+
+export function SkeletonStats({ count = 4 }) {
+  return (
+    <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:14,marginBottom:20}}>
+      {Array.from({length:count}).map((_,i)=>(
+        <div key={i} style={{background:"#fff",border:"1px solid var(--border)",borderRadius:12,padding:18,boxShadow:"var(--sh)"}}>
+          <div style={{height:12,background:"#f0f0f0",borderRadius:6,width:"50%",marginBottom:10,animation:"shimmer 1.5s infinite",backgroundImage:"linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%)",backgroundSize:"400px 100%"}}/>
+          <div style={{height:28,background:"#f0f0f0",borderRadius:6,width:"70%",animation:"shimmer 1.5s infinite",backgroundImage:"linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%)",backgroundSize:"400px 100%"}}/>
+        </div>
+      ))}
     </div>
   )
 }

@@ -111,7 +111,7 @@ function ProductsManager() {
                         {p.is_featured&&<span style={{fontSize:10,background:'var(--aml)',color:'var(--am)',padding:'1px 6px',borderRadius:10,fontWeight:700}}>⭐ TOP</span>}
                         {p.name}
                       </div>
-                      {p.brand&&<div style={{fontSize:11,color:'var(--g400)'}}>{p.brand} {p.weight&&`· ${p.weight}`}</div>}
+                      {p.brand&&<div style={{fontSize:11,color:'var(--tx4)'}}>{p.brand} {p.weight&&`· ${p.weight}`}</div>}
                     </div>
                   </td>
                   <td><span className="bdg bdg-gy">{p.category?.emoji} {p.category?.name||'—'}</span></td>
@@ -202,13 +202,13 @@ function OrdersManager() {
               {filtered.length===0?<tr><td colSpan={9}><Empty icon="🛒" title="Asnjë porosi"/></td></tr>:
               filtered.map(o=>(
                 <tr key={o.id}>
-                  <td style={{fontFamily:'monospace',fontSize:11,color:'var(--g400)'}}>{o.invoice_number}</td>
-                  <td><div><div style={{fontWeight:500}}>{o.buyer_name}</div><div style={{fontSize:11,color:'var(--g400)'}}>{o.buyer_phone}</div></div></td>
+                  <td style={{fontFamily:'monospace',fontSize:11,color:'var(--tx4)'}}>{o.invoice_number}</td>
+                  <td><div><div style={{fontWeight:500}}>{o.buyer_name}</div><div style={{fontSize:11,color:'var(--tx4)'}}>{o.buyer_phone}</div></div></td>
                   <td><span className="bdg bdg-gy">{o.product?.name||'—'}</span></td>
                   <td style={{textAlign:'center',fontWeight:500}}>{o.quantity}</td>
                   <td style={{fontWeight:700}}>{fmtNum(o.total_amount)} L</td>
                   <td style={{fontWeight:600,color:'var(--gr)'}}>{fmtNum(o.platform_amount)} L</td>
-                  <td style={{fontSize:12,color:'var(--g500)'}}>{fmtDate(o.created_at)}</td>
+                  <td style={{fontSize:12,color:'var(--tx3)'}}>{fmtDate(o.created_at)}</td>
                   <td>{statusBadge[o.status]}</td>
                   <td>
                     {o.status==='pending'&&<div style={{display:'flex',gap:4}}>
@@ -303,18 +303,18 @@ export function PublicShop({ gymId, memberId, memberName }) {
             {p.image_url?(
               <img src={p.image_url} alt={p.name} style={{width:'100%',height:160,objectFit:'cover'}}/>
             ):(
-              <div style={{height:140,background:'var(--g100)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:48}}>
+              <div style={{height:140,background:'var(--border)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:48}}>
                 {p.category?.emoji||'📦'}
               </div>
             )}
             <div style={{padding:16}}>
               <div style={{fontWeight:700,fontSize:15,marginBottom:4}}>{p.name}</div>
-              {p.brand&&<div style={{fontSize:11,color:'var(--g400)',marginBottom:8}}>{p.brand} {p.weight&&`· ${p.weight}`}</div>}
-              {p.description&&<div style={{fontSize:12,color:'var(--g600)',marginBottom:12,lineHeight:1.5}}>{p.description}</div>}
+              {p.brand&&<div style={{fontSize:11,color:'var(--tx4)',marginBottom:8}}>{p.brand} {p.weight&&`· ${p.weight}`}</div>}
+              {p.description&&<div style={{fontSize:12,color:'var(--tx2)',marginBottom:12,lineHeight:1.5}}>{p.description}</div>}
               <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
                 <div>
-                  <div style={{fontFamily:'var(--fs)',fontSize:22,fontWeight:900}}>{fmtNum(p.price)}</div>
-                  <div style={{fontSize:11,color:'var(--g400)'}}>ALL · {p.stock} në stok</div>
+                  <div style={{fontFamily:'Georgia,serif',fontSize:22,fontWeight:900}}>{fmtNum(p.price)}</div>
+                  <div style={{fontSize:11,color:'var(--tx4)'}}>ALL · {p.stock} në stok</div>
                 </div>
                 <button className="btn btn-p btn-sm" onClick={()=>addToCart(p)}>+ Shporta</button>
               </div>
@@ -329,12 +329,12 @@ export function PublicShop({ gymId, memberId, memberName }) {
           <button className="btn btn-p" onClick={placeOrder} disabled={ordering||cart.length===0}>{ordering?'Duke dërguar...':'📦 Porosit Cash'}</button></>
         }>
           {cart.map(item=>(
-            <div key={item.id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 0',borderBottom:'1px solid var(--g100)'}}>
-              <div><div style={{fontWeight:500}}>{item.name}</div><div style={{fontSize:12,color:'var(--g500)'}}>× {item.qty} = {fmtNum(item.price*item.qty)} L</div></div>
+            <div key={item.id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 0',borderBottom:'1px solid var(--border)'}}>
+              <div><div style={{fontWeight:500}}>{item.name}</div><div style={{fontSize:12,color:'var(--tx3)'}}>× {item.qty} = {fmtNum(item.price*item.qty)} L</div></div>
               <button className="btn btn-danger btn-xs" onClick={()=>removeFromCart(item.id)}>✕</button>
             </div>
           ))}
-          <div style={{display:'flex',justifyContent:'space-between',fontWeight:700,fontSize:16,padding:'14px 0',borderTop:'2px solid var(--g900)',marginTop:8}}>
+          <div style={{display:'flex',justifyContent:'space-between',fontWeight:700,fontSize:16,padding:'14px 0',borderTop:'2px solid var(--tx)',marginTop:8}}>
             <span>Totali</span><span>{fmtNum(cartTotal)} L</span>
           </div>
           <div className="alert al-bl" style={{marginTop:8}}>💵 Pagesa bëhet cash te recepsioni i palestrës pas konfirmimit.</div>
@@ -370,14 +370,14 @@ export default function ShopAdmin({ logout }) {
       <div className="g2">
         <div className="card" style={{padding:32,textAlign:'center'}}>
           <div style={{fontSize:40,marginBottom:12}}>📦</div>
-          <div style={{fontFamily:'var(--fs)',fontSize:18,marginBottom:8}}>Menaxho Produktet</div>
-          <div style={{fontSize:13,color:'var(--g500)',marginBottom:20}}>Shto, edito dhe menaxho inventarin</div>
+          <div style={{fontFamily:'Georgia,serif',fontSize:18,marginBottom:8}}>Menaxho Produktet</div>
+          <div style={{fontSize:13,color:'var(--tx3)',marginBottom:20}}>Shto, edito dhe menaxho inventarin</div>
           <button className="btn btn-p" onClick={()=>nav('products')}>Shko te Produktet →</button>
         </div>
         <div className="card" style={{padding:32,textAlign:'center'}}>
           <div style={{fontSize:40,marginBottom:12}}>🛒</div>
-          <div style={{fontFamily:'var(--fs)',fontSize:18,marginBottom:8}}>Menaxho Porositë</div>
-          <div style={{fontSize:13,color:'var(--g500)',marginBottom:20}}>Konfirmo dhe dorëzo porositë</div>
+          <div style={{fontFamily:'Georgia,serif',fontSize:18,marginBottom:8}}>Menaxho Porositë</div>
+          <div style={{fontSize:13,color:'var(--tx3)',marginBottom:20}}>Konfirmo dhe dorëzo porositë</div>
           <button className="btn btn-p" onClick={()=>nav('orders')}>Shko te Porositë →</button>
         </div>
       </div>

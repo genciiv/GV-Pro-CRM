@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase'
 import { fmtNum, fmtDate, AVC } from '../../lib/db'
 import { StatCard, Modal, Loading, Empty, Avatar } from '../../components/UI'
 import toast from 'react-hot-toast'
+import AppointmentCalendar from '../appointments/AppointmentCalendar'
 import { emailAppointmentConfirm } from '../../lib/email'
 import { smsAppointmentConfirm } from '../../lib/sms'
 import OnboardingFlow from '../../components/OnboardingFlow'
@@ -77,6 +78,29 @@ function Dashboard({ gymId, setPage }) {
         </div>
       )}
 
+      <div className="g2" style={{marginBottom:14}}>
+        <div className="card">
+          <div className="card-hd"><div className="card-t">Kategorite</div><button className="btn btn-s btn-sm" onClick={()=>setPage('services')}>Menaxho</button></div>
+          <div className="card-b">
+            {[['💇','Prerje & Stilim'],['✨','Ngjyrosje'],['🌿','Trajtime'],['💅','Manikyr'],['💄','Grimin'],['🌸','Depilim']].map(([ico,l])=>(
+              <div key={l} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 0',borderBottom:'1px solid var(--border)'}}>
+                <div style={{width:32,height:32,borderRadius:8,background:'var(--pul)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,flexShrink:0}}>{ico}</div>
+                <div style={{flex:1,fontSize:13,fontWeight:500}}>{l}</div>
+                <button onClick={()=>setPage('new-appointment')} className="btn btn-s btn-xs">+ Rezervo</button>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="card">
+          <div className="card-hd"><div className="card-t">Veprime te Shpejta</div></div>
+          <div className="card-b" style={{display:'flex',flexDirection:'column',gap:8}}>
+            <button onClick={()=>setPage('new-appointment')} className="btn btn-pu" style={{width:'100%',justifyContent:'center'}}>+ Rezervim i Ri</button>
+            <button onClick={()=>setPage('calendar')} className="btn btn-s" style={{width:'100%',justifyContent:'center'}}>Shiko Kalendarin</button>
+            <button onClick={()=>setPage('analytics')} className="btn btn-s" style={{width:'100%',justifyContent:'center'}}>Analytics</button>
+          </div>
+        </div>
+      </div>
+
       <div className="card">
         <div className="card-hd">
           <div className="card-t">📅 Rezervimet e Sotme</div>
@@ -90,8 +114,8 @@ function Dashboard({ gymId, setPage }) {
             <tbody>
               {(appts||[]).map(a=>(
                 <tr key={a.id}>
-                  <td style={{fontWeight:700,color:'var(--ac)',fontSize:14}}>{a.start_time?.slice(0,5)} – {a.end_time?.slice(0,5)}</td>
-                  <td><div><div style={{fontWeight:500}}>{a.client_name}</div><div style={{fontSize:11,color:'var(--g400)'}}>{a.client_phone}</div></div></td>
+                  <td style={{fontWeight:700,color:'var(--bl)',fontSize:14}}>{a.start_time?.slice(0,5)} – {a.end_time?.slice(0,5)}</td>
+                  <td><div><div style={{fontWeight:500}}>{a.client_name}</div><div style={{fontSize:11,color:'var(--tx4)'}}>{a.client_phone}</div></div></td>
                   <td><div className="mc"><Avatar color={a.staff?.avatar_color||0} name={a.staff?.name||'?'} size="sm"/><div className="mn">{a.staff?.name}</div></div></td>
                   <td><span className="bdg bdg-gy">{a.service?.emoji} {a.service?.name}</span></td>
                   <td style={{fontWeight:600}}>{fmtNum(a.price)} L</td>
@@ -174,11 +198,11 @@ function NewAppointment({ gymId, onDone }) {
       </div>
 
       {/* Steps indicator */}
-      <div style={{display:'flex',gap:0,marginBottom:24,background:'var(--g100)',borderRadius:12,padding:4}}>
+      <div style={{display:'flex',gap:0,marginBottom:24,background:'var(--border)',borderRadius:12,padding:4}}>
         {[['1','Stilisti & Shërbimi'],['2','Data & Ora'],['3','Klienti']].map(([n,l],i)=>(
-          <div key={n} style={{flex:1,textAlign:'center',padding:'10px 8px',borderRadius:9,background:step===i+1?'#fff':'transparent',fontWeight:step===i+1?700:400,fontSize:13,color:step===i+1?'var(--g900)':'var(--g400)',transition:'all .2s',boxShadow:step===i+1?'0 1px 4px rgba(0,0,0,.08)':'none',cursor:step>i+1?'pointer':'default'}}
+          <div key={n} style={{flex:1,textAlign:'center',padding:'10px 8px',borderRadius:9,background:step===i+1?'#fff':'transparent',fontWeight:step===i+1?700:400,fontSize:13,color:step===i+1?'var(--tx)':'var(--tx4)',transition:'all .2s',boxShadow:step===i+1?'0 1px 4px rgba(0,0,0,.08)':'none',cursor:step>i+1?'pointer':'default'}}
             onClick={()=>step>i+1&&setStep(i+1)}>
-            <span style={{display:'block',fontSize:10,fontWeight:700,marginBottom:2,color:step>=i+1?'var(--ac)':'var(--g400)'}}>HAPI {n}</span>
+            <span style={{display:'block',fontSize:10,fontWeight:700,marginBottom:2,color:step>=i+1?'var(--bl)':'var(--tx4)'}}>HAPI {n}</span>
             {l}
           </div>
         ))}
@@ -192,13 +216,13 @@ function NewAppointment({ gymId, onDone }) {
             <div style={{display:'flex',flexDirection:'column',gap:10}}>
               {(staff||[]).length===0?<Empty icon="👤" title="Asnjë stilist" sub="Shto stilist nga Konfigurimet"/>:
               (staff||[]).map(s=>(
-                <div key={s.id} style={{display:'flex',alignItems:'center',gap:14,padding:'14px 16px',borderRadius:12,border:`2px solid ${selStaff?.id===s.id?'var(--g900)':'var(--g200)'}`,background:selStaff?.id===s.id?'var(--g50)':'#fff',cursor:'pointer',transition:'all .15s'}}
+                <div key={s.id} style={{display:'flex',alignItems:'center',gap:14,padding:'14px 16px',borderRadius:12,border:`2px solid ${selStaff?.id===s.id?'var(--tx)':'var(--border)'}`,background:selStaff?.id===s.id?'var(--surface2)':'#fff',cursor:'pointer',transition:'all .15s'}}
                   onClick={()=>setSelStaff(s)}>
                   <Avatar color={s.avatar_color||0} name={s.name}/>
                   <div style={{flex:1}}>
                     <div style={{fontWeight:600,fontSize:14}}>{s.name}</div>
-                    <div style={{fontSize:12,color:'var(--g500)',marginTop:2}}>{s.speciality||'Stiliste'}</div>
-                    <div style={{fontSize:11,color:'var(--g400)',marginTop:2}}>
+                    <div style={{fontSize:12,color:'var(--tx3)',marginTop:2}}>{s.speciality||'Stiliste'}</div>
+                    <div style={{fontSize:11,color:'var(--tx4)',marginTop:2}}>
                       {(s.working_days||[]).map(d=>DAYS_AL[d]?.slice(0,3)||d).join(', ')}
                     </div>
                   </div>
@@ -212,12 +236,12 @@ function NewAppointment({ gymId, onDone }) {
             <div style={{display:'flex',flexDirection:'column',gap:10}}>
               {(services||[]).length===0?<Empty icon="✂️" title="Asnjë shërbim" sub="Shto shërbime nga Konfigurimet"/>:
               (services||[]).map(s=>(
-                <div key={s.id} style={{display:'flex',alignItems:'center',gap:14,padding:'14px 16px',borderRadius:12,border:`2px solid ${selSvc?.id===s.id?'var(--g900)':'var(--g200)'}`,background:selSvc?.id===s.id?'var(--g50)':'#fff',cursor:'pointer',transition:'all .15s'}}
+                <div key={s.id} style={{display:'flex',alignItems:'center',gap:14,padding:'14px 16px',borderRadius:12,border:`2px solid ${selSvc?.id===s.id?'var(--tx)':'var(--border)'}`,background:selSvc?.id===s.id?'var(--surface2)':'#fff',cursor:'pointer',transition:'all .15s'}}
                   onClick={()=>setSelSvc(s)}>
-                  <div style={{width:44,height:44,borderRadius:10,background:'var(--g100)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0}}>{s.emoji}</div>
+                  <div style={{width:44,height:44,borderRadius:10,background:'var(--border)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0}}>{s.emoji}</div>
                   <div style={{flex:1}}>
                     <div style={{fontWeight:600,fontSize:14}}>{s.name}</div>
-                    <div style={{fontSize:12,color:'var(--g500)',marginTop:2}}>⏱ {s.duration_min} min</div>
+                    <div style={{fontSize:12,color:'var(--tx3)',marginTop:2}}>⏱ {s.duration_min} min</div>
                   </div>
                   <div style={{textAlign:'right'}}>
                     <div style={{fontWeight:700,fontSize:16}}>{fmtNum(s.price)} L</div>
@@ -260,7 +284,7 @@ function NewAppointment({ gymId, onDone }) {
           <div>
             <div style={{fontWeight:700,fontSize:14,marginBottom:14}}>🕐 Zgjidh Orën</div>
             {slots.length===0?(
-              <div style={{textAlign:'center',padding:'32px 16px',color:'var(--g400)',fontSize:13}}>
+              <div style={{textAlign:'center',padding:'32px 16px',color:'var(--tx4)',fontSize:13}}>
                 {loadSlots?<Loading/>:'Kliko "Shiko Oraret e Lira" për të parë oraret'}
               </div>
             ):(
@@ -268,7 +292,7 @@ function NewAppointment({ gymId, onDone }) {
                 {slots.map((slot,i)=>(
                   <button key={i} disabled={!slot.is_available}
                     onClick={()=>setSelSlot(slot)}
-                    style={{padding:'10px 6px',borderRadius:9,border:`2px solid ${selSlot?.slot_time===slot.slot_time?'var(--g900)':slot.is_available?'var(--g200)':'var(--g100)'}`,background:selSlot?.slot_time===slot.slot_time?'var(--g900)':slot.is_available?'#fff':'var(--g50)',color:selSlot?.slot_time===slot.slot_time?'#fff':slot.is_available?'var(--g900)':'var(--g300)',cursor:slot.is_available?'pointer':'not-allowed',fontSize:13,fontWeight:600,transition:'all .15s'}}>
+                    style={{padding:'10px 6px',borderRadius:9,border:`2px solid ${selSlot?.slot_time===slot.slot_time?'var(--tx)':slot.is_available?'var(--border)':'var(--border)'}`,background:selSlot?.slot_time===slot.slot_time?'var(--tx)':slot.is_available?'#fff':'var(--surface2)',color:selSlot?.slot_time===slot.slot_time?'#fff':slot.is_available?'var(--tx)':'var(--g300)',cursor:slot.is_available?'pointer':'not-allowed',fontSize:13,fontWeight:600,transition:'all .15s'}}>
                     {slot.slot_time?.slice(0,5)}
                     {!slot.is_available&&<div style={{fontSize:9,fontWeight:400,marginTop:2}}>i zënë</div>}
                   </button>
@@ -302,8 +326,8 @@ function NewAppointment({ gymId, onDone }) {
                 ['⏱ Kohëzgjatja', `${selSvc?.duration_min} min`],
                 ['💰 Çmimi', `${fmtNum(selSvc?.price)} L`],
               ].map(([l,v])=>(
-                <div key={l} style={{background:'var(--g50)',borderRadius:8,padding:'10px 12px'}}>
-                  <div style={{fontSize:11,color:'var(--g400)',marginBottom:3}}>{l}</div>
+                <div key={l} style={{background:'var(--surface2)',borderRadius:8,padding:'10px 12px'}}>
+                  <div style={{fontSize:11,color:'var(--tx4)',marginBottom:3}}>{l}</div>
                   <div style={{fontWeight:600,fontSize:13}}>{v}</div>
                 </div>
               ))}
@@ -373,10 +397,10 @@ function Appointments({ gymId }) {
               filtered.map(a=>(
                 <tr key={a.id}>
                   <td>
-                    <div style={{fontWeight:700,color:'var(--ac)'}}>{a.start_time?.slice(0,5)}</div>
-                    <div style={{fontSize:11,color:'var(--g400)'}}>{fmtDate(a.appointment_date)}</div>
+                    <div style={{fontWeight:700,color:'var(--bl)'}}>{a.start_time?.slice(0,5)}</div>
+                    <div style={{fontSize:11,color:'var(--tx4)'}}>{fmtDate(a.appointment_date)}</div>
                   </td>
-                  <td><div><div style={{fontWeight:500}}>{a.client_name}</div><div style={{fontSize:11,color:'var(--g400)'}}>{a.client_phone}</div></div></td>
+                  <td><div><div style={{fontWeight:500}}>{a.client_name}</div><div style={{fontSize:11,color:'var(--tx4)'}}>{a.client_phone}</div></div></td>
                   <td><div className="mc"><Avatar color={a.staff?.avatar_color||0} name={a.staff?.name||'?'} size="sm"/><div className="mn">{a.staff?.name}</div></div></td>
                   <td><span className="bdg bdg-gy">{a.service?.emoji} {a.service?.name}</span></td>
                   <td style={{fontWeight:600}}>{fmtNum(a.price)} L</td>
@@ -456,17 +480,17 @@ function StaffPage({ gymId }) {
                 <Avatar color={s.avatar_color||0} name={s.name} size="lg"/>
                 <div style={{flex:1}}>
                   <div style={{fontWeight:700,fontSize:16,marginBottom:4}}>{s.name}</div>
-                  <div style={{fontSize:12,color:'var(--g500)',marginBottom:6}}>{s.speciality||'Stiliste'}</div>
-                  {s.phone&&<div style={{fontSize:12,color:'var(--g400)'}}>📞 {s.phone}</div>}
+                  <div style={{fontSize:12,color:'var(--tx3)',marginBottom:6}}>{s.speciality||'Stiliste'}</div>
+                  {s.phone&&<div style={{fontSize:12,color:'var(--tx4)'}}>📞 {s.phone}</div>}
                 </div>
                 <button className="btn btn-g btn-xs" onClick={()=>startEdit(s)}>✏️</button>
               </div>
               <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:12}}>
                 {DAYS.map(d=>(
-                  <span key={d} style={{fontSize:10,padding:'2px 7px',borderRadius:8,background:(s.working_days||[]).includes(d)?'var(--g900)':'var(--g100)',color:(s.working_days||[]).includes(d)?'#fff':'var(--g400)',fontWeight:600}}>{DAYS_AL[d]?.slice(0,3)}</span>
+                  <span key={d} style={{fontSize:10,padding:'2px 7px',borderRadius:8,background:(s.working_days||[]).includes(d)?'var(--tx)':'var(--border)',color:(s.working_days||[]).includes(d)?'#fff':'var(--tx4)',fontWeight:600}}>{DAYS_AL[d]?.slice(0,3)}</span>
                 ))}
               </div>
-              <div style={{fontSize:12,color:'var(--g500)',display:'flex',gap:12}}>
+              <div style={{fontSize:12,color:'var(--tx3)',display:'flex',gap:12}}>
                 <span>🕐 {s.start_time?.slice(0,5)} – {s.end_time?.slice(0,5)}</span>
                 <span>⏱ Slot: {s.slot_minutes} min</span>
               </div>
@@ -498,10 +522,10 @@ function StaffPage({ gymId }) {
             </div>
           </div>
           <div style={{marginTop:14}}>
-            <label style={{fontSize:12,fontWeight:600,color:'var(--g600)',display:'block',marginBottom:8}}>Ditët e Punës</label>
+            <label style={{fontSize:12,fontWeight:600,color:'var(--tx2)',display:'block',marginBottom:8}}>Ditët e Punës</label>
             <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
               {DAYS.map(d=>(
-                <button key={d} type="button" onClick={()=>toggleDay(d)} style={{padding:'6px 10px',borderRadius:8,border:`1.5px solid ${form.working_days.includes(d)?'var(--g900)':'var(--g200)'}`,background:form.working_days.includes(d)?'var(--g900)':'#fff',color:form.working_days.includes(d)?'#fff':'var(--g600)',fontSize:12,fontWeight:600,cursor:'pointer',transition:'all .15s'}}>
+                <button key={d} type="button" onClick={()=>toggleDay(d)} style={{padding:'6px 10px',borderRadius:8,border:`1.5px solid ${form.working_days.includes(d)?'var(--tx)':'var(--border)'}`,background:form.working_days.includes(d)?'var(--tx)':'#fff',color:form.working_days.includes(d)?'#fff':'var(--tx2)',fontSize:12,fontWeight:600,cursor:'pointer',transition:'all .15s'}}>
                   {DAYS_AL[d]?.slice(0,3)}
                 </button>
               ))}
@@ -574,10 +598,10 @@ function ServicesPage({ gymId }) {
               {(services||[]).length===0?<tr><td colSpan={6}><Empty icon="✂️" title="Asnjë shërbim" sub="Shto shërbimin e parë ose kliko 'Shërbime Default'"/></td></tr>:
               (services||[]).map(s=>(
                 <tr key={s.id}>
-                  <td><div style={{display:'flex',alignItems:'center',gap:10}}><span style={{fontSize:20}}>{s.emoji}</span><div><div style={{fontWeight:500}}>{s.name}</div>{s.description&&<div style={{fontSize:11,color:'var(--g400)'}}>{s.description}</div>}</div></div></td>
+                  <td><div style={{display:'flex',alignItems:'center',gap:10}}><span style={{fontSize:20}}>{s.emoji}</span><div><div style={{fontWeight:500}}>{s.name}</div>{s.description&&<div style={{fontSize:11,color:'var(--tx4)'}}>{s.description}</div>}</div></div></td>
                   <td><span className="bdg bdg-gy">⏱ {s.duration_min} min</span></td>
                   <td style={{fontWeight:700}}>{fmtNum(s.price)} L</td>
-                  <td style={{color:'var(--g500)',fontSize:12}}>{s.category||'—'}</td>
+                  <td style={{color:'var(--tx3)',fontSize:12}}>{s.category||'—'}</td>
                   <td>{s.is_active?<span className="bdg bdg-gr">Aktiv</span>:<span className="bdg bdg-rd">Joaktiv</span>}</td>
                   <td>
                     <div style={{display:'flex',gap:4}}>
@@ -598,10 +622,10 @@ function ServicesPage({ gymId }) {
           <button className="btn btn-p" onClick={save} disabled={saving}>{saving?'Duke ruajtur...':'✅ Ruaj'}</button></>
         }>
           <div style={{marginBottom:14}}>
-            <label style={{fontSize:12,fontWeight:600,color:'var(--g600)',display:'block',marginBottom:8}}>Emoji</label>
+            <label style={{fontSize:12,fontWeight:600,color:'var(--tx2)',display:'block',marginBottom:8}}>Emoji</label>
             <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
               {EMOJIS.map(e=>(
-                <button key={e} type="button" onClick={()=>set('emoji',e)} style={{width:36,height:36,borderRadius:8,border:`2px solid ${form.emoji===e?'var(--g900)':'var(--g200)'}`,background:form.emoji===e?'var(--g900)':'#fff',fontSize:18,cursor:'pointer'}}>{e}</button>
+                <button key={e} type="button" onClick={()=>set('emoji',e)} style={{width:36,height:36,borderRadius:8,border:`2px solid ${form.emoji===e?'var(--tx)':'var(--border)'}`,background:form.emoji===e?'var(--tx)':'#fff',fontSize:18,cursor:'pointer'}}>{e}</button>
               ))}
             </div>
           </div>
@@ -623,10 +647,12 @@ function ServicesPage({ gymId }) {
 
 // ── LAYOUT ────────────────────────────────────────────────
 const NAV = [
-  {s:'Kryesore', items:[{id:'dashboard',l:'Dashboard',i:'📊'},{id:'new-appointment',l:'Rezervim i Ri',i:'➕'},{id:'appointments',l:'Të gjitha Rezervimet',i:'📅'}]},
-  {s:'Menaxhim', items:[{id:'staff',l:'Stafi / Stilistët',i:'💇'},{id:'services',l:'Shërbimet',i:'✂️'}]},
+  {s:'Kryesore', items:[{id:'dashboard',l:'Dashboard',i:'D'},{id:'calendar',l:'Kalendari',i:'K'},{id:'new-appointment',l:'Rezervim i Ri',i:'+'},{id:'appointments',l:'Rezervimet',i:'R'}]},
+  {s:'Klienta', items:[{id:'members',l:'Klientet',i:'K'},{id:'payments',l:'Pagesat',i:'P'}]},
+  {s:'Menaxhim', items:[{id:'staff',l:'Stafi / Stilistët',i:'S'},{id:'services',l:'Sherbimet',i:'X'}]},
+  {s:'Rritje', items:[{id:'analytics',l:'Analytics',i:'A'},{id:'affiliate',l:'Affiliate',i:'F'}]},
 ]
-const TITLES = { dashboard:'Dashboard', 'new-appointment':'Rezervim i Ri', appointments:'Rezervimet', staff:'Stafi / Stilistët', services:'Shërbimet' }
+const TITLES = { dashboard:'Dashboard', 'new-appointment':'Rezervim i Ri', appointments:'Rezervimet', calendar:'Kalendari', analytics:'Analytics', affiliate:'Affiliate', members:'Klientet', payments:'Pagesat', staff:'Stafi / Stilistët', services:'Sherbimet' }
 
 export default function SalonDashboard() {
   const [showOnboarding, setShowOnboarding] = React.useState(false)
@@ -640,17 +666,21 @@ export default function SalonDashboard() {
   const [page,   setPage]   = useState('dashboard')
   const [sbOpen, setSbOpen] = useState(false)
   const nav = id => { setPage(id); setSbOpen(false) }
-  const gymName  = profile?.gym?.name || 'Barbershop'
+  const gymName  = profile?.gym?.name || 'Sallon Bukurie'
   const userName = profile?.data?.name || 'Admin'
 
   const PAGE = {
     dashboard:        <Dashboard gymId={gymId} setPage={nav}/>,
     'new-appointment':<NewAppointment gymId={gymId} onDone={()=>nav('appointments')}/>,
     appointments:     <Appointments gymId={gymId}/>,
+    calendar:         <AppointmentCalendar gymId={gymId}/>,
+    analytics:        <AnalyticsDashboard gymId={gymId}/>,
+    affiliate:        <AffiliateDashboard gymId={gymId}/>,
     staff:            <StaffPage gymId={gymId}/>,
     services:         <ServicesPage gymId={gymId}/>,
+    members:          <><div className="page-in"><div className="ph"><div><div className="pt">Klientet</div></div></div><div className="card"><div className="card-b"><div className="empty"><div className="ei">K</div><div className="et">Klientet shfaqen automatikisht</div></div></div></div></div></>,
+    payments:         <><div className="page-in"><div className="ph"><div><div className="pt">Pagesat</div></div></div><div className="card"><div className="card-b"><div className="empty"><div className="ei">P</div><div className="et">Pagesat</div></div></div></div></div></>,
   }
-
   return (
     <div className="app">
       {showOnboarding&&(
@@ -691,6 +721,7 @@ export default function SalonDashboard() {
           </div>
           <div className="tbr">
             <span style={{fontSize:11,color:'var(--gr)',fontWeight:600}}>● Live</span>
+            <a href={`/book/${gymId}`} target='_blank' style={{fontSize:11,color:'var(--pu)',fontWeight:600,textDecoration:'none',background:'var(--pul)',padding:'4px 10px',borderRadius:20,border:'1px solid var(--pum)'}}>🔗 Booking Link</a>
             <PushNotifButton gymId={gymId}/>
             <span className="bdg bdg-gy">💅 {gymName}</span>
             <button className="btn btn-p btn-sm" onClick={()=>nav('new-appointment')}>+ Rezervim</button>

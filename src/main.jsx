@@ -27,6 +27,8 @@ import BusinessProfile      from './pages/explore/BusinessProfile.jsx'
 import Register              from './pages/auth/Register.jsx'
 import QRCheckin             from './pages/auth/QRCheckin.jsx'
 import Shop                  from './pages/shop/Shop.jsx'
+import ResetPassword         from './pages/auth/ResetPassword.jsx'
+import PublicBooking         from './pages/public/PublicBooking.jsx'
 import './index.css'
 
 function Router() {
@@ -58,6 +60,8 @@ function Router() {
   if (path === '/register')            return <Register/>
   if (path.startsWith('/checkin/'))   return <QRCheckin/>
   if (path === '/shop')               return <Shop/>
+  if (path === '/reset-password')     return <ResetPassword/>
+  if (path.startsWith('/book/'))      return <PublicBooking/>
 
   // Logged in
   if (user) {

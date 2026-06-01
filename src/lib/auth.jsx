@@ -97,6 +97,18 @@ export function AuthProvider({ children }) {
     if (error) throw error
   }
 
+  const resetPassword = async (email) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
+    if (error) throw new Error(error.message)
+  }
+
+  const updatePassword = async (newPassword) => {
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    if (error) throw new Error(error.message)
+  }
+
   const logout = async () => {
     await supabase.auth.signOut(); setUser(null); setProfile(null)
     window.location.href = '/login'

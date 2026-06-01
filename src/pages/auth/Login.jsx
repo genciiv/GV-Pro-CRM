@@ -1,15 +1,31 @@
 import { useState } from 'react'
+import { VaqoLogo } from '../../components/VaqoLogo'
 import { useAuth } from '../../lib/auth'
 import toast from 'react-hot-toast'
 
 export default function Login() {
-  const { login, loginWithGoogle, loginWithApple } = useAuth()
+  const { login, loginWithGoogle, loginWithApple, resetPassword } = useAuth()
+  const [showForgot, setShowForgot] = useState(false)
+  const [forgotEmail, setForgotEmail] = useState('')
+  const [forgotSent, setForgotSent] = useState(false)
+  const [forgotLoad, setForgotLoad] = useState(false)
   const [form, setForm] = useState({ email:'', password:'' })
   const [loading, setLoading] = useState(false)
   const [googleLoad, setGoogleLoad] = useState(false)
   const [appleLoad,  setAppleLoad]  = useState(false)
   const [showPass, setShowPass] = useState(false)
   const set = (k,v) => setForm(f=>({...f,[k]:v}))
+
+  const submitForgot = async (e) => {
+    e.preventDefault()
+    if (!forgotEmail) return
+    setForgotLoad(true)
+    try {
+      await resetPassword(forgotEmail)
+      setForgotSent(true)
+    } catch(e) { toast.error(e.message) }
+    finally { setForgotLoad(false) }
+  }
 
   const submit = async (e) => {
     e.preventDefault()
@@ -102,8 +118,9 @@ export default function Login() {
               <input className="inp" type="email" required value={form.email} onChange={e=>set('email',e.target.value)} placeholder="email@juaj.al" autoComplete="email"/>
             </div>
             <div>
-              <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
                 <label style={{fontSize:13,fontWeight:600,color:'#3f3f46'}}>Fjalëkalimi</label>
+                <button type="button" onClick={()=>setShowForgot(true)} style={{background:'none',border:'none',cursor:'pointer',fontSize:12,color:'#6c47ff',fontWeight:600,fontFamily:'inherit',padding:0}}>Harrova fjalëkalimin</button>
               </div>
               <div style={{position:'relative'}}>
                 <input className="inp" type={showPass?'text':'password'} required value={form.password} onChange={e=>set('password',e.target.value)} placeholder="••••••••" style={{paddingRight:46}} autoComplete="current-password"/>
@@ -145,6 +162,40 @@ export default function Login() {
           ))}
         </div>
       </div>
+      {/* Forgot Password Modal */}
+      {showForgot&&(
+        <div style={{position:'fixed',inset:0,zIndex:500,background:'rgba(15,17,23,.4)',backdropFilter:'blur(6px)',display:'flex',alignItems:'center',justifyContent:'center',padding:20}} onClick={()=>setShowForgot(false)}>
+          <div style={{background:'#fff',borderRadius:18,padding:32,maxWidth:380,width:'100%',boxShadow:'0 24px 64px rgba(0,0,0,.18)'}} onClick={e=>e.stopPropagation()}>
+            {forgotSent ? (
+              <div style={{textAlign:'center'}}>
+                <div style={{fontSize:48,marginBottom:14}}>✅</div>
+                <div style={{fontFamily:'Georgia,serif',fontSize:20,fontWeight:900,marginBottom:8}}>Email u dërgua!</div>
+                <p style={{fontSize:14,color:'#6b7385',lineHeight:1.7,marginBottom:20}}>Kontrollo <strong>{forgotEmail}</strong> dhe ndiq udhëzimet për rivendosjen e fjalëkalimit.</p>
+                <button onClick={()=>{setShowForgot(false);setForgotSent(false)}} style={{background:'#0f1117',color:'#fff',border:'none',padding:'11px 28px',borderRadius:9,fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>Mbyll →</button>
+              </div>
+            ) : (
+              <>
+                <div style={{fontFamily:'Georgia,serif',fontSize:20,fontWeight:900,marginBottom:6}}>Rikuperim Fjalëkalimi</div>
+                <p style={{fontSize:14,color:'#6b7385',marginBottom:20,lineHeight:1.6}}>Shkruaj emailin tënd dhe do të dërgojmë link rivendosjeje.</p>
+                <form onSubmit={submitForgot}>
+                  <input type="email" required value={forgotEmail} onChange={e=>setForgotEmail(e.target.value)} placeholder="email@juaj.al"
+                    style={{width:'100%',border:'1.5px solid #e8eaef',borderRadius:9,padding:'11px 14px',fontSize:14,fontFamily:'inherit',outline:'none',marginBottom:12,boxSizing:'border-box'}}
+                    onFocus={e=>{e.target.style.borderColor='#6c47ff';e.target.style.boxShadow='0 0 0 3px rgba(108,71,255,.1)'}}
+                    onBlur={e=>{e.target.style.borderColor='#e8eaef';e.target.style.boxShadow='none'}}/>
+                  <div style={{display:'flex',gap:8}}>
+                    <button type="button" onClick={()=>setShowForgot(false)} style={{flex:1,background:'#f4f6fa',border:'1px solid #e8eaef',color:'#6b7385',padding:'11px',borderRadius:9,fontSize:14,fontWeight:600,cursor:'pointer',fontFamily:'inherit'}}>Anulo</button>
+                    <button type="submit" disabled={forgotLoad} style={{flex:2,background:'#6c47ff',color:'#fff',border:'none',padding:'11px',borderRadius:9,fontSize:14,fontWeight:700,cursor:forgotLoad?'wait':'pointer',fontFamily:'inherit',display:'flex',alignItems:'center',justifyContent:'center',gap:8}}>
+                      {forgotLoad&&<div style={{width:14,height:14,border:'2px solid rgba(255,255,255,.3)',borderTopColor:'#fff',borderRadius:'50%',animation:'spin .7s linear infinite'}}/>}
+                      {forgotLoad?'Duke dërguar...':'Dërgo Linkun'}
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )

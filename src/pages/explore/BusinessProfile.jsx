@@ -169,7 +169,7 @@ export default function BusinessProfile() {
                 </div>
               )}
             </div>
-            <button onClick={()=>setShowBook(true)} style={{ background:'#18181b', color:'#fff', border:'none', padding:'12px 24px', borderRadius:10, fontSize:15, fontWeight:600, cursor:'pointer', fontFamily:'inherit', flexShrink:0 }}>
+            <button onClick={()=>window.location.href=`/book/${biz?.slug||biz?.id}`} style={{ background:'#6c47ff', color:'#fff', border:'none', padding:'12px 24px', borderRadius:10, fontSize:15, fontWeight:700, cursor:'pointer', fontFamily:'inherit', flexShrink:0, boxShadow:'0 4px 12px rgba(108,71,255,.3)' }}>
               📅 Rezervo Tani
             </button>
           </div>
