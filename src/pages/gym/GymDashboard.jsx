@@ -1115,13 +1115,167 @@ function Settings({ gymId }) {
 }
 
 // ─── LAYOUT ──────────────────────────────────────────────
+// ── STAFF PAGE ──────────────────────────────────────────
+function StaffPage({ gymId }) {
+  const { data: staff, loading, reload } = useAsync(() => supabase.from('staff').select('*').eq('gym_id',gymId).order('first_name').then(r=>r.data), [gymId])
+  const [showAdd, setShowAdd] = useState(false)
+  const [form, setForm] = useState({ first_name:'', last_name:'', phone:'', email:'', speciality:'', is_active:true })
+  const [saving, setSaving] = useState(false)
+  const sf = (k,v) => setForm(p=>({...p,[k]:v}))
+
+  const save = async e => {
+    e.preventDefault()
+    if (!form.first_name) return
+    setSaving(true)
+    try {
+      await supabase.from('staff').insert({ ...form, gym_id: gymId })
+      toast.success('✅ Punonjësi u shtua!')
+      setShowAdd(false)
+      setForm({ first_name:'', last_name:'', phone:'', email:'', speciality:'', is_active:true })
+      reload()
+    } catch(e) { toast.error(e.message) }
+    finally { setSaving(false) }
+  }
+
+  const toggle = async (id, is_active) => {
+    await supabase.from('staff').update({ is_active: !is_active }).eq('id', id)
+    reload()
+  }
+
+  if (loading) return <div className="ldg"><div className="spn"/>Duke ngarkuar...</div>
+  return (
+    <div className="page-in">
+      <div className="ph">
+        <div><div className="pt">Menaxhim Stafi</div><div className="ps">{(staff||[]).length} punonjës</div></div>
+        <button className="btn btn-p" onClick={()=>setShowAdd(true)}>+ Shto Punonjës</button>
+      </div>
+
+      <div className="card">
+        {(!staff||staff.length===0) ? (
+          <div className="empty" style={{padding:48}}><div className="ei">👥</div><div className="et">Nuk ka staf</div><div className="es">Shto punonjësin e parë</div></div>
+        ) : (
+          <div className="tw">
+            <table><thead><tr>
+              <th>Emri</th><th>Specialiteti</th><th>Telefon</th><th>Email</th><th>Statusi</th><th></th>
+            </tr></thead>
+            <tbody>
+              {(staff||[]).map(s=>(
+                <tr key={s.id}>
+                  <td><div className="mc"><div className="av" style={{background:'#6c47ff',fontSize:13}}>{s.first_name?.[0]}{s.last_name?.[0]}</div><div><div className="mn">{s.first_name} {s.last_name}</div></div></div></td>
+                  <td>{s.speciality||'—'}</td>
+                  <td>{s.phone||'—'}</td>
+                  <td>{s.email||'—'}</td>
+                  <td><span className={`bdg ${s.is_active?'bdg-gr':'bdg-gy'}`}>{s.is_active?'Aktiv':'Joaktiv'}</span></td>
+                  <td><button className="btn btn-s btn-sm" onClick={()=>toggle(s.id,s.is_active)}>{s.is_active?'Çaktivo':'Aktivo'}</button></td>
+                </tr>
+              ))}
+            </tbody></table>
+          </div>
+        )}
+      </div>
+
+      {showAdd&&(
+        <div className="overlay" onClick={()=>setShowAdd(false)}>
+          <div className="modal" onClick={e=>e.stopPropagation()}>
+            <div className="mhd"><div className="mt">Shto Punonjës</div><button className="mcl" onClick={()=>setShowAdd(false)}>×</button></div>
+            <form onSubmit={save} className="mb">
+              <div className="fg c2">
+                <div className="fgp"><label>Emri *</label><input value={form.first_name} onChange={e=>sf('first_name',e.target.value)} placeholder="Emri" required/></div>
+                <div className="fgp"><label>Mbiemri</label><input value={form.last_name} onChange={e=>sf('last_name',e.target.value)} placeholder="Mbiemri"/></div>
+              </div>
+              <div className="fg c2">
+                <div className="fgp"><label>Telefon</label><input value={form.phone} onChange={e=>sf('phone',e.target.value)} placeholder="+355 69..."/></div>
+                <div className="fgp"><label>Email</label><input type="email" value={form.email} onChange={e=>sf('email',e.target.value)} placeholder="email@..."/></div>
+              </div>
+              <div className="fgp"><label>Specialiteti</label><input value={form.speciality} onChange={e=>sf('speciality',e.target.value)} placeholder="p.sh. Personal Trainer"/></div>
+              <div className="mft"><button type="button" className="btn btn-s" onClick={()=>setShowAdd(false)}>Anulo</button><button type="submit" className="btn btn-pu" disabled={saving}>{saving?'Duke ruajtur...':'Shto'}</button></div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── SERVICES PAGE ────────────────────────────────────────
+function ServicesPage({ gymId }) {
+  const { data: services, loading, reload } = useAsync(()=>supabase.from('services').select('*').eq('gym_id',gymId).order('sort_order').then(r=>r.data), [gymId])
+  const [showAdd, setShowAdd] = useState(false)
+  const [form, setForm] = useState({ name:'', price:0, duration_min:60, description:'', is_active:true })
+  const [saving, setSaving] = useState(false)
+  const sf = (k,v) => setForm(p=>({...p,[k]:v}))
+
+  const save = async e => {
+    e.preventDefault()
+    if (!form.name) return
+    setSaving(true)
+    try {
+      await supabase.from('services').insert({ ...form, gym_id: gymId })
+      toast.success('✅ Shërbimi u shtua!')
+      setShowAdd(false)
+      setForm({ name:'', price:0, duration_min:60, description:'', is_active:true })
+      reload()
+    } catch(e) { toast.error(e.message) }
+    finally { setSaving(false) }
+  }
+
+  const toggleActive = async (id, is_active) => {
+    await supabase.from('services').update({ is_active: !is_active }).eq('id', id)
+    reload()
+  }
+
+  if (loading) return <div className="ldg"><div className="spn"/>Duke ngarkuar...</div>
+  return (
+    <div className="page-in">
+      <div className="ph">
+        <div><div className="pt">Shërbimet</div><div className="ps">{(services||[]).length} shërbime</div></div>
+        <button className="btn btn-p" onClick={()=>setShowAdd(true)}>+ Shto Shërbim</button>
+      </div>
+      <div className="card">
+        {(!services||services.length===0) ? (
+          <div className="empty" style={{padding:48}}><div className="ei">💪</div><div className="et">Nuk ka shërbime</div><div className="es">Shto shërbimin e parë</div></div>
+        ) : (
+          <div className="tw"><table><thead><tr><th>Emri</th><th>Kohëzgjatja</th><th>Çmimi</th><th>Statusi</th><th></th></tr></thead>
+            <tbody>{(services||[]).map(s=>(
+              <tr key={s.id}>
+                <td><div className="mn">{s.name}</div>{s.description&&<div className="ms">{s.description}</div>}</td>
+                <td>{s.duration_min} min</td>
+                <td style={{fontWeight:700,color:'var(--gr)'}}>{(s.price||0).toLocaleString('sq-AL')} L</td>
+                <td><span className={`bdg ${s.is_active?'bdg-gr':'bdg-gy'}`}>{s.is_active?'Aktiv':'Joaktiv'}</span></td>
+                <td><button className="btn btn-s btn-sm" onClick={()=>toggleActive(s.id,s.is_active)}>{s.is_active?'Çaktivo':'Aktivo'}</button></td>
+              </tr>
+            ))}</tbody>
+          </table></div>
+        )}
+      </div>
+      {showAdd&&(
+        <div className="overlay" onClick={()=>setShowAdd(false)}>
+          <div className="modal" onClick={e=>e.stopPropagation()}>
+            <div className="mhd"><div className="mt">Shto Shërbim</div><button className="mcl" onClick={()=>setShowAdd(false)}>×</button></div>
+            <form onSubmit={save} className="mb">
+              <div className="fgp" style={{marginBottom:12}}><label>Emri i Shërbimit *</label><input value={form.name} onChange={e=>sf('name',e.target.value)} placeholder="p.sh. Stërvitje Personale" required/></div>
+              <div className="fg c2">
+                <div className="fgp"><label>Kohëzgjatja (min)</label><input type="number" value={form.duration_min} onChange={e=>sf('duration_min',+e.target.value)} min={15} step={15}/></div>
+                <div className="fgp"><label>Çmimi (L)</label><input type="number" value={form.price} onChange={e=>sf('price',+e.target.value)} min={0}/></div>
+              </div>
+              <div className="fgp"><label>Përshkrim</label><textarea value={form.description} onChange={e=>sf('description',e.target.value)} placeholder="Përshkrim i shkurtër..."/></div>
+              <div className="mft"><button type="button" className="btn btn-s" onClick={()=>setShowAdd(false)}>Anulo</button><button type="submit" className="btn btn-pu" disabled={saving}>{saving?'Duke ruajtur...':'Shto'}</button></div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+
 const NAV = [
   {s:'Kryesore', items:[{id:'calendar',l:'Kalendari',i:'📅'},{id:'dashboard',l:'Dashboard',i:'◻️'},{id:'analytics',l:'Analytics',i:'📊'},{id:'checkin',l:'QR Check-in',i:'📷'},{id:'affiliate',l:'Affiliate',i:'🤝'}]},
   {s:'Menaxhim', items:[{id:'members',l:'Anëtarët',i:'👥'},{id:'memberships',l:'Abonimet',i:'🎫'},{id:'payments',l:'Pagesat',i:'💰'}]},
   {s:'Analiza',  items:[{id:'reports',l:'Raporte',i:'📈'}]},
   {s:'Sistem',   items:[{id:'settings',l:'Konfigurimet',i:'⚙️'}]},
 ]
-const TITLES={setup:'🚀 Setup Wizard',dashboard:'Dashboard',checkin:'QR Check-in',members:'Anëtarët',memberships:'Abonimet',payments:'Pagesat',reports:'Raporte',settings:'Konfigurimet'}
+const TITLES={setup:'🚀 Setup Wizard',staff:'👥 Stafi',services:'💪 Shërbimet',dashboard:'Dashboard',checkin:'QR Check-in',members:'Anëtarët',memberships:'Abonimet',payments:'Pagesat',reports:'Raporte',settings:'Konfigurimet'}
 
 export default function GymDashboard() {
   const { profile, gymId, logout } = useAuth()
@@ -1150,6 +1304,8 @@ export default function GymDashboard() {
   const PAGE = {
     calendar:    <AppointmentCalendar gymId={gymId}/>,
     setup:       <div style={{position:'relative',height:'calc(100vh - 54px)',overflow:'hidden'}}><OnboardingFlow gymId={gymId} onComplete={()=>nav('dashboard')}/></div>,
+    staff:       <StaffPage gymId={gymId}/>,
+    services:    <ServicesPage gymId={gymId}/>,
     dashboard:   <Dashboard   gymId={gymId} setPage={nav}/>,
     analytics:   <AnalyticsDashboard gymId={gymId}/>,
     affiliate:   <AffiliateDashboard gymId={gymId}/>,

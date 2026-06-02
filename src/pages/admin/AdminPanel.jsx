@@ -38,6 +38,7 @@ function GymAppRow({ app, onDone }) {
   const [show,setShow]=useState(false)
   const [password,setPassword]=useState('')
   const [loading,setLoading]=useState(false)
+  const [bizType,setBizType]=useState(app.business_type||'gym')
 
   const doApprove = async () => {
     if(!password.trim()){toast.error('Vendos fjalëkalimin');return}

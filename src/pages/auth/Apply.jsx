@@ -40,7 +40,7 @@ export default function Apply() {
         name: f.gymName.trim(), owner_name: f.ownerName.trim(),
         email: f.email.trim(), phone: f.phone.trim(),
         city: f.city, address: f.address.trim(),
-        message: f.message.trim(), status: 'pending',
+        message: f.message.trim(), status: 'new',
         business_type: bizType,
       })
       if (err) throw new Error(err.message)

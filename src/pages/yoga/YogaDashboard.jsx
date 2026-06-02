@@ -496,12 +496,156 @@ function Instructors({ gymId }) {
 }
 
 // ── LAYOUT ────────────────────────────────────────────────
+// ── WAITLIST PAGE ─────────────────────────────────────────
+function WaitlistPage({ gymId }) {
+  const [entries, setEntries] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showAdd, setShowAdd] = useState(false)
+  const [form, setForm] = useState({name:'',phone:'',email:'',class_name:'',notes:''})
+  const sf = (k,v) => setForm(p=>({...p,[k]:v}))
+
+  useEffect(()=>{
+    setLoading(true)
+    supabase.from('waitlist').select('*').eq('gym_id',gymId).order('created_at',{ascending:false})
+      .then(({data})=>{setEntries(data||[]);setLoading(false)})
+  },[gymId])
+
+  const save = async e => {
+    e.preventDefault()
+    if(!form.name||!form.phone) return
+    const {error} = await supabase.from('waitlist').insert({...form,gym_id:gymId,status:'waiting'})
+    if(!error){
+      toast.success('✅ U shtua në listë!')
+      setShowAdd(false)
+      setForm({name:'',phone:'',email:'',class_name:'',notes:''})
+      const {data} = await supabase.from('waitlist').select('*').eq('gym_id',gymId).order('created_at',{ascending:false})
+      setEntries(data||[])
+    } else toast.error(error.message)
+  }
+
+  const updateStatus = async (id,status) => {
+    await supabase.from('waitlist').update({status}).eq('id',id)
+    setEntries(p=>p.map(e=>e.id===id?{...e,status}:e))
+  }
+
+  if(loading) return <div className="ldg"><div className="spn"/>Duke ngarkuar...</div>
+  return (
+    <div className="page-in">
+      <div className="ph">
+        <div><div className="pt">Listë Pritjeje</div><div className="ps">{entries.filter(e=>e.status==='waiting').length} në pritje</div></div>
+        <button className="btn btn-p" onClick={()=>setShowAdd(true)}>+ Shto</button>
+      </div>
+      <div className="card">
+        {entries.length===0 ? (
+          <div className="empty" style={{padding:48}}><div className="ei">⏳</div><div className="et">Lista është bosh</div><div className="es">Shto klientët që presin vend</div></div>
+        ) : (
+          <div className="tw"><table><thead><tr><th>Klienti</th><th>Telefon</th><th>Klasa</th><th>Statusi</th><th>Data</th><th></th></tr></thead>
+            <tbody>{entries.map(e=>(
+              <tr key={e.id}>
+                <td><div className="mn">{e.name}</div>{e.email&&<div className="ms">{e.email}</div>}</td>
+                <td><a href={`tel:${e.phone}`} style={{color:'var(--pu)',fontWeight:600,textDecoration:'none'}}>{e.phone}</a></td>
+                <td>{e.class_name||'—'}</td>
+                <td><span className={`bdg ${e.status==='waiting'?'bdg-am':e.status==='contacted'?'bdg-bl':'bdg-gr'}`}>{e.status==='waiting'?'Pret':e.status==='contacted'?'Kontaktuar':'Konfirmuar'}</span></td>
+                <td style={{fontSize:12,color:'var(--tx4)'}}>{new Date(e.created_at).toLocaleDateString('sq-AL')}</td>
+                <td style={{display:'flex',gap:6}}>
+                  {e.status==='waiting'&&<button className="btn btn-s btn-sm" onClick={()=>updateStatus(e.id,'contacted')}>✓ Kontakto</button>}
+                  {e.status==='contacted'&&<button className="btn btn-success btn-sm" onClick={()=>updateStatus(e.id,'confirmed')}>✓ Konfirmo</button>}
+                  <a href={`tel:${e.phone}`} className="btn btn-s btn-sm">📞</a>
+                </td>
+              </tr>
+            ))}</tbody>
+          </table></div>
+        )}
+      </div>
+      {showAdd&&(
+        <div className="overlay" onClick={()=>setShowAdd(false)}>
+          <div className="modal" onClick={e=>e.stopPropagation()}>
+            <div className="mhd"><div className="mt">Shto në Listë</div><button className="mcl" onClick={()=>setShowAdd(false)}>×</button></div>
+            <form onSubmit={save} className="mb">
+              <div className="fg c2">
+                <div className="fgp"><label>Emri *</label><input value={form.name} onChange={e=>sf('name',e.target.value)} placeholder="Emri Mbiemri" required/></div>
+                <div className="fgp"><label>Telefon *</label><input value={form.phone} onChange={e=>sf('phone',e.target.value)} placeholder="+355 69..." required/></div>
+              </div>
+              <div className="fg c2">
+                <div className="fgp"><label>Email</label><input type="email" value={form.email} onChange={e=>sf('email',e.target.value)}/></div>
+                <div className="fgp"><label>Klasa e dëshiruar</label><input value={form.class_name} onChange={e=>sf('class_name',e.target.value)} placeholder="p.sh. Yoga Hatha"/></div>
+              </div>
+              <div className="fgp"><label>Shënime</label><textarea value={form.notes} onChange={e=>sf('notes',e.target.value)} placeholder="Çdo informacion shtesë..."/></div>
+              <div className="mft"><button type="button" className="btn btn-s" onClick={()=>setShowAdd(false)}>Anulo</button><button type="submit" className="btn btn-pu">Shto</button></div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── REMINDERS PAGE ────────────────────────────────────────
+function RemindersPage({ gymId }) {
+  const [upcoming, setUpcoming] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [sending, setSending] = useState(null)
+
+  useEffect(()=>{
+    const today = new Date().toISOString().split('T')[0]
+    const in3days = new Date(Date.now()+3*86400000).toISOString().split('T')[0]
+    supabase.from('appointments').select('id,client_name,client_phone,appointment_date,start_time,services(name)').eq('gym_id',gymId).gte('appointment_date',today).lte('appointment_date',in3days).in('status',['confirmed','pending']).order('appointment_date')
+      .then(({data})=>{setUpcoming(data||[]);setLoading(false)})
+  },[gymId])
+
+  const sendReminder = async (appt) => {
+    setSending(appt.id)
+    try {
+      // SMS reminder via Supabase edge function
+      const msg = `Pershendetje ${appt.client_name}! Ju kujtojme se keni rezervim me ne me ${new Date(appt.appointment_date).toLocaleDateString('sq-AL')} ora ${appt.start_time?.slice(0,5)}. Per anulim na kontaktoni. Faleminderit! - Vaqo`
+      await supabase.functions.invoke('send-sms', { body: { to: appt.client_phone, message: msg } })
+      toast.success(`✅ Kujtesa u dërgua te ${appt.client_name}`)
+    } catch(e) { toast.error('❌ Dërgimi dështoi') }
+    finally { setSending(null) }
+  }
+
+  const sendAll = async () => {
+    for(const a of upcoming) { if(a.client_phone) await sendReminder(a) }
+  }
+
+  if(loading) return <div className="ldg"><div className="spn"/>Duke ngarkuar...</div>
+  return (
+    <div className="page-in">
+      <div className="ph">
+        <div><div className="pt">Kujtesat Automatike</div><div className="ps">Rezervimet e 3 ditëve të ardhshme</div></div>
+        {upcoming.length>0&&<button className="btn btn-pu" onClick={sendAll}>📲 Dërgo të gjitha</button>}
+      </div>
+      <div className="alert al-bl" style={{marginBottom:16}}>
+        💡 Kujtesa dërgohet automatikisht 24h para rezervimit nëse SMS është aktiv. Mund ta dërgosh edhe manualisht.
+      </div>
+      <div className="card">
+        {upcoming.length===0 ? (
+          <div className="empty" style={{padding:48}}><div className="ei">🔔</div><div className="et">Nuk ka rezervime</div><div className="es">Rezervimet e 3 ditëve të ardhshme shfaqen këtu</div></div>
+        ) : (
+          <div className="tw"><table><thead><tr><th>Klienti</th><th>Telefon</th><th>Shërbimi</th><th>Data & Ora</th><th></th></tr></thead>
+            <tbody>{upcoming.map(a=>(
+              <tr key={a.id}>
+                <td><div className="mn">{a.client_name}</div></td>
+                <td>{a.client_phone||'—'}</td>
+                <td>{a.services?.name||'—'}</td>
+                <td style={{fontSize:13}}>{new Date(a.appointment_date).toLocaleDateString('sq-AL',{weekday:'short',day:'numeric',month:'short'})} · {a.start_time?.slice(0,5)}</td>
+                <td><button className="btn btn-s btn-sm" onClick={()=>sendReminder(a)} disabled={!a.client_phone||sending===a.id}>{sending===a.id?'Duke dërguar...':'📲 Dërgo Kujtesë'}</button></td>
+              </tr>
+            ))}</tbody>
+          </table></div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+
 const NAV = [
   {s:'Kryesore', items:[{id:'dashboard',l:'Dashboard',i:'📊'},{id:'calendar',l:'Kalendari',i:'📅'},{id:'new-class',l:'Klasë e Re',i:'➕'},{id:'classes',l:'Të gjitha Klasat',i:'📋'}]},
-  {s:'Menaxhim', items:[{id:'instructors',l:'Instruktorët',i:'🧘'}]},
+  {s:'Menaxhim', items:[{id:'instructors',l:'Instruktorët',i:'🧘'},{id:'waitlist',l:'Listë Pritjeje',i:'⏳'},{id:'reminders',l:'Kujtesat',i:'🔔'}]},
   {s:'Rritje', items:[{id:'analytics',l:'Analytics',i:'📈'},{id:'affiliate',l:'Affiliate',i:'🤝'}]},
 ]
-const TITLES = { dashboard:'Dashboard', calendar:'📅 Kalendari', 'new-class':'Klasë e Re', classes:'Klasat', instructors:'Instruktorët', analytics:'📊 Analytics', affiliate:'🤝 Affiliate' }
+const TITLES = { dashboard:'Dashboard', calendar:'📅 Kalendari', waitlist:'⏳ Listë Pritjeje', reminders:'🔔 Kujtesat', 'new-class':'Klasë e Re', classes:'Klasat', instructors:'Instruktorët', analytics:'📊 Analytics', affiliate:'🤝 Affiliate' }
 
 export default function YogaDashboard() {
   const [showOnboarding, setShowOnboarding] = React.useState(false)
@@ -529,6 +673,8 @@ export default function YogaDashboard() {
     instructors:  <Instructors gymId={gymId}/>,
     analytics:    <AnalyticsDashboard gymId={gymId}/>,
     affiliate:    <AffiliateDashboard gymId={gymId}/>,
+    waitlist:    <WaitlistPage gymId={gymId}/>,
+    reminders:   <RemindersPage gymId={gymId}/>,
   }
 
   return (

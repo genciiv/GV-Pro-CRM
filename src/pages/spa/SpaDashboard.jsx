@@ -647,13 +647,66 @@ function ServicesPage({ gymId }) {
 }
 
 // ── LAYOUT ────────────────────────────────────────────────
+// ── REMINDERS PAGE ────────────────────────────────────────
+function RemindersPage({ gymId }) {
+  const [upcoming, setUpcoming] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [sending, setSending] = useState(null)
+  const { supabase: sb } = { supabase }
+
+  useEffect(()=>{
+    const today = new Date().toISOString().split('T')[0]
+    const in3days = new Date(Date.now()+3*86400000).toISOString().split('T')[0]
+    supabase.from('appointments').select('id,client_name,client_phone,appointment_date,start_time,services(name)').eq('gym_id',gymId).gte('appointment_date',today).lte('appointment_date',in3days).in('status',['confirmed','pending']).order('appointment_date')
+      .then(({data})=>{setUpcoming(data||[]);setLoading(false)})
+  },[gymId])
+
+  const sendReminder = async (appt) => {
+    setSending(appt.id)
+    try {
+      const msg = `Pershendetje ${appt.client_name}! Ju kujtojme se keni rezervim me ne me ${new Date(appt.appointment_date+'T12:00').toLocaleDateString('sq-AL')} ora ${appt.start_time?.slice(0,5)}. Faleminderit! - Vaqo`
+      await supabase.functions.invoke('send-sms', { body: { to: appt.client_phone, message: msg } })
+      toast.success('✅ Kujtesa u dërgua!')
+    } catch(e) { toast.error('❌ Dërgimi dështoi - SMS jo i konfiguruar') }
+    finally { setSending(null) }
+  }
+
+  if(loading) return <div className="ldg"><div className="spn"/>Duke ngarkuar...</div>
+  return (
+    <div className="page-in">
+      <div className="ph">
+        <div><div className="pt">Kujtesat</div><div className="ps">Rezervimet e 3 ditëve të ardhshme · {upcoming.length} rezervime</div></div>
+        {upcoming.length>0&&<button className="btn btn-pu" onClick={()=>upcoming.forEach(a=>a.client_phone&&sendReminder(a))}>📲 Dërgo të gjitha</button>}
+      </div>
+      <div className="alert al-bl" style={{marginBottom:16}}>💡 Kujtesat dërgohen 24h para rezervimit kur SMS është aktiv. Këtu mund ti dërgosh manualisht.</div>
+      <div className="card">
+        {upcoming.length===0 ? (
+          <div className="empty" style={{padding:48}}><div className="ei">🔔</div><div className="et">Nuk ka rezervime të ardhshme</div><div className="es">Rezervimet e 3 ditëve tjetër shfaqen këtu</div></div>
+        ) : (
+          <div className="tw"><table><thead><tr><th>Klienti</th><th>Telefon</th><th>Shërbimi</th><th>Data & Ora</th><th></th></tr></thead>
+            <tbody>{upcoming.map(a=>(
+              <tr key={a.id}>
+                <td><div className="mn">{a.client_name}</div></td>
+                <td>{a.client_phone||<span style={{color:'var(--tx4)'}}>—</span>}</td>
+                <td>{a.services?.name||'—'}</td>
+                <td style={{fontSize:13}}>{new Date(a.appointment_date+'T12:00').toLocaleDateString('sq-AL',{weekday:'short',day:'numeric',month:'short'})} · {a.start_time?.slice(0,5)}</td>
+                <td><button className="btn btn-s btn-sm" onClick={()=>sendReminder(a)} disabled={!a.client_phone||sending===a.id}>{sending===a.id?'Duke dërguar...':'📲 Dërgo'}</button></td>
+              </tr>
+            ))}</tbody>
+          </table></div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 const NAV = [
   {s:'Kryesore', items:[{id:'dashboard',l:'Dashboard',i:'D'},{id:'calendar',l:'Kalendari',i:'K'},{id:'new-appointment',l:'Rezervim i Ri',i:'+'},{id:'appointments',l:'Rezervimet',i:'R'}]},
   {s:'Klienta', items:[{id:'members',l:'Klientet',i:'K'},{id:'payments',l:'Pagesat',i:'P'}]},
   {s:'Menaxhim', items:[{id:'staff',l:'Stafi / Terapistët',i:'S'},{id:'services',l:'Sherbimet',i:'X'}]},
-  {s:'Rritje', items:[{id:'analytics',l:'Analytics',i:'A'},{id:'affiliate',l:'Affiliate',i:'F'}]},
+  {s:'Rritje', items:[{id:'analytics',l:'Analytics',i:'A'},{id:'affiliate',l:'Affiliate',i:'F'},{id:'reminders',l:'Kujtesat',i:'K'}]},
 ]
-const TITLES = { dashboard:'Dashboard', 'new-appointment':'Rezervim i Ri', appointments:'Rezervimet', calendar:'Kalendari', analytics:'Analytics', affiliate:'Affiliate', members:'Klientet', payments:'Pagesat', staff:'Stafi / Terapistët', services:'Sherbimet' }
+const TITLES = { dashboard:'Dashboard', 'new-appointment':'Rezervim i Ri', appointments:'Rezervimet', calendar:'Kalendari', analytics:'Analytics', reminders:'🔔 Kujtesat', affiliate:'Affiliate', members:'Klientet', payments:'Pagesat', staff:'Stafi / Terapistët', services:'Sherbimet' }
 
 export default function SpaDashboard() {
   const [showOnboarding, setShowOnboarding] = React.useState(false)
@@ -677,6 +730,7 @@ export default function SpaDashboard() {
     calendar:         <AppointmentCalendar gymId={gymId}/>,
     analytics:        <AnalyticsDashboard gymId={gymId}/>,
     affiliate:        <AffiliateDashboard gymId={gymId}/>,
+    reminders:       <RemindersPage gymId={gymId}/>,
     staff:            <StaffPage gymId={gymId}/>,
     services:         <ServicesPage gymId={gymId}/>,
     members:          <><div className="page-in"><div className="ph"><div><div className="pt">Klientet</div></div></div><div className="card"><div className="card-b"><div className="empty"><div className="ei">K</div><div className="et">Klientet shfaqen automatikisht</div></div></div></div></div></>,

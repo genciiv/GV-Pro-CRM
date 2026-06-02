@@ -868,3 +868,28 @@ CREATE TRIGGER set_gym_slug BEFORE INSERT OR UPDATE OF name ON gyms
 
 -- Backfill existing gyms
 UPDATE gyms SET name = name WHERE slug IS NULL;
+
+-- ── FIX: Shto kolona që mungojnë ─────────────────────────
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS business_type text;
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS owner_name text;
+-- Riemëro status check constraint (lejon edhe 'pending')
+ALTER TABLE applications DROP CONSTRAINT IF EXISTS applications_status_check;
+ALTER TABLE applications ADD CONSTRAINT applications_status_check 
+  CHECK (status IN ('new','pending','contacted','approved','rejected'));
+
+-- ── WAITLIST TABLE ────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS waitlist (
+  id          uuid primary key default uuid_generate_v4(),
+  gym_id      uuid references gyms(id) on delete cascade,
+  name        text not null,
+  phone       text not null,
+  email       text,
+  class_name  text,
+  notes       text,
+  status      text default 'waiting' check (status in ('waiting','contacted','confirmed','cancelled')),
+  created_at  timestamptz default now()
+);
+ALTER TABLE waitlist ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "waitlist_gym" ON waitlist USING (
+  gym_id IN (SELECT gym_id FROM gym_users WHERE auth_id = auth.uid())
+);
