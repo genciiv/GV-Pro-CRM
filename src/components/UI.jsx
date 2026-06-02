@@ -43,7 +43,7 @@ export function BarChart({ data=[] }) {
 }
 
 export function Modal({ title, children, footer, onClose }) {
-  return (
+  return createPortal(
     <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div className="modal">
         <div className="mhd">
@@ -54,9 +54,8 @@ export function Modal({ title, children, footer, onClose }) {
         {footer&&<div className="mft">{footer}</div>}
       </div>
     </div>
-  )
+ , document.body)
 }
-
 export function Loading() {
   return <div className="ldg"><div className="spn"/><span>Duke ngarkuar...</span></div>
 }

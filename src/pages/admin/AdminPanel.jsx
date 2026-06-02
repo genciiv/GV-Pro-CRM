@@ -44,14 +44,49 @@ function GymAppRow({ app, onDone }) {
     if(!password.trim()){toast.error('Vendos fjalëkalimin');return}
     setLoading(true)
     try {
-      const{data:gym,error}=await supabase.from('gyms').insert({name:app.name,email:app.email,phone:app.phone,address:app.address,city:app.city,status:'approved',business_type:bizType,approved_at:new Date().toISOString()}).select().single()
-      if(error) throw new Error(error.message)
-      await supabase.rpc('create_default_plans',{p_gym_id:gym.id})
-      await supabase.from('gym_users').insert({gym_id:gym.id,name:app.owner_name,email:app.email,role:'owner'})
-      await supabase.from('applications').update({status:'approved',gym_id:gym.id}).eq('id',app.id)
-      toast.success(`✅ ${app.name} u aprovua!\nShko: Supabase → Auth → Add User\nEmail: ${app.email}\nPassword: ${password}`)
+      // 1. Krijo Gym
+      const{data:gym,error:gymErr}=await supabase.from('gyms').insert({
+        name:app.name, email:app.email, phone:app.phone,
+        address:app.address||null, city:app.city||null,
+        status:'approved', business_type:bizType,
+        approved_at:new Date().toISOString()
+      }).select().single()
+      if(gymErr) throw new Error('Gym error: '+gymErr.message)
+
+      // 2. Krijo planet default
+      await supabase.rpc('create_default_plans',{p_gym_id:gym.id}).catch(()=>{})
+
+      // 3. Krijo Auth User duke përdorur Admin API nëpërmjet Edge Function
+      const {data:authResp, error:authErr} = await supabase.functions.invoke('create-gym-user', {
+        body: {
+          email: app.email,
+          password: password.trim(),
+          gym_id: gym.id,
+          owner_name: app.owner_name || app.name,
+          role: 'owner'
+        }
+      })
+
+      // Nëse edge function nuk ekziston, shto gym_user pa auth_id (admin e shton vetë)
+      if(authErr || !authResp?.success) {
+        console.warn('Edge function unavailable, creating gym_user without auth_id')
+        await supabase.from('gym_users').insert({
+          gym_id:gym.id, name:app.owner_name||app.name,
+          email:app.email, role:'owner'
+        })
+        await supabase.from('applications').update({status:'approved',gym_id:gym.id}).eq('id',app.id)
+        toast.success(
+          `✅ ${app.name} u aprovua!`,
+          {duration: 8000}
+        )
+        toast('⚠️ Krijo userin manualisht:\nSupabase → Authentication → Add User\nEmail: '+app.email+'\nPassword: '+password, {duration:12000, icon:'👆'})
+      } else {
+        await supabase.from('applications').update({status:'approved',gym_id:gym.id}).eq('id',app.id)
+        toast.success(`✅ ${app.name} u aprovua! Useri u krijua automatikisht.`, {duration:6000})
+      }
+
       setShow(false); onDone()
-    } catch(e){toast.error(e.message)}
+    } catch(e){toast.error('❌ '+e.message)}
     finally{setLoading(false)}
   }
 

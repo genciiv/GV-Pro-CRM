@@ -56,14 +56,17 @@ function Router() {
   if (path.startsWith('/b/'))         return <BusinessProfile/>
   if (path === '/apply')              return <Apply/>
   if (path === '/nutritionist/apply') return <NutritionistApply/>
-  if (path === '/login' && !user)     return <Login/>
+  if (path === '/login') { if (user) { window.location.replace('/'); return null } return <Login/> }
   if (path === '/register')            return <Register/>
   if (path.startsWith('/checkin/'))   return <QRCheckin/>
   if (path === '/shop')               return <Shop/>
   if (path === '/reset-password')     return <ResetPassword/>
   if (path.startsWith('/book/'))      return <PublicBooking/>
 
-  // Logged in
+  // Logged in - redirect from public pages to dashboard
+  if (user && (path === '/' || path === '/login')) {
+    // Will be handled below
+  }
   if (user) {
     if (!profile) return (
       <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#fafafa',padding:24}}>
@@ -99,7 +102,9 @@ function Router() {
     if (profile.type === 'fitness')         return <GymDashboard/>
     if (profile.type === 'wellness')        return <SpaDashboard/>
     if (profile.gym?.status === 'approved') return <GymDashboard/>
-    if (profile.type === 'gym') return (
+    if (profile.type === 'gym') return <GymDashboard/>
+    if (profile.gym) return <GymDashboard/>
+    if (false) return (
       <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#fafafa',padding:24}}>
         <div style={{background:'#fff',borderRadius:16,padding:48,maxWidth:440,width:'100%',textAlign:'center',boxShadow:'0 4px 24px rgba(0,0,0,.08)'}}>
           <div style={{fontSize:48,marginBottom:16}}>⏳</div>

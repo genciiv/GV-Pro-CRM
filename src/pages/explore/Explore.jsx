@@ -15,7 +15,7 @@ const BIZ_TYPES = {
 const CITIES = ['Të Gjitha', 'Tiranë', 'Durrës', 'Shkodër', 'Vlorë', 'Elbasan', 'Korçë', 'Fier', 'Berat', 'Lushnjë']
 
 async function getBusinesses(type, city, search) {
-  let q = supabase.from('gyms').select('id,name,city,address,business_type,rating,review_count,logo_url,description,phone,slug,latitude,longitude').eq('status','approved')
+  let q = supabase.from('gyms').select('id,name,city,address,business_type,rating,review_count,logo_url,description,phone,slug,latitude,longitude').neq('status','rejected')
   if (type && type !== 'all') q = q.eq('business_type', type)
   if (city && city !== 'Të Gjitha') q = q.eq('city', city)
   if (search) q = q.ilike('name', `%${search}%`)
