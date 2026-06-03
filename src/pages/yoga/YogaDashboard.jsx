@@ -641,7 +641,7 @@ function RemindersPage({ gymId }) {
 
 
 const NAV = [
-  {s:'Kryesore', items:[{id:'dashboard',l:'Dashboard',i:'📊'},{id:'calendar',l:'Kalendari',i:'📅'},{id:'new-class',l:'Klasë e Re',i:'➕'},{id:'classes',l:'Të gjitha Klasat',i:'📋'}]},
+  {s:'Kryesore', items:[{id:'dashboard',l:'Dashboard',i:'📊'},{id:'new-class',l:'Klasë e Re',i:'➕'},{id:'classes',l:'Të gjitha Klasat',i:'📋'}]},
   {s:'Menaxhim', items:[{id:'instructors',l:'Instruktorët',i:'🧘'},{id:'waitlist',l:'Listë Pritjeje',i:'⏳'},{id:'reminders',l:'Kujtesat',i:'🔔'}]},
   {s:'Rritje', items:[{id:'analytics',l:'Analytics',i:'📈'},{id:'affiliate',l:'Affiliate',i:'🤝'}]},
 ]

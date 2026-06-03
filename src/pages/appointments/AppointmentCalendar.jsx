@@ -175,8 +175,8 @@ function QuickAddModal({ date, time, gymId, onClose, onSaved }) {
       const endMin = h*60+m+dur
       const end_time = `${String(Math.floor(endMin/60)).padStart(2,'0')}:${String(endMin%60).padStart(2,'0')}`
       const {error:err} = await supabase.from('appointments').insert({
-        gym_id: gymId, service_id: form.service_id,
-        staff_id: form.staff_id || null,
+        gym_id: gymId, service_id: form.service_id || null,
+        ...(form.staff_id ? { staff_id: form.staff_id } : {}),
         client_name: form.client_name.trim(),
         client_phone: form.client_phone.trim()||null,
         appointment_date: form.date, start_time: form.start_time+':00',

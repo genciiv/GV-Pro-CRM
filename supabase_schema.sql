@@ -893,3 +893,8 @@ ALTER TABLE waitlist ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "waitlist_gym" ON waitlist USING (
   gym_id IN (SELECT gym_id FROM gym_users WHERE auth_id = auth.uid())
 );
+
+-- ── FIX staff_id nullable ─────────────────────────────────
+-- Barbershop/Salon mund të kenë rezervim pa specifikuar staf
+ALTER TABLE appointments ALTER COLUMN staff_id DROP NOT NULL;
+ALTER TABLE appointments ALTER COLUMN service_id DROP NOT NULL;

@@ -1270,7 +1270,7 @@ function ServicesPage({ gymId }) {
 
 
 const NAV = [
-  {s:'Kryesore', items:[{id:'calendar',l:'Kalendari',i:'📅'},{id:'dashboard',l:'Dashboard',i:'◻️'},{id:'analytics',l:'Analytics',i:'📊'},{id:'checkin',l:'QR Check-in',i:'📷'},{id:'affiliate',l:'Affiliate',i:'🤝'}]},
+  {s:'Kryesore', items:[{id:'dashboard',l:'Dashboard',i:'◻️'},{id:'analytics',l:'Analytics',i:'📊'},{id:'checkin',l:'QR Check-in',i:'📷'},{id:'affiliate',l:'Affiliate',i:'🤝'}]},
   {s:'Menaxhim', items:[{id:'members',l:'Anëtarët',i:'👥'},{id:'memberships',l:'Abonimet',i:'🎫'},{id:'payments',l:'Pagesat',i:'💰'}]},
   {s:'Analiza',  items:[{id:'reports',l:'Raporte',i:'📈'}]},
   {s:'Sistem',   items:[{id:'settings',l:'Konfigurimet',i:'⚙️'}]},
@@ -1302,7 +1302,6 @@ export default function GymDashboard() {
   const userRole = profile?.data?.role || 'owner'
 
   const PAGE = {
-    calendar:    <AppointmentCalendar gymId={gymId}/>,
     setup:       <div style={{position:'relative',height:'calc(100vh - 54px)',overflow:'hidden'}}><OnboardingFlow gymId={gymId} onComplete={()=>nav('dashboard')}/></div>,
     staff:       <StaffPage gymId={gymId}/>,
     services:    <ServicesPage gymId={gymId}/>,
