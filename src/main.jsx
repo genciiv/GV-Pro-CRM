@@ -7,8 +7,6 @@ import Login                 from './pages/auth/Login.jsx'
 import Apply                 from './pages/auth/Apply.jsx'
 import AdminPanel            from './pages/admin/AdminPanel.jsx'
 import GymDashboard          from './pages/gym/GymDashboard.jsx'
-import NutritionistDashboard from './pages/nutritionist/NutritionistDashboard.jsx'
-import NutritionistApply     from './pages/nutritionist/NutritionistApply.jsx'
 import MemberApp             from './pages/member/MemberApp.jsx'
 import BarbershopDashboard   from './pages/barbershop/BarbershopDashboard.jsx'
 import SalonDashboard        from './pages/salon/SalonDashboard.jsx'
@@ -55,7 +53,6 @@ function Router() {
   if (path === '/gdpr')                 return <GDPR/>
   if (path.startsWith('/b/'))         return <BusinessProfile/>
   if (path === '/apply')              return <Apply/>
-  if (path === '/nutritionist/apply') return <NutritionistApply/>
   if (path === '/login') { if (user) { window.location.replace('/'); return null } return <Login/> }
   if (path === '/register')            return <Register/>
   if (path.startsWith('/checkin/'))   return <QRCheckin/>
@@ -69,28 +66,24 @@ function Router() {
   }
   if (user) {
     if (!profile) return (
-      <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#fafafa',padding:24}}>
-        <div style={{background:'#fff',borderRadius:16,padding:48,maxWidth:460,width:'100%',textAlign:'center',boxShadow:'0 4px 24px rgba(0,0,0,.08)'}}>
-          <div style={{fontSize:48,marginBottom:16}}>⚠️</div>
-          <div style={{fontFamily:'serif',fontSize:22,marginBottom:12}}>Profili nuk u gjet</div>
-          <div style={{fontSize:14,color:'#71717a',marginBottom:16}}>Email: <strong>{user.email}</strong></div>
-          <div style={{background:'#fef3c7',border:'1px solid #fde68a',borderRadius:10,padding:14,marginBottom:24,fontSize:13,textAlign:'left',lineHeight:1.8}}>
-            <strong>Zgjidha:</strong> Supabase → SQL Editor → Run:<br/>
-            <code style={{fontSize:11,background:'#fff',padding:'2px 6px',borderRadius:4,display:'block',marginTop:6,wordBreak:'break-all'}}>
-              UPDATE platform_admins SET auth_id = (SELECT id FROM auth.users WHERE email = '{user.email}' LIMIT 1) WHERE email = '{user.email}';
-            </code>
+      <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#fafaf8',fontFamily:'system-ui',padding:24}}>
+        <div style={{background:'#fff',borderRadius:16,padding:36,maxWidth:480,width:'100%',border:'1px solid #e8e4dc',boxShadow:'0 4px 24px rgba(0,0,0,.08)',textAlign:'center'}}>
+          <div style={{fontSize:40,marginBottom:16}}>👋</div>
+          <div style={{fontFamily:'Georgia,serif',fontSize:22,fontWeight:700,marginBottom:10}}>Mirë se vini!</div>
+          <p style={{fontSize:14,color:'#9e9b94',marginBottom:28,lineHeight:1.7}}>U kyçët me {user.email}.<br/>Çfarë dëshironi të bëni?</p>
+          <div style={{display:'flex',flexDirection:'column',gap:12}}>
+            <a href="/apply" style={{background:'#6c47ff',color:'#fff',padding:'13px 24px',borderRadius:10,fontSize:15,fontWeight:700,textDecoration:'none',display:'block'}}>🏢 Regjistro Biznesin Tim</a>
+            <button onClick={logout} style={{background:'#f5f4f0',border:'1px solid #e8e4dc',color:'#6b6760',padding:'11px 24px',borderRadius:10,fontSize:14,fontWeight:500,cursor:'pointer',fontFamily:'inherit'}}>← Dil nga llogaria</button>
           </div>
-          <div style={{display:'flex',gap:10,justifyContent:'center'}}>
-            <button onClick={()=>window.location.reload()} style={{background:'#18181b',color:'#fff',border:'none',padding:'10px 20px',borderRadius:8,fontSize:14,fontWeight:600,cursor:'pointer'}}>↻ Rifresko</button>
-            <button onClick={logout} style={{background:'#fff',color:'#18181b',border:'1px solid #e4e4e7',padding:'10px 20px',borderRadius:8,fontSize:14,cursor:'pointer'}}>Dil</button>
-          </div>
+          <p style={{fontSize:12,color:'#c0bdb6',marginTop:16}}>Nëse jeni klient i një biznesi, kontaktoni biznesin drejtpërdrejt.</p>
         </div>
       </div>
     )
 
+
     if (profile.type === 'admin')        return <AdminPanel logout={logout}/>
-    if (profile.type === 'nutritionist') return <NutritionistDashboard/>
     if (profile.type === 'member')       return <MemberApp/>
+    if (profile.type === 'guest')        return <MemberApp/>
     if (profile.type === 'client')          return <Explore/>
     if (profile.type === 'barbershop')    return <BarbershopDashboard/>
     if (profile.type === 'salon')           return <SalonDashboard/>
@@ -118,7 +111,7 @@ function Router() {
 
   // 404 for unknown logged-out paths
   if (path !== '/' && !user && path !== '/login' && path !== '/apply' && path !== '/register' &&
-      path !== '/nutritionist/apply' && !path.startsWith('/checkin/') &&
+      !path.startsWith('/checkin/') &&
       !path.startsWith('/b/') && !path.startsWith('/category/') && !path.startsWith('/blog/') &&
       !['explore','demo','pricing','blog','terms','privacy','gdpr','shop'].includes(path.slice(1))) {
     return (
