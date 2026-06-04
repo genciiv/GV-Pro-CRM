@@ -14,16 +14,16 @@ export const TRANSLATIONS = {
     },
     // HERO
     hero: {
-      badge: 'Rezervim Online + Harta',
-      title1: 'Software Wellness',
-      title2: 'All-in-One',
-      title3: 'për Shqipërinë',
-      desc: 'Palestra, barbershop, sallon, spa, yoga — menaxho gjithçka nga një dashboard. Rezervime online, pagesa dhe check-in QR.',
+      badge: 'Platforma #1 e Rezervimeve në Shqipëri',
+      title1: 'Menaxho gjithë biznesin',
+      title2: 'nga një platformë',
+      title3: 'e vetme.',
+      desc: 'Rezervime • Pagesa • Klientë • Staf • Raporte — gjithçka automatike, gjithçka në shqip.',
       cta1: 'Book Demo Falas →',
       cta2: '🔍 Shfleto Bizneset',
-      stat1: 'Biznese aktive',
-      stat2: 'Klientë të menaxhuar',
-      stat3: 'Të kënaqur',
+      stat1: 'Ditë falas',
+      stat2: 'Setup',
+      stat3: 'Support Shqip',
     },
     // CATEGORIES
     categories: {
@@ -70,7 +70,7 @@ export const TRANSLATIONS = {
         { category:'Rrit Biznesin', icon:'🚀', color:'#16a34a', bg:'#f0fdf4', items:[
           { icon:'⭐', title:'Reviews & Rating',   desc:'Vlerësimet shfaqen te Explore' },
           { icon:'🗺️', title:'Harta Interaktive', desc:'Klientët te gjejnë lehtë' },
-          { icon:'🥗', title:'Dietologë 70/30',   desc:'Shes dieta, merr komision 70%' },
+          { icon:'🔗', title:'Booking Link',       desc:'Klientët rezervojnë direkt nga interneti' },
           { icon:'📱', title:'App Anëtarësh',     desc:'Abonime, stërvitje, statistika' },
         ]},
       ],
@@ -155,10 +155,10 @@ export const TRANSLATIONS = {
       bookDemo: 'Book Demo',
     },
     hero: {
-      badge: 'Online Booking + Interactive Map',
-      title1: 'Wellness Software',
-      title2: 'All-in-One',
-      title3: 'for Albania',
+      badge: '#1 Booking Platform in Albania',
+      title1: 'Manage your entire business',
+      title2: 'from one platform',
+      title3: '— beautifully.',
       desc: 'Gym, barbershop, salon, spa, yoga — manage everything from one dashboard. Online bookings, payments and QR check-in.',
       cta1: 'Book Free Demo →',
       cta2: '🔍 Explore Businesses',

@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import { t, useLanguage, setLanguage } from "../lib/i18n"
 import { VaqoLogo, VaqoIcon } from "../components/VaqoLogo"
-import { VideoSection } from "../components/DemoVideo"
 
 function useW() {
   const [w,setW]=useState(typeof window!=='undefined'?window.innerWidth:1200)
@@ -59,7 +58,7 @@ export default function VaqoLanding({ onApply, onLogin }) {
       }
       setTimeout(()=>requestAnimationFrame(tick),400)
     }
-    anim('gyms',150,1600);anim('members',28000,2000);anim('rating',98,1200)
+    // No fake stats - using value propositions instead
   },[])
 
   const scroll=id=>document.getElementById(id)?.scrollIntoView({behavior:'smooth'})
@@ -235,7 +234,11 @@ export default function VaqoLanding({ onApply, onLogin }) {
               </div>
               {/* Stats */}
               <div style={{display:'flex',gap:isMobile?24:44,paddingTop:24,borderTop:'1px solid rgba(0,0,0,.08)',flexWrap:'wrap',justifyContent:isMobile?'center':'flex-start'}}>
-                {[[count.gyms+'+',T.hero.stat1],[count.members.toLocaleString(lang==='sq'?'sq-AL':'en-US')+'+',T.hero.stat2],[count.rating+'%',T.hero.stat3]].map(([n,l])=>(
+                {[
+                  ['30',  lang==='sq'?'Ditë falas':'Days free'],
+                  ['24h', lang==='sq'?'Setup & Gati':'Setup time'],
+                  ['🇦🇱', lang==='sq'?'Support Shqip':'Albanian support'],
+                ].map(([n,l])=>(
                   <div key={l} style={{textAlign:isMobile?'center':'left'}}>
                     <div style={{fontSize:isMobile?34:44,fontWeight:900,lineHeight:1}}>{n}</div>
                     <div style={{fontSize:12,color:'#71717a',marginTop:4,fontFamily:'system-ui'}}>{l}</div>
@@ -305,7 +308,7 @@ export default function VaqoLanding({ onApply, onLogin }) {
       </section>
 
       {/* ── TICKER ── */}
-      <div style={{background:'#18181b',padding:'10px 0',overflow:'hidden'}}>
+      <div style={{background:'#f4f4f5',borderTop:'1px solid #e4e4e7',borderBottom:'1px solid #e4e4e7',padding:'10px 0',overflow:'hidden'}}>
         <div style={{display:'flex'}}>
           <div className="ticker" style={{display:'flex',whiteSpace:'nowrap',flexShrink:0}}>
             {[...GYMS,...GYMS].map((g,i)=>(
@@ -377,7 +380,7 @@ export default function VaqoLanding({ onApply, onLogin }) {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section style={{padding:`${isMobile?48:80}px ${px}px`,background:'#18181b',color:'#fff'}}>
+      <section style={{padding:`${isMobile?48:80}px ${px}px`,background:'#f8f9fc'}}>
         <div style={{maxWidth:1060,margin:'0 auto',textAlign:'center'}}>
           <div style={{fontSize:10,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:'#c8a96e',marginBottom:10,fontFamily:'system-ui'}}>{T.howItWorks.label}</div>
           <h2 style={{fontSize:isMobile?24:isTablet?30:44,fontWeight:900,lineHeight:1.1,marginBottom:40}}>{T.howItWorks.title}</h2>
@@ -395,8 +398,6 @@ export default function VaqoLanding({ onApply, onLogin }) {
         </div>
       </section>
 
-      {/* ── VIDEO ── */}
-      <VideoSection/>
 
       {/* ── CALCULATOR ── */}
       <section style={{padding:`${isMobile?48:80}px ${px}px`,background:'#fff'}}>
@@ -405,13 +406,13 @@ export default function VaqoLanding({ onApply, onLogin }) {
             <div style={{fontSize:10,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:'#7c3aed',marginBottom:10,fontFamily:'system-ui'}}>{T.calc.label}</div>
             <h2 style={{fontSize:isMobile?22:isTablet?28:40,fontWeight:900,lineHeight:1.1}}>{T.calc.title}</h2>
           </div>
-          <div style={{background:'#18181b',borderRadius:20,padding:isMobile?24:40}}>
+          <div style={{background:'#fff',borderRadius:20,padding:isMobile?24:40,border:'1px solid #e4e4e7',boxShadow:'0 2px 12px rgba(0,0,0,.04)'}}>
             <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:isMobile?28:48}}>
               <div style={{display:'flex',flexDirection:'column',gap:24}}>
                 {[{k:'clients',label:T.calc.clients,min:10,max:500,step:10,unit:T.calc.unit1},{k:'bookings',label:T.calc.bookings,min:1,max:15,step:1,unit:T.calc.unit2},{k:'admin',label:T.calc.admin,min:1,max:8,step:1,unit:T.calc.unit3}].map(s=>(
                   <div key={s.k}>
                     <div style={{display:'flex',justifyContent:'space-between',marginBottom:10,fontFamily:'system-ui'}}>
-                      <label style={{fontSize:13,color:'rgba(255,255,255,.5)'}}>{s.label}</label>
+                      <label style={{fontSize:13,color:'#71717a'}}>{s.label}</label>
                       <span style={{fontWeight:700,color:'#c8a96e',fontSize:14}}>{calc[s.k]} {s.unit}</span>
                     </div>
                     <input type="range" min={s.min} max={s.max} step={s.step} value={calc[s.k]} onChange={e=>setCalc(c=>({...c,[s.k]:Number(e.target.value)}))} style={{width:'100%',background:'rgba(255,255,255,.15)'}}/>
@@ -419,13 +420,13 @@ export default function VaqoLanding({ onApply, onLogin }) {
                 ))}
               </div>
               <div style={{display:'flex',flexDirection:'column',gap:12,justifyContent:'center'}}>
-                <div style={{background:'rgba(255,255,255,.05)',border:'1px solid rgba(255,255,255,.08)',borderRadius:14,padding:isMobile?18:24,textAlign:'center'}}>
-                  <div style={{fontSize:10,color:'rgba(255,255,255,.3)',marginBottom:5,letterSpacing:'.07em',textTransform:'uppercase',fontFamily:'system-ui'}}>{T.calc.saved1}</div>
+                <div style={{background:'rgba(255,255,255,.05)',border:'1px solid #e4e4e7',borderRadius:14,padding:isMobile?18:24,textAlign:'center'}}>
+                  <div style={{fontSize:10,color:'#9ca3af',marginBottom:5,letterSpacing:'.07em',textTransform:'uppercase',fontFamily:'system-ui'}}>{T.calc.saved1}</div>
                   <div style={{fontSize:isMobile?44:56,fontWeight:900,color:'#c8a96e',lineHeight:1}}>{savedHours}</div>
-                  <div style={{fontSize:13,color:'rgba(255,255,255,.4)',marginTop:5,fontFamily:'system-ui'}}>{T.calc.unit4}</div>
+                  <div style={{fontSize:13,color:'#9ca3af',marginTop:5,fontFamily:'system-ui'}}>{T.calc.unit4}</div>
                 </div>
                 <div style={{background:'rgba(200,169,110,.12)',border:'1px solid rgba(200,169,110,.25)',borderRadius:14,padding:isMobile?16:22,textAlign:'center'}}>
-                  <div style={{fontSize:10,color:'rgba(255,255,255,.3)',marginBottom:5,letterSpacing:'.07em',textTransform:'uppercase',fontFamily:'system-ui'}}>{T.calc.saved2}</div>
+                  <div style={{fontSize:10,color:'#9ca3af',marginBottom:5,letterSpacing:'.07em',textTransform:'uppercase',fontFamily:'system-ui'}}>{T.calc.saved2}</div>
                   <div style={{fontSize:isMobile?36:42,fontWeight:900,color:'#c8a96e',lineHeight:1}}>{savedMoney.toLocaleString(lang==='sq'?'sq-AL':'en-US')}</div>
                   <div style={{fontSize:12,color:'rgba(255,255,255,.4)',marginTop:5,fontFamily:'system-ui'}}>{T.calc.unit5}</div>
                 </div>
@@ -494,7 +495,41 @@ export default function VaqoLanding({ onApply, onLogin }) {
       </section>
 
       {/* ── CTA FINAL ── */}
-      <section style={{padding:`${isMobile?48:80}px ${px}px`,background:'#18181b',color:'#fff',textAlign:'center'}}>
+      {/* ── PSE VAQO? ── */}
+      <section style={{padding:`${isMobile?48:80}px ${px}px`,background:'#f8f9fc'}}>
+        <div style={{maxWidth:1100,margin:'0 auto'}}>
+          <div style={{textAlign:'center',marginBottom:isMobile?32:48}}>
+            <div style={{fontSize:10,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:'#7c3aed',marginBottom:12,fontFamily:'system-ui'}}>AVANTAZHET</div>
+            <h2 style={{fontSize:isMobile?28:42,fontWeight:900,letterSpacing:'-.03em',marginBottom:12}}>
+              {lang==='sq'?'Pse bizneset zgjedhin Vaqo?':'Why businesses choose Vaqo?'}
+            </h2>
+            <p style={{fontSize:isMobile?14:16,color:'#52525b',fontFamily:'system-ui',maxWidth:480,margin:'0 auto'}}>
+              {lang==='sq'?'Ndërtuar enkas për tregun shqiptar.':'Built specifically for the Albanian market.'}
+            </p>
+          </div>
+          <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':isTablet?'1fr 1fr':'repeat(3,1fr)',gap:16}}>
+            {[
+              {ico:'⚡',t:lang==='sq'?'Setup brenda 24 orësh':'Setup within 24 hours',d:lang==='sq'?'Filloni të punoni brenda 1 dite. Ne ju ndihmojmë me gjithçka.':'Start operating within 1 day. We help you with everything.'},
+              {ico:'🇦🇱',t:lang==='sq'?'Gjithçka në Shqip':'Everything in Albanian',d:lang==='sq'?'Platform, support dhe dokumentacion — tërësisht në gjuhën shqipe.':'Platform, support and documentation — entirely in Albanian.'},
+              {ico:'📞',t:lang==='sq'?'Support Lokal':'Local Support',d:lang==='sq'?'Nuk flet me bot — flet me njerëz realë që e njohin tregun shqiptar.':'No bots — talk with real people who know the Albanian market.'},
+              {ico:'🔓',t:lang==='sq'?'Pa Kontratë':'No Contract',d:lang==='sq'?'Anulo kurdo. Pa penalitete. Të dhënat janë gjithmonë tuajat.':'Cancel anytime. No penalties. Your data is always yours.'},
+              {ico:'📱',t:lang==='sq'?'Rezervime Online 24/7':'Online Bookings 24/7',d:lang==='sq'?'Klientët rezervojnë edhe kur ju jeni të mbyllur. Asnjë telefonatë e humbur.':'Clients book even when you are closed. No missed calls.'},
+              {ico:'📊',t:lang==='sq'?'Raporte Automatike':'Automatic Reports',d:lang==='sq'?'Të ardhura, prezenca, klientë të riskut — të gjitha automatike.':'Revenue, attendance, at-risk clients — all automated.'},
+              {ico:'💬',t:lang==='sq'?'SMS & Email Automatik':'Automatic SMS & Email',d:lang==='sq'?'Kujtesa para takimeve. Zero anulime të fundit të minutës.':'Reminders before appointments. Zero last-minute cancellations.'},
+              {ico:'💰',t:lang==='sq'?'Faturim i Thjeshtë':'Simple Billing',d:lang==='sq'?'Regjistro pagesat, gjenero fatura dhe ngjit të ardhurat.':'Record payments, generate invoices and track revenue.'},
+              {ico:'🔒',t:lang==='sq'?'Siguri & GDPR':'Security & GDPR',d:lang==='sq'?'Të dhënat e klientëve të mbrojtura me enkriptim dhe backup automatik.':'Client data protected with encryption and automatic backup.'},
+            ].map(({ico,t,d})=>(
+              <div key={t} style={{background:'#fff',border:'1px solid #e4e4e7',borderRadius:14,padding:isMobile?18:22,boxShadow:'0 1px 4px rgba(0,0,0,.04)'}}>
+                <div style={{fontSize:28,marginBottom:12}}>{ico}</div>
+                <div style={{fontWeight:700,fontSize:15,marginBottom:6}}>{t}</div>
+                <p style={{fontSize:13,color:'#71717a',lineHeight:1.65,fontFamily:'system-ui'}}>{d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section style={{padding:`${isMobile?48:80}px ${px}px`,background:'linear-gradient(135deg,#6d28d9 0%,#7c3aed 100%)',color:'#fff',textAlign:'center'}}>
         <div style={{maxWidth:560,margin:'0 auto'}}>
           <div style={{fontSize:10,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:'#c8a96e',marginBottom:14,fontFamily:'system-ui'}}>{T.cta.label}</div>
           <h2 style={{fontSize:isMobile?26:isTablet?32:52,fontWeight:900,lineHeight:1.05,letterSpacing:'-.03em',marginBottom:16}}>{T.cta.title}</h2>
@@ -518,15 +553,75 @@ export default function VaqoLanding({ onApply, onLogin }) {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer style={{background:'#0a0a0a',padding:`24px ${px}px`,display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:14}}>
-        <button onClick={()=>window.scrollTo({top:0,behavior:'smooth'})} style={{display:'flex',alignItems:'center',gap:9,background:'none',border:'none',cursor:'pointer',padding:0}}>
-          <span style={{fontSize:18,color:'#fff',fontWeight:900}}>Vaqo</span>
-        </button>
-        {!isMobile&&<div style={{fontSize:11,color:'rgba(255,255,255,.2)',fontFamily:'system-ui'}}>{T.footer.copy}</div>}
-        <div style={{display:'flex',gap:16,flexWrap:'wrap'}}>
-          {[['Blog','/blog'],['Çmimet','/pricing'],['Explore','/explore'],['Termat','/terms'],['Privatësia','/privacy']].map(([l,href])=>(
-            <a key={l} href={href} style={{color:'rgba(255,255,255,.25)',fontSize:12,textDecoration:'none'}}>{l}</a>
-          ))}
+      <footer style={{background:'#1f2937',padding:`${isMobile?28:40}px ${px}px 24px`}}>
+        <div style={{maxWidth:1100,margin:'0 auto'}}>
+          {/* Top footer */}
+          <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':isTablet?'1fr 1fr':'2fr 1fr 1fr 1fr',gap:isMobile?28:40,marginBottom:36}}>
+            {/* Brand */}
+            <div>
+              <div style={{fontSize:22,fontWeight:900,color:'#fff',marginBottom:10}}>Vaqo</div>
+              <p style={{fontSize:13,color:'rgba(255,255,255,.35)',lineHeight:1.7,fontFamily:'system-ui',maxWidth:240,marginBottom:16}}>
+                {lang==='sq'?'Platforma all-in-one për bizneset wellness në Shqipëri.':'The all-in-one platform for wellness businesses in Albania.'}
+              </p>
+              <div style={{display:'flex',flexDirection:'column',gap:8}}>
+                <a href="tel:+355692291041" style={{color:'rgba(255,255,255,.5)',fontSize:13,textDecoration:'none',fontFamily:'system-ui',display:'flex',alignItems:'center',gap:8}}>
+                  📞 +355 692 291 041
+                </a>
+                <a href="https://wa.me/355692291041" target="_blank" style={{color:'rgba(255,255,255,.5)',fontSize:13,textDecoration:'none',fontFamily:'system-ui',display:'flex',alignItems:'center',gap:8}}>
+                  💬 WhatsApp
+                </a>
+                <a href="mailto:info@vaqo.al" style={{color:'rgba(255,255,255,.5)',fontSize:13,textDecoration:'none',fontFamily:'system-ui',display:'flex',alignItems:'center',gap:8}}>
+                  ✉️ info@vaqo.al
+                </a>
+              </div>
+            </div>
+            {/* Produkt */}
+            <div>
+              <div style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,.3)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:14,fontFamily:'system-ui'}}>
+                {lang==='sq'?'Produkti':'Product'}
+              </div>
+              {[
+                [lang==='sq'?'Funksionet':'Features','#features'],
+                [lang==='sq'?'Çmimet':'Pricing','/pricing'],
+                [lang==='sq'?'Demo Falas':'Free Demo','/demo'],
+                ['Explore','/explore'],
+                ['Blog','/blog'],
+              ].map(([l,h])=>(
+                <a key={l} href={h} style={{display:'block',color:'rgba(255,255,255,.4)',fontSize:13,textDecoration:'none',marginBottom:9,fontFamily:'system-ui'}}
+                  onMouseEnter={e=>e.target.style.color='rgba(255,255,255,.8)'}
+                  onMouseLeave={e=>e.target.style.color='rgba(255,255,255,.4)'}>{l}</a>
+              ))}
+            </div>
+            {/* Bizneset */}
+            <div>
+              <div style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,.3)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:14,fontFamily:'system-ui'}}>
+                {lang==='sq'?'Bizneset':'Businesses'}
+              </div>
+              {[['💈 Barbershop','/apply'],['💅 Sallon Bukurie','/apply'],['💆 Spa & Masazh','/apply'],['🏋️ Palestre','/apply'],['🧘 Yoga Studio','/apply']].map(([l,h])=>(
+                <a key={l} href={h} style={{display:'block',color:'rgba(255,255,255,.4)',fontSize:13,textDecoration:'none',marginBottom:9,fontFamily:'system-ui'}}
+                  onMouseEnter={e=>e.target.style.color='rgba(255,255,255,.8)'}
+                  onMouseLeave={e=>e.target.style.color='rgba(255,255,255,.4)'}>{l}</a>
+              ))}
+            </div>
+            {/* Ligjore */}
+            <div>
+              <div style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,.3)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:14,fontFamily:'system-ui'}}>
+                {lang==='sq'?'Ligjore':'Legal'}
+              </div>
+              {[[lang==='sq'?'Termat e Shërbimit':'Terms','/terms'],[lang==='sq'?'Privatësia':'Privacy','/privacy'],['GDPR','/gdpr']].map(([l,h])=>(
+                <a key={l} href={h} style={{display:'block',color:'rgba(255,255,255,.4)',fontSize:13,textDecoration:'none',marginBottom:9,fontFamily:'system-ui'}}
+                  onMouseEnter={e=>e.target.style.color='rgba(255,255,255,.8)'}
+                  onMouseLeave={e=>e.target.style.color='rgba(255,255,255,.4)'}>{l}</a>
+              ))}
+            </div>
+          </div>
+          {/* Bottom footer */}
+          <div style={{borderTop:'1px solid rgba(255,255,255,.06)',paddingTop:20,display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:12}}>
+            <div style={{fontSize:11,color:'rgba(255,255,255,.2)',fontFamily:'system-ui'}}>{T.footer.copy}</div>
+            <div style={{fontSize:11,color:'rgba(255,255,255,.2)',fontFamily:'system-ui'}}>
+              {lang==='sq'?'Ndërtuar me ❤️ në Shqipëri':'Built with ❤️ in Albania'}
+            </div>
+          </div>
         </div>
       </footer>
     </div>
