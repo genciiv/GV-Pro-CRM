@@ -8,6 +8,7 @@ import Apply                 from './pages/auth/Apply.jsx'
 import AdminPanel            from './pages/admin/AdminPanel.jsx'
 import GymDashboard          from './pages/gym/GymDashboard.jsx'
 import MemberApp             from './pages/member/MemberApp.jsx'
+import ClientDashboard       from './pages/member/ClientDashboard.jsx'
 import BarbershopDashboard   from './pages/barbershop/BarbershopDashboard.jsx'
 import SalonDashboard        from './pages/salon/SalonDashboard.jsx'
 import SpaDashboard          from './pages/spa/SpaDashboard.jsx'
@@ -53,6 +54,7 @@ function Router() {
   if (path === '/gdpr')                 return <GDPR/>
   if (path.startsWith('/b/'))         return <BusinessProfile/>
   if (path === '/apply')              return <Apply/>
+  if (path === '/member')             return user ? <ClientDashboard logout={logout}/> : <Login/>
   if (path === '/login') { if (user) { window.location.replace('/'); return null } return <Login/> }
   if (path === '/register')            return <Register/>
   if (path.startsWith('/checkin/'))   return <QRCheckin/>
@@ -65,20 +67,7 @@ function Router() {
     // Will be handled below
   }
   if (user) {
-    if (!profile) return (
-      <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#fafaf8',fontFamily:'system-ui',padding:24}}>
-        <div style={{background:'#fff',borderRadius:16,padding:36,maxWidth:480,width:'100%',border:'1px solid #e8e4dc',boxShadow:'0 4px 24px rgba(0,0,0,.08)',textAlign:'center'}}>
-          <div style={{fontSize:40,marginBottom:16}}>👋</div>
-          <div style={{fontFamily:'Georgia,serif',fontSize:22,fontWeight:700,marginBottom:10}}>Mirë se vini!</div>
-          <p style={{fontSize:14,color:'#9e9b94',marginBottom:28,lineHeight:1.7}}>U kyçët me {user.email}.<br/>Çfarë dëshironi të bëni?</p>
-          <div style={{display:'flex',flexDirection:'column',gap:12}}>
-            <a href="/apply" style={{background:'#6c47ff',color:'#fff',padding:'13px 24px',borderRadius:10,fontSize:15,fontWeight:700,textDecoration:'none',display:'block'}}>🏢 Regjistro Biznesin Tim</a>
-            <button onClick={logout} style={{background:'#f5f4f0',border:'1px solid #e8e4dc',color:'#6b6760',padding:'11px 24px',borderRadius:10,fontSize:14,fontWeight:500,cursor:'pointer',fontFamily:'inherit'}}>← Dil nga llogaria</button>
-          </div>
-          <p style={{fontSize:12,color:'#c0bdb6',marginTop:16}}>Nëse jeni klient i një biznesi, kontaktoni biznesin drejtpërdrejt.</p>
-        </div>
-      </div>
-    )
+    if (!profile) return <ClientDashboard logout={logout}/>
 
 
     if (profile.type === 'admin')        return <AdminPanel logout={logout}/>
